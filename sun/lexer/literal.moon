@@ -26,9 +26,9 @@ Lower   = R"az"
 Letter  = Upper + Lower
 Numeric = R"09"
 
-Class    = Upper * Letter ^ 0
-Variable = Lower ^ 1
-Macro    = Upper ^ 1
+VariableNotFiltered = Letter * (Letter + Numeric) ^ 0
+-- ::TODO:: put all keywords here
+Variable = VariableNotFiltered - (P"if" + P"else" + P"elseif")
 
 -- Strings
 
@@ -45,12 +45,24 @@ String = SingleQuoteString + DoubleQuoteString
 
 -- ::TODO:: add Table, TableKey, etc.
 
+-- Booleans (true/false)
+
+True    = P"true"
+False   = P"false"
+Boolean = True + False
+
+-- Nil
+
+Nil = P"nil"
+
 return {
 	:Space, :Whitespace, :EndOfLine, :Shebang, :Comment,
 	:Number,
 	:Upper, :Lower, :Letter, :Numeric,
-	:Class, :Variable, :Macro,
+	:Variable,
 	:SingleQuote, :DoubleQuote, :FullEscape,
 	:SingleQuoteString, :DoubleQuoteString,
-	:String
+	:String,
+	:True, :False, :Boolean
+	:Nil
 }
