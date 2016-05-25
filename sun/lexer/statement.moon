@@ -31,11 +31,12 @@ Base = {
 	BinaryExpression: V"Value" * Whitespace * BinarySymbolPattern *
 		Whitespace * V"Expression"
 	UnaryExpression: S"#-~!" * Whitespace * V"ValueNoUnary"
-	Expression: V"BinaryExpression" + V"UnaryExpression" + V"Value"
 	ValueNoUnary: V"Call" + Literal * P"[" * V"Value" * P"]" + Literal + (
 		P"(" * Whitespace * V"Value" * Whitespace * P")"
 	)
 	Value: V"UnaryExpression" + V"ValueNoUnary"
+	Expression: V"BinaryExpression" + V"UnaryExpression" + V"Value"
+	-- Use Expression unless you need to use Value
 }
 
 patterns = {}
@@ -56,7 +57,14 @@ import Call, Vararg, BinaryExpression, UnaryExpression, Expression,
 VariableList = Variable * (Whitespace * P"," * Whitespace * Variable) ^ 0
 Assignment = VariableList * Whitespace * P"=" * Whitespace * Vararg
 
-Statement = Whitespace * (Assignment + Call) * Whitespace * ";"
+Statement = P {
+	"Statement",
+	Statement: Whitespace * (Assignment + Call) * Whitespace * P";" + (
+		P"{" * Whitespace * (V"Statement" * Whitespace) ^ 1 * ( P"return" *
+			Whitespace * V"Statement") ^ -1 * Whitespace * P"}"
+			-- Matches at least one Statement and up to one return Statement
+	)
+}
 
 return {
 	:Call, :Vararg, :BinaryExpression, :UnaryExpression, :Expression,

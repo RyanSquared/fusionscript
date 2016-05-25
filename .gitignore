@@ -1,3 +1,8 @@
+# Lua source files
+# I keep these for debugging
+lua-5.3.2.tar.gz
+lua/
+
 # Compiled Lua sources
 luac.out
 
