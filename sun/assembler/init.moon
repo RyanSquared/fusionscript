@@ -18,3 +18,22 @@ header = (sink)->
 	-- LUAC_INT and LUAC_NUM
 	resume sink, util.check_luac_int!
 	resume sink, util.check_luac_num!
+
+function_header = (sink, tree)->
+	--[[ documentation for `tree` argument:
+	-- `.source` source name (converted using convert_literal_string())
+	-- `.line` line defined (0 for file master function)
+	-- `.lastline` last line defined (0 for file master function)
+	-- `.parameters` list of parameters defined
+	-- `.is_vararg` byte saying if is a vararg function
+	-- `.maxstacksize` number of registers used
+	-- `.instructions` list of instructions to be assembled
+	-- `.constants` list of constants to be compiled
+	-- `.upvalues` list of upvalues
+	-- `.prototypes` list of prototypes
+	-- `.debug` {
+	--   `.lineinfo` first and last line as two bytes
+	--   `.localvars` local variables
+	--   `.upvalues` list of upvalues
+	-- }
+	--]]
