@@ -79,8 +79,8 @@ int sun_convert_literal_string(lua_State *L) {
 	for (int i=0; i < (int)sizeof(size_t); i++) {
 		output[i] = conv.c[i]; /* manually copy to avoid '\0' errors */
 	}
-	for (i=0; i < length; i++) {
-		output[sizeof(size_t) + i] = input[i];
+	for (int j=0; j < length; j++) {
+		output[sizeof(size_t) + j] = input[j];
 	}
 	output[sizeof(size_t) + length] = '\0';
 	lua_pushlstring(L, output, sizeof(size_t) + length + 1);
