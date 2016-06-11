@@ -2,6 +2,8 @@
 
 util = require "sun.assembler.util"
 
+resume = (sink, value)-> coroutine.resume sink, type(value) == "string" or string.byte(value)
+
 header = (sink)->
 	resume = (sink, value)-> coroutine.resume sink, type(value) == "string" or string.byte(value)
 	-- first bytes of header
@@ -24,7 +26,7 @@ function_header = (sink, tree)->
 	-- `.source` source name (converted using convert_literal_string())
 	-- `.line` line defined (0 for file master function)
 	-- `.lastline` last line defined (0 for file master function)
-	-- `.parameters` list of parameters defined
+	-- `.parameters` number of parameters defined
 	-- `.is_vararg` byte saying if is a vararg function
 	-- `.maxstacksize` number of registers used
 	-- `.instructions` list of instructions to be assembled
@@ -37,3 +39,28 @@ function_header = (sink, tree)->
 	--   `.upvalues` list of upvalues
 	-- }
 	--]]
+	resume sink, util.convert_literal_string assert(tree.source)
+	resume sink, util.convert_int(tree.line)
+	resume sink, util.convert_int(tree.lastline)
+	resume sink, tree.parameters
+	resume sink, tree.is_vararg -- 0 is none, 1 means uses '...' in function, 2
+	                            -- is set for vararg functions
+	resume sink, tree.maxstacksize
+	-- Instructions
+	resume sink, util.convert_int(#tree.instructions)
+	--[[ Instruction bit-by-bit guide
+	-- ::Two-argument instruction::
+	-- 000000 00000000 000000000000000000
+	-- |      |        |
+	-- ^ instruction   |
+	--        ^ first argument
+	--                 ^ second argument
+	-- ::Three-argument instruction::
+	-- 000000 00000000 000000000 000000000
+	-- |      |        |         |
+	-- ^ instruction   |         |
+	--        ^ first argument   |
+	--                 ^ second argument
+	--                           ^ third argument
+	--]]
+	--for instruction in *tree.instructions
