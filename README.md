@@ -16,5 +16,5 @@ installed:
  * Linux compatible archiving tool (`tar`)
 
 ```sh
-curl https://www.lua.org/ftp/lua-5.3.2.tar.gz | tar -xv && mv lua-5.3.2 lua
+curl https://www.lua.org/ftp/lua-5.3.2.tar.gz | tar -xvz && mv lua-5.3.2 lua
 ```
