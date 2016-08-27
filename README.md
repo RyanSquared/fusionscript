@@ -16,7 +16,5 @@ installed:
  * Linux compatible archiving tool (`tar`)
 
 ```sh
-curl https://www.lua.org/ftp/lua-5.3.2.tar.gz | tar -xvf
-gcc -I. -Wall -pedantic -c -fPIC sun/assembler/util.c -o sun/assembler/util.o
-gcc `pkg-config lua` -shared -o sun/assembler/util.so sun/assembler/util.o
+curl https://www.lua.org/ftp/lua-5.3.2.tar.gz | tar -xv && mv lua-5.3.2 lua
 ```
