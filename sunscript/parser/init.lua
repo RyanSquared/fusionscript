@@ -29,7 +29,7 @@ local FullEscape  = P"\\" * P(1)
 
 local SingleQuoteString = SingleQuote * (P(1) - SingleQuote) ^ 0 * SingleQuote
 local DoubleQuoteString = DoubleQuote * ((FullEscape + P(1)) - P"\\" *
-    DoubleQuote)) ^ 0 * DoubleQuote
+    DoubleQuote) ^ 0 * DoubleQuote
     -- match either an escape sequence or single byte that is not '\"'
 
 local String = SingleQuoteString + DoubleQuoteString
@@ -57,14 +57,11 @@ local Letter = Upper + Lower
 
 local VariableName = (Letter + P"_") * (Letter + P"_" + Integer) ^ 0
 local Filters = P(false)
-local Keywords = {"else", "if", "true", "false", "nil", "while", "do"}
+local Keywords = {"else", "if", "true", "false", "nil", "while", "do", "new"}
 for key, word in pairs(Keywords)
     Filters = Filters + P(word)
 end
 local Variable = VariableName - Filters
-
-local Literal = Number + String + Boolean + Nil
-local SingleValue = Literal + Variable
 
 -- Binary symbol pattern
 
@@ -87,7 +84,6 @@ do
 end
 
 local Base = P {
-    -- ::TODO:: while x do loop, do x while loop, for loop
     "File";
     FunctionCall        = V"PrefixExpression" * V"Arguments" + V"PrefixExpression" *
         P":" * Variable * V"Arguments";
@@ -96,9 +92,11 @@ local Base = P {
     Name                = Variable + V"PrefixExpression" * WS * P"[" * WS *
         V"Expression" * WS * P"]" + V"PrefixExpression" *WS * P"." * WS *
         Variable;
-    Expression          = Literal + P"..." + V"FunctionDeclaration" +
-        V"PrefixExpression" + V"TableConstructor" + V"Expression" * WS *
-        BinarySymbol * WS * V"Expression" + UnarySymbol * WS * V"Expression";
+    Expression          = V"Literal" + P"..." + V"PrefixExpression" +
+        V"Expression" * WS * BinarySymbol * WS * V"Expression" + UnarySymbol * WS
+        * V"Expression";
+    Literal             = V"TableConstructor" + V"FunctionDeclaration" + V"Class" +
+        Number + String + Boolean + Nil;
     Arguments           = P"(" * V"ExpressionList" * V")";
     ExpressionList      = V"Expression" * (WS * P"," * WS * V"Expression") ^ 0;
     TableConstructor    = P"{" * WS * V"TableFieldList" * WS * P"}";
@@ -112,13 +110,16 @@ local Base = P {
     Assignment          = V"VariableList" * WS * P"=" * WS * V"ExpressionList";
     StatementList       = V"Statement" + P"{" * V"Statement" * (WS *
         V"Statement") ^ 0 * P"}";
-    Statement           = (P"return" * WS * V"ExpressionList" +
-        V"Assignment" + P"break" + V"Do" + V"While" + V"For" + ) * WS * P";";
+    Statement           = (P"return" * WS * V"ExpressionList" + P";" +
+        V"Assignment" + P"break" + V"While" + V"For" + V"If" + V"Class") * WS
+        * P";";
     While               = P"while" * WS * V"Expression" * V"StatementList";
-    Do                  = P"do" * WS * V"StatementList" * WS * P"while" * WS *
-        V"Expression";
     For                 = (V"FunctionCall" + V"Name") * WS * (P"|>" + P"|" *
         V"Arguments" * P">") * WS * StatementList;
+    If                  = P"if" * WS * V"Expression" * WS * StatementList *
+        (WS * P"else" * WS * V"Statement") ^ 0
+    Class               = P"new" * (WS * Variable) ^ -1 * V"TableConstructor" *
+        (WS * P"::" * WS * Variable) ^ -1  
     File                = Shebang ^ -1 * (V"Statement" * (WS * V"Statement") ^
         0) ^ -1
 }
