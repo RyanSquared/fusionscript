@@ -111,8 +111,8 @@ local Base = P {
     StatementList       = V"Statement" + P"{" * V"Statement" * (WS *
         V"Statement") ^ 0 * P"}";
     Statement           = (P"return" * WS * V"ExpressionList" + P";" +
-        V"Assignment" + P"break" + V"While" + V"For" + V"If" + V"Class") * WS
-        * P";";
+        V"Assignment" + P"break" + V"While" + V"For" + V"If" + V"Class") * WS *
+        P";";
     While               = P"while" * WS * V"Expression" * V"StatementList";
     For                 = (V"FunctionCall" + V"Name") * WS * (P"|>" + P"|" *
         V"Arguments" * P">") * WS * StatementList;
