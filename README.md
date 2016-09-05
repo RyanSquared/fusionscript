@@ -1,4 +1,4 @@
-# SunScript
+# FusionScript
 The programming language of ultimate dankliness
 
 **Warning:** This project is considered volatile and should not be used unless
