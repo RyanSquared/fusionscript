@@ -68,7 +68,7 @@ local Base = P {
                             V"Arguments";
     PrefixExpression     = V"Name" + V"FunctionCall" + P"(" * WS * V"Expression" * WS * P")";
     Name                 = V"PrefixExpression" * WS * P"[" * WS * V"Expression" * WS * P"]" + V"PrefixExpression" * WS *
-                            P"." * WS * Variable + Variable;
+                            P"." * WS * Variable + P"@" * WS * P"[" * WS * V"Name" * WS * P"]" + Variable;
     Expression           = V"Literal" + P"..." + V"PrefixExpression" + V"Expression" * WS * BinarySymbol * WS *
                             V"Expression" + UnarySymbol * WS * V"Expression";
     Literal              = V"TableConstructor" + V"FunctionDeclaration" + V"Class" + Number + String + Boolean + Nil;
@@ -91,8 +91,8 @@ local Base = P {
     Reassignment         = Variable * WS * BinarySymbol * P"=" * WS * Expression;
     StatementList        = V"Statement" + P"{" *  WS * V"Statement" * (WS * V"Statement") ^ 0 * P"}";
     Statement            =(P"return" * WSOnce * V"ExpressionList" * WS + V"Assignment" + V"Reassignment" + P"break" +
-                            V"FunctionCall") * WS * P";" + V"While" + V"ForwardAssertFor" +
-                            V"IteratorFor" + V"NumericFor" + V"If" + V"Class";
+                            V"FunctionCall") * WS * P";" + V"While" + V"ForwardAssertFor" + V"IteratorFor" +
+                            V"NumericFor" + V"If" + V"Class";
     While                = P"while" * WS * Parenthesis * V"Expression" * WS * V"StatementList";
     ForwardAssertFor     =(V"FunctionCall" + V"Name") * WS * P"|>" * WS * V"StatementList";
     NumericForItem       = Number + V"PrefixExpression";
