@@ -9,9 +9,10 @@ new Array {
 }
 
 new LimitedArray extends Array {
-    __new(limit = 500)=>
+    __new(limit = 500)=> {
         assert(type(limit) == "number", TypeError("number", limit));
         @limit = limit;
+    }
     __newindex(k, v)=>
         @__super.__newindex(self, k, v);
         if (@size > @limit * 1.1)
