@@ -111,6 +111,9 @@ new ExampleAsyncApp extends Async {
         client:close();
         server:close();
     }
+
+    handler(errorMessage)=>
+        error(errorMessage);
 }
 
 ExampleAsyncApp:run();
