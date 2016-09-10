@@ -15,7 +15,7 @@ language so good luck figuring out what the hell I'm doing.
  * and will not actually run as of 9/9/2016
  */
 
-local {stdout} = require("core.async.io");
+local {stdout} = io;
 stdout:write("Hello World!");
 ```
 
@@ -27,7 +27,7 @@ stdout:write("Hello World!");
  * and will not actually run as of 9/9/2016
  */
 
-{stdout} = require("core.async.io");
+local {stdout} = io;
 
 factorial(n)->
     if n == 0
