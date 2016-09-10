@@ -47,7 +47,7 @@ stdout:write(tostring(factorial(5)));
  */
 
 new Account {
-    new(balance = 0)=> {
+    __new(balance = 0)=> {
         @balance = balance;
     }
 
@@ -88,9 +88,15 @@ assert(bob:withdraw(math.max)); /* errors */
 local {Async} = require("core.async");
 local {TCPSocket, TCPServer} = require("core.async.net");
 
-new ExampleAsyncApp extends Async {
-    priority = {"server", "client"};
+/*
+ * The server MUST be started before the asynchronization
+ * due to the fact the client can attempt connecting before
+ * the server is initialized.
+ */
 
+server = TCPServer("localhost", 9999);
+
+new ExampleAsyncApp extends Async {
     client()-> {
         socket = TCPSocket("localhost", 9999);
         socket:send("echo");
@@ -99,7 +105,6 @@ new ExampleAsyncApp extends Async {
     }
 
     server()-> {
-        server = TCPServer("localhost", 9999);
         local client = server:accept();
         local input = client:recv(1024);
         client:send(input);
