@@ -1,0 +1,43 @@
+local _error(errorObject)-> {
+    if (errorObject) {
+        local errorMessage = tostring(errorObject);
+        if (errorMessage)
+            error(errorMessage);
+        else
+            error("error();");
+    } else
+        error("error();");
+}
+
+local _assert(test, errorObject, ...)-> {
+    if (test)
+        return test, errorObject, ...;
+    else if errorObject
+        error(errorObject);
+    else
+        error("assert failed: %s" % test);
+}
+
+new Error {
+    __tostring()=>
+        return "%s: %s" % {@__name, @error = "Unidentified Error"};
+    __new(error)=>
+        @error = error;
+}
+
+new TypeError extends Error {
+    __tostring()=>
+        return "%s: Expected %s, got %s <%s>" % {@__name,
+            @expected,
+            type(@actual),
+            @actual};
+    __new(expected, actual)=>
+        @expected, @actual = expected, actual;
+}
+
+return {
+    error = _error,
+    assert = _assert,
+    Error = Error,
+    TypeError = TypeError
+};
