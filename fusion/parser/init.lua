@@ -86,6 +86,7 @@ local Base = P {
     NamedLocalFunction   = P"local" * WSOnce * Variable * WS * V"FunctionDeclaration";
     AnonymousFunction    = V"FunctionBody";
     FunctionDeclaration  = V"NamedFunction" + V"NamedLocalFunction" + V"AnonymousFunction";
+    LocalDeclaration     = P"local" * WSOnce * V"VariableList";
     Assignment           =(P"local" * WSOnce) ^ -1 * V"VariableList" * WS * P"=" * WS * V"ExpressionList";
     Reassignment         = Variable * WS * BinarySymbol * P"=" * WS * Expression;
     StatementList        = V"Statement" + P"{" *  WS * V"Statement" * (WS * V"Statement") ^ 0 * P"}";
