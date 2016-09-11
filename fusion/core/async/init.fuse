@@ -14,13 +14,14 @@ new Async {
              */
             assert(type(v) == "function", TypeError(v, "function"));
             @evqueue:append(v);
-            while (!@evqueue:empty()) {
-                local ok, err = @evqueue:step();
-                if (!ok)
-                    if (@handler)
-                        @handler(ok, err);
-                    else
-                        @errors[@errors + 1] = err;
-            }
-    }
+        }
+        while (!@evqueue:empty()) {
+            local ok, error = @evqueue:step();
+            if (!ok)
+                if (@handler)
+                    @handler(ok, error);
+                else
+                    @errors[@errors + 1] = error;
+        }
+        return @errors
 }
