@@ -19,8 +19,12 @@ This method, when used in a class extended from `Async`, will take all methods
 inside of the class, treating them as values, and wrap them as a coroutine
 inside of a queue and then attempt to process all the functions until complete.
 It is possible this function generates an infinite loop and might not return.
+The function will also return an empty array if no errors occured during the
+routines or if there was instead a handler method implemented (see below).
 
 ### **user-defined** _method_ Async:handler(_error_)
 
 This method is called whenever an error is found inside an asynchronous
-function. The method will only be called when using the `run()` function.
+function. The method will only be called when using the `run()` function. Use
+of declaring this method should be done when extending the class but can also
+be done by monkeypatching the Async class, which is not recommended.
