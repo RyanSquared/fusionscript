@@ -40,7 +40,7 @@ Tables are the native data structure that all data structures in Lua can be
 built off of. Tables are implemented via a hashmap and can use any value
 excluding nil as an index. They are implemented using a sequence of comma
 delimited assignment fields between curly brackets. Fields can be any of three
-things &mdash; an expression; a square bracket-bound expression, `=`, and an
+things &mdash; an expression; a square-bracket-bound expression, `=`, and an
 expression; or a variable name, `=`, and an expression.
 
 ```fuse
@@ -50,6 +50,87 @@ expression; or a variable name, `=`, and an expression.
     asdf = "peanut butter"
 }
 ```
+
+## Expressions
+
+Expressions can take either one or two values and (possibly) produces a result
+from the values. Unary expressions take one variable with an operator to the
+left; binary expressions take two variables with an operator in the middle of
+the two.
+
+All bitwise operators automatically convert all values to integers before
+evaluating and therefore return an integer.
+
+### Precedence
+
+Following Lua semantics, the precedence for operators is as follows, from the
+lowest priority to the highest priority:
+
+* `||`
+* `&&`
+* `<` `>` `<=` `>=` `!=` `==`
+* `|`
+* `~` (binary)
+* `&`
+* `<<` `>>`
+* `..`
+* `+` `-`
+* `*` `/` `//` `%`
+* `!` `#` `-` `~` (unary)
+* `^`
+
+Parenthesis can be used to change precedence of an expression. The `..` and `^`
+operators are right associative while all other binary operators are left
+associative.
+
+### Unary Expressions
+
+* `!` &mdash; Boolean not: Any truthy value becomes false, any falsy
+value becomes true
+* `#` &mdash; Length operator: Returns the length of a string or highest set
+index of a table
+* `-` &mdash; Unary decimal negation: Equivalent to `-1 * value`
+* `~` &mdash; Unary bitwise not
+
+### Binary Expressions
+
+**Arithmetic Operators**
+
+* `+` &mdash; Addition
+* `-` &mdash; Subtraction
+* `*` &mdash; Multiplication
+* `/` &mdash; Division
+* `//` &mdash; Floor division
+* `%` &mdash; Modulo
+* `^` &mdash; Exponent / Power
+
+**Bitwise Operators**
+
+* `&` &mdash; Bitwise and
+* `|` &mdash; Bitwise or
+* `~` &mdash; Bitwise exclusive or
+* `>>` &mdash; Right shift
+* `<<` &mdash; Left shift
+
+**Relational Operators**
+
+* `==` &mdash; Equality
+* `!=` &mdash; Inequality
+* `<` &mdash; Less than
+* `<=` &mdash; Less than or equal to
+* `>` &mdash; Greater than
+* `>=` &mdash; Greater than or equal to
+
+**Logical Operators**
+
+* `&&` &mdash; And: Return true if left side and right side are truthy
+* `||` &mdash; Or: Return true if left side or right side are truthy
+
+**Concatenation**
+
+* `..` &mdash; Concat: Append the right side string to the left side string
+  - **Note:** Numbers will be converted to a string if either operator is
+  a string.
 
 ## Inline Statements
 
