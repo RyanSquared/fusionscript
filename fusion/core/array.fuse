@@ -8,6 +8,24 @@ new Array {
         @[k] = v;
         @size += 1;
     }
+    insert(key, value)=> {
+        table.insert(self, key, value);
+        @size += 1;
+    }
+    remove(key)=> {
+        local value = table.remove(self, key)
+        if (value != nil)
+            @self -= 1;
+        return value;
+    }
+    append(value)=> {
+        table.insert(self, #self + 1, value);
+        @size += 1;
+    }
+    prepend(value)=> {
+        table.insert(self, #self + 1, value);
+        @size += 1;
+    } 
 }
 
 new LimitedArray extends Array {
