@@ -11,14 +11,14 @@ Functions are defined in the `core.error` module and should be either included
 or destructured before using in an application. Unless explicitly stated, these
 functions will NOT return.
 
-_function_ error(_errorObject_)
+### _function_ error(_errorObject_)
 
 Generates an error based on the string representation of an object. If the
 object fails to produce a string representation (for example, by overwriting
 the __tostring metamethod with an erroring version) or an object is not passed,
 instead, the string "error();" will be used.
 
-_function_ assert(_test_, _errorObject_, _..._) -> _test_, _errorObject_, _..._
+### _function_ assert(_test_, _errorObject_, _..._) -> _test_, _errorObject_, _..._
 
 If _test_ evaluates to a falsy expression, an error is called using the object
 passed to the assertion function. If not, all values - including the test, the
@@ -63,11 +63,11 @@ Error
 \- TypeError
 ```
 
-_class_ Error(string _errorMessage_) -> _object_
+### _class_ Error(string _errorMessage_) -> _object_
 
 Base class for all errors; you can use this class if you want to provide a
 simple, generic error that takes an optional string as a descriptive argument.
 
-_class_ TypeError(string _expected_, _actual_) :: Error -> _object_
+### _class_ TypeError(string _expected_, _actual_) :: Error -> _object_
 
 Error used when an improper type is given to a function or operation.
