@@ -71,7 +71,8 @@ local Base = P {
                             P"." * WS * Variable + P"@" * WS * P"[" * WS * V"Name" * WS * P"]" + Variable;
     Expression           = V"Literal" + P"..." + V"PrefixExpression" + V"Expression" * WS * BinarySymbol * WS *
                             V"Expression" + UnarySymbol * WS * V"Expression";
-    Literal              = V"TableConstructor" + V"FunctionDeclaration" + V"Class" + Number + String + Boolean + Nil;
+    Literal              = V"TableConstructor" + V"FunctionDeclaration" + V"Class" + Number + String + Boolean + Nil +
+                            V"AnonymousFunction";
     Arguments            = P"(" * WS * V"ExpressionList" * WS * V")";
     ExpressionList       = V"Expression" * (WS * P"," * WS * V"Expression") ^ 0;
     TableConstructor     = P"{" * WS * V"TableFieldList" * WS * P"}";
@@ -85,7 +86,7 @@ local Base = P {
     NamedFunction        = Variable * (WS * P"[" * WS * V"Expression" * WS * P"]") ^ 0 * WS * V"FunctionBody";
     NamedLocalFunction   = P"local" * WSOnce * Variable * WS * V"FunctionDeclaration";
     AnonymousFunction    = V"FunctionBody";
-    FunctionDeclaration  = V"NamedFunction" + V"NamedLocalFunction" + V"AnonymousFunction";
+    FunctionDeclaration  = V"NamedFunction" + V"NamedLocalFunction";
     LocalDeclaration     = P"local" * WSOnce * V"VariableList";
     Assignment           =(P"local" * WSOnce) ^ -1 * V"VariableList" * WS * P"=" * WS * V"ExpressionList";
     Reassignment         = Variable * WS * BinarySymbol * P"=" * WS * Expression;
