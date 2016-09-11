@@ -19,6 +19,26 @@ Queue ::TODO::
 Creates an array which can only use integer-based indexes but is not based on a
 sequence like an FIFO or queue would be.
 
+### _method_ Array:insert(integer _key_, _value_)
+
+Put _value_ in the array at position _key_. If _key_ is currently filled in,
+the element at position _key_ will be moved down and _key_ will be replaced
+with _value_.
+
+### _method_ Array:remove(integer _key_) -> value
+
+Remove the value at position _key_. If any items are above _key_, they will be
+shifted downwards to fill _key_. If any value existed at _key_, the value will
+be returned from the function.
+
+### _method_ Array:append(_value_)
+
+Add _value_ to the end of Array. Similar to `Array:insert(@size + 1, value);`.
+
+### _method_ Array:prepend(_value_)
+
+Prepend _value_ to the array. Similar to `Array:insert(1, value);`.
+
 ::TODO:: implement append, prepend, insert, remove
 
 ### _class_ LimitedArray(integer _limit_ = 500) :: Array -> _object_
