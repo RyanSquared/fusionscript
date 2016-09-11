@@ -2,7 +2,7 @@ local {assert, TypeError} = require("core.error");
 
 new Array {
     __newindex(k, v)=> {
-        assert(type(k) == "number", TypeError("number", k));
+        assert(math.type(k) == "integer", TypeError("integer", k));
         @[k] = v;
         @size += 1;
     }
@@ -10,7 +10,7 @@ new Array {
 
 new LimitedArray extends Array {
     __new(limit = 500)=> {
-        assert(type(limit) == "number", TypeError("number", limit));
+        assert(math.type(limit) == "integer", TypeError("integer", limit));
         @limit = limit;
     }
     __newindex(k, v)=>
