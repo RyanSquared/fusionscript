@@ -20,9 +20,9 @@ local _assert(test, errorObject, ...)-> {
 
 new Error {
     __tostring()=>
-        return "%s: %q" % {@__name, @error = "Unidentified Error"};
-    __new(error)=>
-        @error = error;
+        return "%s: %q" % {@__name, @error || "Unidentified Error"};
+    __new(error_message)=>
+        @error = error_message;
 }
 
 new TypeError extends Error {
