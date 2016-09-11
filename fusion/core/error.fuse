@@ -20,14 +20,14 @@ local _assert(test, errorObject, ...)-> {
 
 new Error {
     __tostring()=>
-        return "%s: %s" % {@__name, @error = "Unidentified Error"};
+        return "%s: %q" % {@__name, @error = "Unidentified Error"};
     __new(error)=>
         @error = error;
 }
 
 new TypeError extends Error {
     __tostring()=>
-        return "%s: Expected %s, got %s <%s>" % {@__name,
+        return "%s: Expected %s, got %s <%q>" % {@__name,
             @expected,
             type(@actual),
             @actual};
