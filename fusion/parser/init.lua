@@ -91,7 +91,7 @@ local Base = P {
     Reassignment         = Variable * WS * BinarySymbol * P"=" * WS * Expression;
     StatementList        = V"Statement" + P"{" *  WS * V"Statement" * (WS * V"Statement") ^ 0 * P"}";
     Statement            =(P"return" * WSOnce * V"ExpressionList" * WS + V"Assignment" + V"Reassignment" + P"break" +
-                            V"FunctionCall") * WS * P";" + V"While" + V"ForwardAssertFor" + V"IteratorFor" +
+                            V"FunctionCall" + V"ForwardAssertFor") * WS * P";" + V"While" + V"IteratorFor" +
                             V"NumericFor" + V"If" + V"Class";
     While                = P"while" * WS * Parenthesis * V"Expression" * WS * V"StatementList";
     ForwardAssertFor     =(V"FunctionCall" + V"Name") * WS * P"|>" * WS * V"StatementList";
