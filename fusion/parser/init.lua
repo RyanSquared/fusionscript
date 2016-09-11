@@ -4,8 +4,6 @@ local P, V, S, R = lpeg.P, lpeg.V, lpeg.S, lpeg.R
 local Space       = P" "
 local WSPre       = S" \t\r\n\v"
 local WS, WSOnce  = WSPre ^ 0, WSPre ^ 1
-local EndOfLine   = P"\r" ^ -1 * P"\n"
-local Shebang     = P"#!" * P(1 - EndOfLine) ^ 0 * EndOfLine
 local Parenthesis = #(P"(") -- lookahead
 -- ::TODO:: comments
 
@@ -109,5 +107,5 @@ local Base = P {
     ClassField           = V"ClassAttributeField" + V"ClassFunctionField";
     Class                = P"new" * (WSOnce * Variable) ^ -1 * WS * (P"extends" * WSOnce * V"Expression" * WS) ^ -1 *
                             P"{" * (WS * V"ClassField") ^ 0 * WS * P"}";
-    File                 = Shebang ^ -1 * (V"Statement" * (WS * V"Statement") ^ 0) ^ -1;
+    File                 = (V"Statement" * (WS * V"Statement") ^ 0) ^ -1;
 }
