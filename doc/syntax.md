@@ -36,8 +36,8 @@ of two values that will not pass a conditional statement or expression.
 
 ### Tables
 
-Tables are the native data structure that all data structures in Lua can be
-built off of. Tables are implemented via a hashmap and can use any value
+Tables are the native data structure that all data structures in FusionScript
+can be built off of. Tables are implemented via a hashmap and can use any value
 excluding nil as an index. They are implemented using a sequence of comma
 delimited assignment fields between curly brackets. Fields can be any of three
 things &mdash; an expression; a square-bracket-bound expression, `=`, and an
