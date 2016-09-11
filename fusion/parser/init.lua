@@ -93,7 +93,7 @@ local Base = P {
     StatementList        = V"Statement" + P"{" *  WS * V"Statement" * (WS * V"Statement") ^ 0 * P"}";
     Statement            =(P"return" * WSOnce * V"ExpressionList" * WS + V"Assignment" + V"Reassignment" + P"break" +
                             V"FunctionCall" + V"ForwardAssertFor") * WS * P";" + V"While" + V"IteratorFor" +
-                            V"NumericFor" + V"If" + V"Class";
+                            V"NumericFor" + V"If" + V"Class" + V"FunctionDeclaration";
     While                = P"while" * WS * Parenthesis * V"Expression" * WS * V"StatementList";
     ForwardAssertFor     =(V"FunctionCall" + V"Name") * WS * P"|>" * WS * V"StatementList";
     NumericForItem       = Number + V"PrefixExpression";
