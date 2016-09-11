@@ -1,6 +1,8 @@
 local {assert, TypeError} = require("core.error");
 
 new Array {
+    __new()=>
+        @size = 0;
     __newindex(k, v)=> {
         assert(math.type(k) == "integer", TypeError("integer", k));
         @[k] = v;
@@ -14,7 +16,7 @@ new LimitedArray extends Array {
         @limit = limit;
     }
     __newindex(k, v)=>
-        @__super.__newindex(self, k, v);
+        @__super.__newindex(self, math.min(@self, k), v);
         if (@size > @limit * 1.1)
             for (i=1, @limit // 10) {
                 if (@handle_output) {
