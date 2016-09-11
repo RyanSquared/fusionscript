@@ -10,7 +10,7 @@ language so good luck figuring out what the hell I'm doing.
 ### Hello World
 
 ```
-/*
+/* ::TODO::
  * The example in this code example is just for testing
  * and will not actually run as of 9/9/2016
  */
@@ -22,7 +22,7 @@ stdout:write("Hello World!");
 ### Factorial
 
 ```
-/*
+/* ::TODO::
  * The example in this code example is just for testing
  * and will not actually run as of 9/9/2016
  */
@@ -41,7 +41,7 @@ stdout:write(tostring(factorial(5)));
 ### Account (from Lua Demo)
 
 ```
-/*
+/* ::TODO::
  * The example in this code example is just for testing
  * and will not actually run as of 9/9/2016
  */
@@ -80,7 +80,7 @@ assert(bob:withdraw(math.max)); /* errors */
 ### Asynchronous Networking
 
 ```
-/*
+/* ::TODO::
  * The example in this code example is just for testing
  * and will not actually run as of 9/9/2016
  */
