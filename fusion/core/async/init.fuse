@@ -1,4 +1,4 @@
-local cqueues = require("core.cqueues");
+local cqueues = require("cqueues");
 local {assert, TypeError} = require("core.error");
 local {LimitedArray} = require("core.array");
 
