@@ -1,0 +1,14 @@
+local table = require("core.table");
+local _string = table.copy(string);
+
+local {error, TypeError} = require("core.error");
+
+local _string_metatable = getmetatable("");
+
+_string_metatable.__mod(tFormatOptions)=>
+    if (type(tFormatOptions) == "string")
+        return @format(tFormatOptions);
+    else if (type(tFormatOptions) == "table")
+        return @format(unpack(tFormatOperations));
+    else
+        error(TypeError(tFormatOptions, "string/table"));
