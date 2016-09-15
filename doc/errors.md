@@ -24,6 +24,11 @@ If _test_ evaluates to a falsy expression, an error is called using the object
 passed to the assertion function. If not, all values - including the test, the
 second variable, and any other variables - are returned from the function.
 
+### _function_ type(_input_, _..._)
+
+If the `type()` of _input_ is equal to any items in _..._, the function will
+return. If no match is found, `error()` is called with a TypeError.
+
 ## Error Classes
 
 The `error` library (located in `core.error`) contains functions and classes
