@@ -18,6 +18,15 @@ local _assert(test, errorObject, ...)-> {
         error("assert failed: %s" % test);
 }
 
+local _type(input, ...)-> {
+    local types = {...};
+    local _input_type = type(input);
+    for (i=1, #types)
+        if (input_type = types[i])
+            return;
+    _error(TypeError(table.concat(types, "/"), input));
+}
+
 new Error {
     __tostring()=>
         return "%s: %q" % {@__name, @error || "Unidentified Error"};
@@ -38,6 +47,7 @@ new TypeError extends Error {
 return {
     error = _error,
     assert = _assert,
+    type = _type,
     Error = Error,
     TypeError = TypeError
 };
