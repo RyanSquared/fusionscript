@@ -63,7 +63,7 @@ end
 local Base = P {
     "File";
     FunctionCall         = V"PrefixExpression" * V"Arguments" + V"PrefixExpression" * WS * P":" * WS * Variable *
-                            V"Arguments";
+                            (WS * P"<" * WS * Variable * P">") ^ -1 * WS * V"Arguments";
     PrefixExpression     = V"Name" + V"FunctionCall" + P"(" * WS * V"Expression" * WS * P")";
     Name                 = V"PrefixExpression" * WS * P"[" * WS * V"Expression" * WS * P"]" + V"PrefixExpression" * WS *
                             P"." * WS * Variable + P"@" * WS * P"[" * WS * V"Name" * WS * P"]" + Variable;
@@ -71,7 +71,7 @@ local Base = P {
                             V"Expression" + UnarySymbol * WS * V"Expression";
     Literal              = V"TableConstructor" + V"FunctionDeclaration" + V"Class" + Number + String + Boolean + Nil +
                             V"AnonymousFunction";
-    Arguments            = P"(" * WS * V"ExpressionList" * WS * V")";
+    Arguments            = P"(" * WS * V"ExpressionList" * WS * P")";
     ExpressionList       = V"Expression" * (WS * P"," * WS * V"Expression") ^ 0;
     TableConstructor     = P"{" * WS * V"TableFieldList" * WS * P"}";
     TableFieldList       = V"TableField" * (WS * P"," * WS * V"TableField") ^ 0;
@@ -87,7 +87,7 @@ local Base = P {
     FunctionDeclaration  = V"NamedFunction" + V"NamedLocalFunction";
     LocalDeclaration     = P"local" * WSOnce * V"VariableList";
     Assignment           =(P"local" * WSOnce) ^ -1 * V"VariableList" * WS * P"=" * WS * V"ExpressionList";
-    Reassignment         = Variable * WS * BinarySymbol * P"=" * WS * Expression;
+    Reassignment         = Variable * WS * BinarySymbol * P"=" * WS * V"Expression";
     StatementList        = V"Statement" + P"{" *  WS * V"Statement" * (WS * V"Statement") ^ 0 * P"}";
     Statement            =(P"return" * WSOnce * V"ExpressionList" * WS + V"Assignment" + V"Reassignment" + P"break" +
                             V"FunctionCall" + V"ForwardAssertFor") * WS * P";" + V"While" + V"IteratorFor" +
