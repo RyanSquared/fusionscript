@@ -20,8 +20,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // This file was generated with a script.
-// Generated 2016-09-22 16:13:14.308519 UTC
-// This header was generated with sol v2.14.2 (revision dc000fb)
+// Generated 2016-09-28 23:10:06.808593 UTC
+// This header was generated with sol v2.14.5 (revision 86664b4)
 // https://github.com/ThePhD/sol2
 
 #ifndef SOL_SINGLE_INCLUDE_HPP
@@ -3005,6 +3005,12 @@ namespace sol {
 		operator int() const { return index; }
 	};
 
+	struct raw_index {
+		int index;
+		raw_index(int i) : index(i) {}
+		operator int() const { return index; }
+	};
+
 	struct absolute_index {
 		int index;
 		absolute_index(lua_State* L, int idx) : index(lua_absindex(L, idx)) {}
@@ -3581,6 +3587,8 @@ namespace sol {
 		stack_reference() noexcept = default;
 		stack_reference(nil_t) noexcept : stack_reference() {};
 		stack_reference(lua_State* L, int i) noexcept : L(L), index(lua_absindex(L, i)) {}
+		stack_reference(lua_State* L, absolute_index i) noexcept : L(L), index(i) {}
+		stack_reference(lua_State* L, raw_index i) noexcept : L(L), index(i) {}
 		stack_reference(stack_reference&& o) noexcept = default;
 		stack_reference& operator=(stack_reference&&) noexcept = default;
 		stack_reference(const stack_reference&) noexcept = default;
@@ -5354,12 +5362,22 @@ namespace sol {
 
 		template<typename... Args>
 		struct getter<std::tuple<Args...>> {
-			template <std::size_t... I>
-			static decltype(auto) apply(std::index_sequence<I...>, lua_State* L, int index, record& tracking) {
-				return std::tuple<decltype(stack::get<Args>(L, index))...>{stack::get<Args>(L, index + tracking.used, tracking)...};
+			typedef std::tuple<decltype(stack::get<Args>(nullptr, 0))...> R;
+			
+			template <typename... TArgs>
+			static R apply(std::index_sequence<>, lua_State*, int, record&, TArgs&&... args) {
+				// Fuck you too, VC++
+				return R{std::forward<TArgs>(args)...};
+			}
+			
+			template <std::size_t I, std::size_t... Ix, typename... TArgs>
+			static R apply(std::index_sequence<I, Ix...>, lua_State* L, int index, record& tracking, TArgs&&... args) {
+				// Fuck you too, VC++
+				typedef std::tuple_element_t<I, std::tuple<Args...>> T;
+				return apply(std::index_sequence<Ix...>(), L, index, tracking, std::forward<TArgs>(args)..., stack::get<T>(L, index + tracking.used, tracking));
 			}
 
-			static decltype(auto) get(lua_State* L, int index, record& tracking) {
+			static R get(lua_State* L, int index, record& tracking) {
 				return apply(std::make_index_sequence<sizeof...(Args)>(), L, index, tracking);
 			}
 		};
@@ -10235,7 +10253,7 @@ namespace sol {
 			indexbase(&usertype_detail::simple_core_indexing_call<true>), newindexbase(&usertype_detail::simple_core_indexing_call<false>),
 			indexbaseclasspropogation(usertype_detail::walk_all_bases<true>), newindexbaseclasspropogation(&usertype_detail::walk_all_bases<false>),
 			baseclasscheck(nullptr), baseclasscast(nullptr),
-			mustindex(false), secondarymeta(false) {
+			mustindex(true), secondarymeta(true) {
 			(void)detail::swallow{ 0,
 				(add(L, detail::forward_get<I * 2>(args), detail::forward_get<I * 2 + 1>(args)),0)...
 			};
@@ -10529,7 +10547,7 @@ namespace sol {
 				if (k <= src.size() && k > 0) {
 					--k;
 					std::advance(it, k);
-					return stack::push(L, *it);
+					return stack::push_reference(L, *it);
 				}
 			}
 			return stack::push(L, nil);
@@ -10539,7 +10557,7 @@ namespace sol {
 			K k = stack::get<K>(L, 2);
 			--k;
 			std::advance(it, k);
-			return stack::push(L, *it);
+			return stack::push_reference(L, *it);
 #endif // Safety
 		}
 
@@ -10588,8 +10606,7 @@ namespace sol {
 			if (it == end(source)) {
 				return 0;
 			}
-			int p = stack::push(L, k + 1);
-			p += stack::push(L, *it);
+			int p = stack::multi_push_reference(L, k + 1, *it);
 			std::advance(it, 1);
 			return p;
 		}
@@ -10686,7 +10703,7 @@ namespace sol {
 				auto it = detail::find(src, *k);
 				if (it != end(src)) {
 					auto& v = *it;
-					return stack::push(L, v.second);
+					return stack::push_reference(L, v.second);
 				}
 			}
 			return stack::push(L, nil);
