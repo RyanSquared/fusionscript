@@ -5,14 +5,9 @@
 
 #include "ftoken.hpp"
 
-using namespace std;
-
-
 namespace fusion {
 
-	using namespace std;
-
-	array<string, 25> fusion_tokens = {
+	std::array<std::string, 25> fusion_tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends", "for",
 		/* */
 		"&&", "||", ">>", "<<", "==", "!=", ">=", "<=", ".."
@@ -21,16 +16,16 @@ namespace fusion {
 	};
 
 	/* ::TODO:: */
-	pair<bool, string> try_parse_num(TokenizerState *ts) {
-		return pair<bool, string>(true, "");
+	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
+		return std::pair<bool, std::string>(true, "");
 	}
-	bool is_reserved(string word) {return true;}
+	bool is_reserved(std::string word) {return true;}
 
-	void ftokenize(TokenizerState *ts, string input) {
+	void ftokenize(TokenizerState *ts, std::string input) {
 		/* initialize the tokenizer state */
 		ts->position = 0;
 		ts->current_line = 1;
-		ts->tokens = vector<token>();
+		ts->tokens = std::vector<token>();
 		ts->input = input;
 
 		/* search through string for a token */
@@ -129,9 +124,9 @@ namespace fusion {
 				case '.': {
 					/* check .., then ...; if not ... then ..; then . */
 					auto result = try_parse_num(ts); /* ::TODO:: try_parse_num */
-					if (get<0>(result)) { /* true if number, false if not */
+					if (std::get<0>(result)) { /* true if number, false if not */
 						/* get<1>(result) should return a std::string */
-						string result_num = get<1>(result);
+						std::string result_num = std::get<1>(result);
 						ts->tokens.push_back({token::TOK_NUM, result_num});
 						ts->position += result_num.length();
 					} else if (check_next(1, '.')) {
@@ -149,7 +144,7 @@ namespace fusion {
 					} /* end else if */
 				} /* end case */
 				case '"': { /* ::TODO:: ' */
-					string buffer = "";
+					std::string buffer = "";
 					ts->position++; /* increment position past the " */
 					char current = '\0'; /* current in string */
 					while (current != '"') { /* we can pass over '\"' during the loop */
@@ -173,7 +168,7 @@ namespace fusion {
 				case '5': case '6': case '7': case '8': case '9': {
 					/* no matter what, this should return a number */
 					/* we don't need to test try_parse_num[1] */
-					string result_num = get<1>(try_parse_num(ts)); /* ::TODO:: */
+					std::string result_num = std::get<1>(try_parse_num(ts)); /* ::TODO:: */
 					ts->tokens.push_back({token::TOK_NUM, result_num});
 					ts->position += result_num.length();
 					break;
@@ -181,7 +176,7 @@ namespace fusion {
 				default: {
 					/* ::TODO:: is_reserved(keyword) -> bool */
 					if (isalpha(input[ts->position])) {
-						string word = "";
+						std::string word = "";
 						while (isalnum(input[ts->position])) {
 							 word += input[ts->position];
 							 ts->position++;
