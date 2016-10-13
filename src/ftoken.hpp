@@ -2,11 +2,8 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 #define FIRST_TOKEN 257
 /* 256 possible for char, plus one */
-
 #define check_next(pos, test_char)	input[ts->position + pos] == test_char
 
 namespace fusion {
@@ -22,14 +19,14 @@ namespace fusion {
 			/* extra tokens */
 			TOK_VARARG, TOK_EOF, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME
 		} type;
-		string self;
+		std::string self;
 	};
 
 	struct TokenizerState {
 		char current_char;
 		int current_line;
 		int position;
-		vector<token> tokens;
-		string input;
+		std::vector<token> tokens;
+		std::string input;
 	};
 }
