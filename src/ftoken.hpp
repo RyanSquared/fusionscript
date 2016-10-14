@@ -4,7 +4,7 @@
 
 #define FIRST_TOKEN 257
 /* 256 possible for char, plus one */
-#define check_next(pos, test_char)	input[ts->position + pos] == test_char
+#define check_next(pos, test_char)	input.at(pos) == test_char
 
 namespace fusion {
 
@@ -17,16 +17,19 @@ namespace fusion {
 			TOK_BOOLAND, TOK_BOOLOR, TOK_RSHIFT, TOK_LSHIFT, TOK_EQ, TOK_NEQ, TOK_GE,
 			TOK_LE, TOK_CONCAT, TOK_FLOORDIV,
 			/* extra tokens */
-			TOK_VARARG, TOK_EOF, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME
+			TOK_VARARG, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME, TOK_END
 		} type;
 		std::string self;
 	};
 
 	struct TokenizerState {
-		char current_char;
 		int current_line;
 		int position;
 		std::vector<token> tokens;
 		std::string input;
+	};
+
+	const struct TokenizerState TOKENIZER_STATE_DEFAULT = {
+		1, 0, std::vector<token>(), ""
 	};
 }
