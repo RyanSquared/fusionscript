@@ -1,6 +1,5 @@
 /* vim:set noet sts=0 sw=2 ts=2: */
-#include <iostream>
-#include <string> /* ::TODO:: remove */
+#include <string>
 #include <cctype>
 #include <array>
 #include <utility>
@@ -17,12 +16,41 @@ namespace fusion {
 		"...", "[int]", "[num]", "[str]", "[name]", "[eof]"
 	};
 
-	/* ::TODO:: */
 	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
+		std::string input = ts->input;
+		char first = input.at(ts->position);
+		if (first == '0' && (check_next(1, 'x') || check_next(1, 'X')) {
+			std::string hexable = "0123456789ABCDEF";
+			std::string scanned = ""
+			uint32_t pos = ts->position + 2
+			while (input.find_first_of(hexable, pos) == pos)
+				scanned += input.at(++pos);
+			if (scanned.length() == 0)
+				return std::pair<bool, std::string>(false, "");
+			char *exponent = input.at(pos);
+			if (exponent == 'p' || exponent == 'P') {
+				scanned += exponent;
+				if (input.at(pos + 1) == '-' || input.at(pos + 1) == '+')
+					scanned += input.at(++pos);
+				while (input.find_first_of("0123456789", pos) == pos)
+					scanned += input.at(++pos);
+			}
+			return std::pair<bool, std::string>(true, scanned);
+		} else if (input.find_first_of("0123456789.", ts->position) {
+			// period included for decimals
+			std::string scanned = "";
+			uint32_t pos = ts->position;
+			while (input.find_first_of("0123456789", pos) == pos)
+				scanned += input.at(++pos);
+			if (input.at(pos) == "." && input.find("0123456789", pos) == pos + 1)) {
+				pos++;
+				while (input.find_first_of("0123456789", pos) == pos)
+					scanned += input.at(++pos);
+			}
+			if (scanned != ".") // it can potentially match just a period so don't do that
+				return std::pair<bool, std::string>(true, scanned);
+		}
 		return std::pair<bool, std::string>(false, "");
-	}
-	bool is_reserved(std::string word) {
-		return true;
 	}
 
 	void tokenize(TokenizerState *ts, std::string input) {
@@ -121,7 +149,7 @@ namespace fusion {
 					}
 					case '.': {
 						/* check .., then ...; if not ... then ..; then . */
-						auto result = try_parse_num(ts); /* ::TODO:: try_parse_num */
+						auto result = try_parse_num(ts);
 						if (std::get<0>(result)) { /* true if number, false if not */
 							/* get<1>(result) should return a std::string */
 							std::string result_num = std::get<1>(result);
@@ -148,16 +176,13 @@ namespace fusion {
 							break;
 						}
 					}
-					case '"': { /* ::TODO:: ' */
+					case '"': { 
 						std::string buffer = "\"";
 						ts->position++; /* increment position past the " */
 						char current = '\0'; /* current in string */
 						while (current != '"') { /* we can pass over '\"' during the loop */
 							current = input.at(ts->position);
-							if (current == '\r' || current == '\n') {
-								/* break on new line. you can use \n like everyone else >:C */
-								/* ::TODO:: implement erroring */
-							} else if (current == '\\') { /* process escape code, C-style */
+							if (current == '\\') { /* process escape code, C-style */
 								buffer += "\\" + input.at(ts->position + 2);
 								ts->position += 2;
 							} else if (current == '"') {
@@ -170,7 +195,6 @@ namespace fusion {
 							}
 						} /* end while */
 						ts->tokens.push_back({token::TOK_STRING, buffer});
-							/* hope this works TODO */
 						break;
 					} /* end case */
 					case '\'': {
@@ -178,13 +202,7 @@ namespace fusion {
 						ts->position++; /* incr past ' */
 						char current = '\0';
 						while (current != '\'') {
-							current = input.at(ts->position);
-							if (current == '\r' || current == '\n') {
-								// break again but ::TODO::
-							} else {
-								buffer += current;
-								ts->position++;
-							} /* end if */
+							buffer += input.at(ts->position++);
 						} /* end while */
 						ts->tokens.push_back({token::TOK_STRING, buffer});
 						break;
@@ -193,21 +211,18 @@ namespace fusion {
 					case '5': case '6': case '7': case '8': case '9': {
 						/* no matter what, this should return a number */
 						/* we don't need to test try_parse_num[1] */
-						std::string result_num = std::get<1>(try_parse_num(ts)); /* ::TODO:: */
+						std::string result_num = std::get<1>(try_parse_num(ts));
 						ts->tokens.push_back({token::TOK_NUM, result_num});
 						ts->position += result_num.length();
 						break;
 					} /* end case */
 					default: {
-						/* ::TODO:: is_reserved(keyword) -> bool */
 						char current_char = input.at(ts->position);
 						if (isalpha(current_char) || current_char == '_') {
 							std::string word = "";
 							while (isalnum(current_char) || current_char == '_') {
 								word += current_char;
-								std::cout << word << std::endl;
-								ts->position++;
-								current_char = input.at(ts->position);
+								current_char = input.at(++ts->position);
 							} /* end while */
 								/* fully captured word, check if reserved keyword */
 							bool is_reserved = false;
@@ -217,7 +232,6 @@ namespace fusion {
 								if (word == *iter) {
 									/* found reserved word */
 									uint16_t pos = iter - tokens.begin();
-									std::cout << pos << std::endl;
 									ts->tokens.push_back({
 										static_cast<token::token_t>(pos + FIRST_TOKEN),
 										word
@@ -231,7 +245,7 @@ namespace fusion {
 							ts->tokens.push_back({
 								static_cast<token::token_t>(input.at(ts->position)),
 								std::string(1, input.at(ts->position))
-							}); // ::TODO:: test
+							});
 							ts->position++;
 						} /* end else */
 					} /* end default */
@@ -246,13 +260,5 @@ namespace fusion {
 } /* end namespace */
 
 int main() {
-	fusion::TokenizerState ts = fusion::TOKENIZER_STATE_DEFAULT;
-	ts.input = "print('hi');";
-	fusion::tokenize(&ts, "print('hi');");
-	for (auto token = ts.tokens.begin(); token != ts.tokens.end(); token++) {
-		std::string token_name = (token->type > fusion::token::TOK_VARARG) ? // tok_vararg is the last non-named
-			fusion::tokens[token->type - 256] : "" << token->type // std::to_string(token->type);
-		std::cout << "Token<" << token->type << ">: " << token_name << std::endl;
-	}
 	return 0;
 }
