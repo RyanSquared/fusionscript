@@ -19,15 +19,15 @@ namespace fusion {
 	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
 		std::string input = ts->input;
 		char first = input.at(ts->position);
-		if (first == '0' && (check_next(1, 'x') || check_next(1, 'X')) {
+		if (first == '0' && (check_next(1, 'x') || check_next(1, 'X'))) {
 			std::string hexable = "0123456789ABCDEF";
-			std::string scanned = ""
-			uint32_t pos = ts->position + 2
+			std::string scanned = "";
+			uint32_t pos = ts->position + 2;
 			while (input.find_first_of(hexable, pos) == pos)
 				scanned += input.at(++pos);
 			if (scanned.length() == 0)
 				return std::pair<bool, std::string>(false, "");
-			char *exponent = input.at(pos);
+			char exponent = input.at(pos);
 			if (exponent == 'p' || exponent == 'P') {
 				scanned += exponent;
 				if (input.at(pos + 1) == '-' || input.at(pos + 1) == '+')
@@ -36,13 +36,13 @@ namespace fusion {
 					scanned += input.at(++pos);
 			}
 			return std::pair<bool, std::string>(true, scanned);
-		} else if (input.find_first_of("0123456789.", ts->position) {
+		} else if (input.find_first_of("0123456789.", ts->position)) {
 			// period included for decimals
 			std::string scanned = "";
 			uint32_t pos = ts->position;
 			while (input.find_first_of("0123456789", pos) == pos)
 				scanned += input.at(++pos);
-			if (input.at(pos) == "." && input.find("0123456789", pos) == pos + 1)) {
+			if (input.at(pos) == '.' && (input.find("0123456789", pos) == pos + 1)) {
 				pos++;
 				while (input.find_first_of("0123456789", pos) == pos)
 					scanned += input.at(++pos);
