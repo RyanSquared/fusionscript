@@ -15,7 +15,7 @@ namespace fusion {
 			TOK_IN, TOK_NEW, TOK_EXTENDS, TOK_FOR,
 			/* binary operators with more than one char*/
 			TOK_BOOLAND, TOK_BOOLOR, TOK_RSHIFT, TOK_LSHIFT, TOK_EQ, TOK_NEQ, TOK_GE,
-			TOK_LE, TOK_CONCAT,
+			TOK_LE, TOK_CONCAT, TOK_FLOORDIV,
 			/* extra tokens */
 			TOK_VARARG, TOK_EOF, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME
 		} type;

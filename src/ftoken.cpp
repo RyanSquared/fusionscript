@@ -10,7 +10,7 @@ namespace fusion {
 	std::array<std::string, 25> fusion_tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends", "for",
 		/* */
-		"&&", "||", ">>", "<<", "==", "!=", ">=", "<=", ".."
+		"&&", "||", ">>", "<<", "==", "!=", ">=", "<=", "..", "_/",
 		/* */
 		"...", "[eof]", "[int]", "[num]", "[str]", "[name]"
 	};
@@ -143,6 +143,11 @@ namespace fusion {
 						}
 					} /* end else if */
 				} /* end case */
+				case '_': { /* floor division */
+					if (check_next(1, '/')) {
+						ts->tokens.push_back({token::TOK_FLOORDIV, "_/"});
+					}
+				}
 				case '"': { /* ::TODO:: ' */
 					std::string buffer = "";
 					ts->position++; /* increment position past the " */
