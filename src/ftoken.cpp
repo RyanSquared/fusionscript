@@ -7,7 +7,6 @@
 #include "ftoken.hpp"
 
 namespace fusion {
-
 	std::array<std::string, 26> tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends", "for",
 		/* */
@@ -35,6 +34,7 @@ namespace fusion {
 				while (input.find_first_of("0123456789", pos) == pos)
 					scanned += input.at(++pos);
 			}
+			ts->position = pos;
 			return std::pair<bool, std::string>(true, scanned);
 		} else if (input.find_first_of("0123456789.", ts->position)) {
 			// period included for decimals
@@ -47,8 +47,10 @@ namespace fusion {
 				while (input.find_first_of("0123456789", pos) == pos)
 					scanned += input.at(++pos);
 			}
-			if (scanned != ".") // it can potentially match just a period so don't do that
+			if (scanned != ".") { // it can potentially match just a period so don't do that
+				ts->position = pos;
 				return std::pair<bool, std::string>(true, scanned);
+			}
 		}
 		return std::pair<bool, std::string>(false, "");
 	}
@@ -256,7 +258,6 @@ namespace fusion {
 			} /* end try */ /* end of input, return final token */
 		} /* end while */
 	} /* end function */
-
 } /* end namespace */
 
 int main() {
