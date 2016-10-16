@@ -119,16 +119,8 @@ new ExampleAsyncApp extends Async {
 ExampleAsyncApp:run();
 ```
 
-## Compiling Utilities Library
-
-**Please note** that this method is proven to work on Linux systems only. The
-commands used should work fine as long as you have the following programs
-installed:
-
- * cURL (`curl`)
- * GNU Compiler Collection (`gcc`)
- * Linux compatible archiving tool (`tar`)
+### Building
 
 ```sh
-curl https://www.lua.org/ftp/lua-5.3.2.tar.gz | tar -xvz && mv lua-5.3.2 lua
+make
 ```
