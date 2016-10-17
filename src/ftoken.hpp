@@ -2,9 +2,14 @@
 #include <string>
 #include <vector>
 
-#define FIRST_TOKEN 257
+#define FIRST_TOKEN 256
 /* 256 possible for char, plus one */
-#define check_next(pos, test_char)	input.at(pos) == test_char
+#define f_check_next(pos, test_char)	input.at(pos) == test_char
+#define f_iswhitespace(test_char) test_char == ' ' || \
+	test_char == '\t' || \
+	test_char == '\n' || \
+  test_char == '\v' || \
+	test_char == '\f'
 
 namespace fusion {
 
@@ -17,7 +22,7 @@ namespace fusion {
 			TOK_BOOLAND, TOK_BOOLOR, TOK_RSHIFT, TOK_LSHIFT, TOK_EQ, TOK_NEQ, TOK_GE,
 			TOK_LE, TOK_CONCAT, TOK_FLOORDIV,
 			/* extra tokens */
-			TOK_VARARG, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME, TOK_END
+			TOK_VARARG, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME, TOK_END, TOK_WHITE
 		} type;
 		std::string self;
 	};

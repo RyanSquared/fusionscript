@@ -4,21 +4,23 @@
 #include <array>
 #include <utility>
 
+#include <iostream>
+
 #include "ftoken.hpp"
 
 namespace fusion {
-	std::array<std::string, 26> tokens = {
+	std::array<std::string, 27> tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends", "for",
 		/* */
 		"&&", "||", ">>", "<<", "==", "!=", ">=", "<=", "..", "_/",
 		/* */
-		"...", "[int]", "[num]", "[str]", "[name]", "[eof]"
+		"...", "[int]", "[num]", "[str]", "[name]", "[eof]", "[white]"
 	};
 
 	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
 		std::string input = ts->input;
 		char first = input.at(ts->position);
-		if (first == '0' && (check_next(1, 'x') || check_next(1, 'X'))) {
+		if (first == '0' && (f_check_next(1, 'x') || f_check_next(1, 'X'))) {
 			std::string hexable = "0123456789ABCDEF";
 			std::string scanned = "";
 			uint32_t pos = ts->position + 2;
@@ -72,11 +74,17 @@ namespace fusion {
 						break;
 					}
 					case ' ': case '\t': case '\v': case '\f': {
-						ts->position++;
+						std::string whitespace_token = "";
+						while (f_iswhitespace(input.at(ts->position))) {
+							whitespace_token += input.at(ts->position);
+							ts->position++;
+						}
+						ts->tokens.push_back({token::TOK_WHITE, whitespace_token});
+						break;
 					}
 					case '&': {
 						/* check for && otherwise & */
-						if (check_next(1, '&')) {
+						if (f_check_next(1, '&')) {
 							/* generate token for && and incr position to skip over */
 							ts->tokens.push_back({
 								token::TOK_BOOLAND, /* token::type */
@@ -89,7 +97,7 @@ namespace fusion {
 					} /* end case */
 					case '|': {
 						/* same as above, check for || otherwise | */
-						if (check_next(1, '|')) {
+						if (f_check_next(1, '|')) {
 							/* generate || token and incr */
 							ts->tokens.push_back({token::TOK_BOOLOR, "||"});
 							ts->position += 2;
@@ -135,7 +143,7 @@ namespace fusion {
 					} /* end case */
 					case '=': {
 						/* check == else = */
-						if (check_next(1, '=')) {
+						if (f_check_next(1, '=')) {
 							ts->tokens.push_back({token::TOK_EQ, "=="});
 							ts->position += 2;
 							break;
@@ -143,7 +151,7 @@ namespace fusion {
 					}
 					case '!': {
 						/* check != else = */
-						if (check_next(1, '=')) {
+						if (f_check_next(1, '=')) {
 							ts->tokens.push_back({token::TOK_NEQ, "!="});
 							ts->position += 2;
 							break;
@@ -157,8 +165,8 @@ namespace fusion {
 							std::string result_num = std::get<1>(result);
 							ts->tokens.push_back({token::TOK_NUM, result_num});
 							ts->position += result_num.length();
-						} else if (check_next(1, '.')) {
-							if (check_next(2, '.')) {
+						} else if (f_check_next(1, '.')) {
+							if (f_check_next(2, '.')) {
 								/* ... */
 								ts->tokens.push_back({token::TOK_VARARG, "..."});
 								ts->position += 3;
@@ -172,7 +180,7 @@ namespace fusion {
 						} /* end else if */
 					} /* end case */
 					case '_': { /* floor division */
-						if (check_next(1, '/')) {
+						if (f_check_next(1, '/')) {
 							ts->tokens.push_back({token::TOK_FLOORDIV, "_/"});
 							ts->position += 2;
 							break;
@@ -261,5 +269,14 @@ namespace fusion {
 } /* end namespace */
 
 int main() {
+	fusion::TokenizerState ts = fusion::TOKENIZER_STATE_DEFAULT;
+	fusion::tokenize(&ts, "print(    \"hi\" )");
+	for (auto token = ts.tokens.begin(); token != ts.tokens.end(); token++) {
+		if (token->type > 256)
+			std::cout << fusion::tokens[token->type - 256] << " ";
+		else
+			std::cout << token->type << " ";
+		std::cout << token->self << std::endl;
+	}
 	return 0;
 }
