@@ -17,7 +17,7 @@ namespace fusion {
 		enum token_t {
 			/* keywords */
 			TOK_ELSE = FIRST_TOKEN, TOK_IF, TOK_TRUE, TOK_FALSE, TOK_NIL, TOK_WHILE,
-			TOK_IN, TOK_NEW, TOK_EXTENDS, TOK_FOR,
+			TOK_IN, TOK_NEW, TOK_EXTENDS, TOK_FOR, TOK_ASYNC, TOK_YIELD,
 			/* binary operators with more than one char*/
 			TOK_BOOLAND, TOK_BOOLOR, TOK_RSHIFT, TOK_LSHIFT, TOK_EQ, TOK_NEQ, TOK_GE,
 			TOK_LE, TOK_CONCAT, TOK_FLOORDIV,

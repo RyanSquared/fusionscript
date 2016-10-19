@@ -9,8 +9,9 @@
 #include "ftoken.hpp"
 
 namespace fusion {
-	std::array<std::string, 27> tokens = {
-		"else", "if", "true", "false", "nil", "while", "in", "new", "extends", "for",
+	std::array<std::string, 29> tokens = {
+		"else", "if", "true", "false", "nil", "while", "in", "new", "extends",
+		"for", "async", "yield"
 		/* */
 		"&&", "||", ">>", "<<", "==", "!=", ">=", "<=", "..", "_/",
 		/* */
