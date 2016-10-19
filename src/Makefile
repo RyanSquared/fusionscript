@@ -1,9 +1,14 @@
 CXXFLAGS = -Wall -Werror -std=c++11
 
 SRC = ftoken.cpp
+# use obj files for C++ objects
+OBJS = $(SRC:.cpp=.obj)
 
-default: test
+.PHONY: default
+default: $(OBJS)
 
-test: $(SRC)
-	# use obj files for C++ objects
-	$(CXX) ftoken.cpp $(CXXFLAGS) -o ftoken.obj
+%.obj: %.cpp
+	$(CXX) $< -o $@
+
+clean:
+	rm -f $(OBJS)
