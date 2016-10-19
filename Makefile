@@ -9,6 +9,6 @@ $(PLATS):
 	$(MAKE) -C src/lua/src $@
 
 clean:
-	$(MAKE) -C src/lua/src
+	$(MAKE) -C src/lua/src clean
 	$(MAKE) -C src clean
 

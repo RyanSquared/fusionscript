@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -Werror -std=c++11
+CXXFLAGS = -Wall -Werror -std=c++11 -I./lua/src/lua
 
 SRC = ftoken.cpp
 # use obj files for C++ objects
@@ -8,7 +8,7 @@ OBJS = $(SRC:.cpp=.obj)
 default: $(OBJS)
 
 %.obj: %.cpp
-	$(CXX) $< -o $@
+	$(CXX) $< -o $@ $(CXXFLAGS)
 
 clean:
 	rm -f $(OBJS)
