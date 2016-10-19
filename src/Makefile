@@ -9,3 +9,6 @@ default: $(OBJS)
 
 %.obj: %.cpp
 	$(CXX) $< -o $@
+
+clean:
+	rm -f $(OBJS)
