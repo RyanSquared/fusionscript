@@ -237,7 +237,8 @@ static void checkHeader (LoadState *S) {
   checkliteral(S, LUA_SIGNATURE + 1, "not a");  /* 1st char already checked */
   if (LoadByte(S) != LUAC_VERSION)
     error(S, "version mismatch in");
-  if (LoadByte(S) != LUAC_FORMAT)
+  char format = LoadByte(S);
+  if (format != LUAC_FORMAT && format != LUAC_FORMAT_OFFICIAL)
     error(S, "format mismatch in");
   checkliteral(S, LUAC_DATA, "corrupted");
   checksize(S, int);
