@@ -9,6 +9,7 @@
 #include "ftoken.hpp"
 
 namespace fusion {
+
 	const std::array<std::string, 28> tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends",
 		"for", "async", "yield"
@@ -250,8 +251,6 @@ namespace fusion {
 							while (isalnum(current_char) || current_char == '_') {
 								word += current_char;
 								current_char = get_next(++ts->position, input);
-								if (current_char == '\0')
-									break;
 							} /* end while */
 								/* fully captured word, check if reserved keyword */
 							bool is_reserved = false;
@@ -285,6 +284,7 @@ namespace fusion {
 			} /* end try */ /* end of input, return final token */
 		} /* end while */
 	} /* end function */
+
 } /* end namespace */
 
 int main() {
