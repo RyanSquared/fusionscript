@@ -9,7 +9,7 @@
 #include "ftoken.hpp"
 
 namespace fusion {
-	const std::array<std::string, 29> tokens = {
+	const std::array<std::string, 28> tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends",
 		"for", "async", "yield"
 		/* */
@@ -20,15 +20,15 @@ namespace fusion {
 
 	char get_next(uint32_t position, std::string input) {
 		/* this should ONLY be used when the input is pre-verified */
-		if (input.length() < position + 1)
+		if (input.length() > position) {
 			return input.at(position); // position is already incremented
-		else
+		} else
 			return '\0'; // there should not ever be a '\0' in input
 	}
 
 	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
 		std::string input = ts->input;
-		char first = input.at(ts->position);
+		char first = get_next(ts->position, input);
 		if (first == '0' && (f_check_next(1, 'x') || f_check_next(1, 'X'))) {
 			std::string hexable = "0123456789ABCDEF";
 			std::string scanned = "";
@@ -37,7 +37,7 @@ namespace fusion {
 				scanned += get_next(++pos, input);
 			if (scanned.length() == 0)
 				return std::pair<bool, std::string>(false, "");
-			char exponent = get_next(pos);
+			char exponent = get_next(pos, input);
 			if (exponent == 'p' || exponent == 'P') {
 				scanned += exponent;
 				if (get_next(pos + 1, input) == '-' ||
@@ -48,17 +48,21 @@ namespace fusion {
 			}
 			ts->position = pos;
 			return std::pair<bool, std::string>(true, scanned);
-		} else if (input.find_first_of("0123456789.", ts->position)) {
+		} else if (input.find_first_of("0123456789.", ts->position) ==
+				ts->position) {
 			// period included for decimals
 			std::string scanned = "";
 			uint32_t pos = ts->position;
-			while (input.find_first_of("0123456789", pos) == pos)
+			while (input.find_first_of("0123456789", pos) == pos) {
 				scanned += get_next(++pos, input);
+				std::cout << scanned << "\n";
+			}
 			if (get_next(pos, input) == '.' &&
 					(input.find("0123456789", pos) == pos + 1)) {
 				pos++;
-				while (input.find_first_of("0123456789", pos) == pos)
+				while (input.find_first_of("0123456789", pos) == pos) {
 					scanned += get_next(++pos, input);
+				}
 			}
 			if (scanned != ".") { // it can potentially match just a period so don't do that
 				ts->position = pos;
@@ -71,6 +75,7 @@ namespace fusion {
 	void tokenize(TokenizerState *ts, std::string input) {
 		/* initialize the tokenizer state */
 		/* search through string for a token */
+		ts->input = input;
 		while (true) {
 			try {
 				switch (input.at(ts->position)) {
@@ -86,8 +91,8 @@ namespace fusion {
 					}
 					case ' ': case '\t': case '\v': case '\f': {
 						std::string whitespace_token = "";
-						while (f_iswhitespace(get_next(ts->position))) {
-							whitespace_token += get_next(ts->position);
+						while (f_iswhitespace(get_next(ts->position, input))) {
+							whitespace_token += get_next(ts->position, input);
 							ts->position++;
 						}
 						ts->tokens.push_back({token::TOK_WHITE, whitespace_token});
@@ -244,7 +249,7 @@ namespace fusion {
 							std::string word = "";
 							while (isalnum(current_char) || current_char == '_') {
 								word += current_char;
-								current_char = get_next(++ts->position);
+								current_char = get_next(++ts->position, input);
 								if (current_char == '\0')
 									break;
 							} /* end while */
@@ -284,10 +289,10 @@ namespace fusion {
 
 int main() {
 	fusion::TokenizerState ts = fusion::TOKENIZER_STATE_DEFAULT;
-	fusion::tokenize(&ts, "print(    \"hi\" )");
+	fusion::tokenize(&ts, "42");
 	for (auto token = ts.tokens.begin(); token != ts.tokens.end(); token++) {
-		if (token->type > 256)
-			std::cout << fusion::tokens[token->type - 256] << " ";
+		if (token->type >= FIRST_TOKEN)
+			std::cout << fusion::tokens[token->type - FIRST_TOKEN - 1] << " ";
 		else
 			std::cout << token->type << " ";
 		std::cout << token->self << std::endl;
