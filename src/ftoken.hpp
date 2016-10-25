@@ -6,6 +6,7 @@
 
 #define FIRST_TOKEN 256
 /* 256 possible for char, plus one */
+
 #define f_check_next(pos, test_char)	get_next(pos, input) == test_char
 #define f_iswhitespace(test_char) test_char == ' ' || \
 	test_char == '\t' || \
@@ -29,8 +30,8 @@ namespace fusion {
 	};
 
 	struct TokenizerState {
-		int current_line;
-		int position;
+		uint32_t current_line;
+		uint32_t position;
 		std::vector<token> tokens;
 		std::string input;
 	};

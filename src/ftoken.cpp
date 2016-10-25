@@ -1,4 +1,4 @@
-/* vim:set noet sts=0 sw=2 ts=2: */
+/* vim:set noet sts=0 sw=2 ts=2 foldmethod=syntax foldnestmax=2: */
 #include <string>
 #include <cctype>
 #include <array>
@@ -65,7 +65,8 @@ namespace fusion {
 					scanned += get_next(pos++, input);
 				}
 			}
-			if (scanned != ".") { // it can potentially match just a period so don't do that
+			if (scanned != ".") {
+				// it can potentially match just a period so don't do that
 				ts->position = pos;
 				return std::pair<bool, std::string>(true, scanned);
 			}
@@ -79,7 +80,8 @@ namespace fusion {
 		ts->input = input;
 		while (true) {
 			try {
-				switch (input.at(ts->position)) {
+				char current_token = input.at(ts->position);
+				switch (current_token) {
 					case '\r': {
 						/* ignore \r for Windows support */
 						ts->position++;
@@ -108,8 +110,15 @@ namespace fusion {
 								"&&"                /* string self */
 							});
 							ts->position += 2;
-						break;
-						} /* end if */ /* do not process just & */
+							break;
+						} else {
+							ts->tokens.push_back({
+								static_cast<token::token_t>(current_token),
+								"&"
+							});
+							ts->position++;
+							break;
+						} /* end if */
 						/* the nonbreaking default will process single-char tokens */
 					} /* end case */
 					case '|': {
@@ -119,50 +128,68 @@ namespace fusion {
 							ts->tokens.push_back({token::TOK_BOOLOR, "||"});
 							ts->position += 2;
 							break;
+						} else {
+							ts->tokens.push_back({
+								static_cast<token::token_t>(current_token),
+								"|"
+							});
+							ts->position++;
+							break;
 						}
 					} /* end case */
 					case '>': {
 						/* check for >>, check for >=, or DON'T break */
 						/* the char lives as itself as a token if nobreak */
-						bool is_single_char = false;
 						switch (get_next(ts->position + 1, input)) {
 							case '>':
 								ts->tokens.push_back({token::TOK_RSHIFT, ">>"});
+								ts->position += 2;
 								break;
 							case '=':
 								ts->tokens.push_back({token::TOK_GE, ">="});
+								ts->position += 2;
 								break;
 							default:
-								is_single_char = true;
+								ts->tokens.push_back({
+									static_cast<token::token_t>(current_token),
+									">"
+								});
+								ts->position++;
+								break;
 						} /* end switch */
-						if (!is_single_char) {
-							ts->position += 2;
-							break;
-						}
 					} /* end case */
 					case '<': {
 						/* duplicate above again, but with < */
-						bool is_single_char = false;
 						switch(get_next(ts->position + 1, input)) {
 							case '<':
 								ts->tokens.push_back({token::TOK_LSHIFT, "<<"});
+								ts->position += 2;
 								break;
 							case '=':
 								ts->tokens.push_back({token::TOK_LE, "<="});
+								ts->position += 2;
 								break;
 							default:
-								is_single_char = true;
+								ts->tokens.push_back({
+									static_cast<token::token_t>(current_token),
+									"<"
+								});
+								ts->position++;
+								break;
 						} /* end switch */
-						if (!is_single_char) {
-							ts->position += 2;
-							break;
-						}
 					} /* end case */
 					case '=': {
 						/* check == else = */
 						if (f_check_next(1, '=')) {
 							ts->tokens.push_back({token::TOK_EQ, "=="});
 							ts->position += 2;
+							break;
+						} else {
+							ts->tokens.push_back({
+								static_cast<token::token_t>(current_token),
+								"="
+							});
+							ts->position++;
 							break;
 						}
 					}
@@ -171,6 +198,13 @@ namespace fusion {
 						if (f_check_next(1, '=')) {
 							ts->tokens.push_back({token::TOK_NEQ, "!="});
 							ts->position += 2;
+							break;
+						} else {
+							ts->tokens.push_back({
+								static_cast<token::token_t>(current_token),
+								"="
+							});
+							ts->position++;
 							break;
 						}
 					}
@@ -194,12 +228,26 @@ namespace fusion {
 								ts->position += 3;
 								break;
 							}
+						} else {
+							ts->tokens.push_back({
+								static_cast<token::token_t>(current_token),
+								"."
+							});
+							ts->position++;
+							break;
 						} /* end else if */
 					} /* end case */
 					case '_': { /* floor division */
 						if (f_check_next(1, '/')) {
 							ts->tokens.push_back({token::TOK_FLOORDIV, "_/"});
 							ts->position += 2;
+							break;
+						} else {
+							ts->tokens.push_back({
+								static_cast<token::token_t>(current_token),
+								"_"
+							});
+							ts->position++;
 							break;
 						}
 					}
@@ -289,7 +337,7 @@ namespace fusion {
 
 int main() {
 	fusion::TokenizerState ts = fusion::TOKENIZER_STATE_DEFAULT;
-	fusion::tokenize(&ts, "42");
+	fusion::tokenize(&ts, "herp derp = trains");
 	for (auto token = ts.tokens.begin(); token != ts.tokens.end(); token++) {
 		if (token->type >= FIRST_TOKEN)
 			std::cout << fusion::tokens[token->type - FIRST_TOKEN - 1] << " ";
