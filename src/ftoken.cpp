@@ -20,10 +20,11 @@ namespace fusion {
 
 	char get_next(uint32_t position, std::string input) {
 		/* this should ONLY be used when the input is pre-verified */
-		if (input.length() > position) {
-			return input.at(position); // position is already incremented
-		} else
-			return '\0'; // there should not ever be a '\0' in input
+		try {
+			return input.at(position);
+		} catch (std::out_of_range const &ignore) {
+			return '\0';
+		}
 	}
 
 	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
@@ -31,10 +32,10 @@ namespace fusion {
 		char first = get_next(ts->position, input);
 		if (first == '0' && (f_check_next(1, 'x') || f_check_next(1, 'X'))) {
 			std::string hexable = "0123456789ABCDEF";
-			std::string scanned = "";
+			std::string scanned = "0x";
 			uint32_t pos = ts->position + 2;
 			while (input.find_first_of(hexable, pos) == pos)
-				scanned += get_next(++pos, input);
+				scanned += get_next(pos++, input);
 			if (scanned.length() == 0)
 				return std::pair<bool, std::string>(false, "");
 			char exponent = get_next(pos, input);
@@ -44,7 +45,7 @@ namespace fusion {
 						get_next(pos + 1, input) == '+')
 					scanned += get_next(++pos, input);
 				while (input.find_first_of("0123456789", pos) == pos)
-					scanned += get_next(++pos, input);
+					scanned += get_next(pos++, input);
 			}
 			ts->position = pos;
 			return std::pair<bool, std::string>(true, scanned);
@@ -54,14 +55,13 @@ namespace fusion {
 			std::string scanned = "";
 			uint32_t pos = ts->position;
 			while (input.find_first_of("0123456789", pos) == pos) {
-				scanned += get_next(++pos, input);
-				std::cout << scanned << "\n";
+				scanned += get_next(pos++, input);
 			}
 			if (get_next(pos, input) == '.' &&
 					(input.find("0123456789", pos) == pos + 1)) {
 				pos++;
 				while (input.find_first_of("0123456789", pos) == pos) {
-					scanned += get_next(++pos, input);
+					scanned += get_next(pos++, input);
 				}
 			}
 			if (scanned != ".") { // it can potentially match just a period so don't do that
