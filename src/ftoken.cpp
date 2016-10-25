@@ -9,14 +9,22 @@
 #include "ftoken.hpp"
 
 namespace fusion {
-	std::array<std::string, 29> tokens = {
+	const std::array<std::string, 29> tokens = {
 		"else", "if", "true", "false", "nil", "while", "in", "new", "extends",
 		"for", "async", "yield"
 		/* */
 		"&&", "||", ">>", "<<", "==", "!=", ">=", "<=", "..", "_/",
 		/* */
-		"...", "[int]", "[num]", "[str]", "[name]", "[eof]", "[white]"
+		"...", "[num]", "[str]", "[name]", "[eof]", "[white]"
 	};
+
+	char get_next(uint32_t position, std::string input) {
+		/* this should ONLY be used when the input is pre-verified */
+		if (input.length() < position + 1)
+			return input.at(position); // position is already incremented
+		else
+			return '\0'; // there should not ever be a '\0' in input
+	}
 
 	std::pair<bool, std::string> try_parse_num(TokenizerState *ts) {
 		std::string input = ts->input;
@@ -26,16 +34,17 @@ namespace fusion {
 			std::string scanned = "";
 			uint32_t pos = ts->position + 2;
 			while (input.find_first_of(hexable, pos) == pos)
-				scanned += input.at(++pos);
+				scanned += get_next(++pos, input);
 			if (scanned.length() == 0)
 				return std::pair<bool, std::string>(false, "");
-			char exponent = input.at(pos);
+			char exponent = get_next(pos);
 			if (exponent == 'p' || exponent == 'P') {
 				scanned += exponent;
-				if (input.at(pos + 1) == '-' || input.at(pos + 1) == '+')
-					scanned += input.at(++pos);
+				if (get_next(pos + 1, input) == '-' ||
+						get_next(pos + 1, input) == '+')
+					scanned += get_next(++pos, input);
 				while (input.find_first_of("0123456789", pos) == pos)
-					scanned += input.at(++pos);
+					scanned += get_next(++pos, input);
 			}
 			ts->position = pos;
 			return std::pair<bool, std::string>(true, scanned);
@@ -44,11 +53,12 @@ namespace fusion {
 			std::string scanned = "";
 			uint32_t pos = ts->position;
 			while (input.find_first_of("0123456789", pos) == pos)
-				scanned += input.at(++pos);
-			if (input.at(pos) == '.' && (input.find("0123456789", pos) == pos + 1)) {
+				scanned += get_next(++pos, input);
+			if (get_next(pos, input) == '.' &&
+					(input.find("0123456789", pos) == pos + 1)) {
 				pos++;
 				while (input.find_first_of("0123456789", pos) == pos)
-					scanned += input.at(++pos);
+					scanned += get_next(++pos, input);
 			}
 			if (scanned != ".") { // it can potentially match just a period so don't do that
 				ts->position = pos;
@@ -76,8 +86,8 @@ namespace fusion {
 					}
 					case ' ': case '\t': case '\v': case '\f': {
 						std::string whitespace_token = "";
-						while (f_iswhitespace(input.at(ts->position))) {
-							whitespace_token += input.at(ts->position);
+						while (f_iswhitespace(get_next(ts->position))) {
+							whitespace_token += get_next(ts->position);
 							ts->position++;
 						}
 						ts->tokens.push_back({token::TOK_WHITE, whitespace_token});
@@ -109,7 +119,7 @@ namespace fusion {
 						/* check for >>, check for >=, or DON'T break */
 						/* the char lives as itself as a token if nobreak */
 						bool is_single_char = false;
-						switch (input.at(ts->position + 1)) {
+						switch (get_next(ts->position + 1, input)) {
 							case '>':
 								ts->tokens.push_back({token::TOK_RSHIFT, ">>"});
 								break;
@@ -127,7 +137,7 @@ namespace fusion {
 					case '<': {
 						/* duplicate above again, but with < */
 						bool is_single_char = false;
-						switch(input.at(ts->position + 1)) {
+						switch(get_next(ts->position + 1, input)) {
 							case '<':
 								ts->tokens.push_back({token::TOK_LSHIFT, "<<"});
 								break;
@@ -192,9 +202,10 @@ namespace fusion {
 						ts->position++; /* increment position past the " */
 						char current = '\0'; /* current in string */
 						while (current != '"') { /* we can pass over '\"' during the loop */
-							current = input.at(ts->position);
+							current = get_next(ts->position, input);
 							if (current == '\\') { /* process escape code, C-style */
-								buffer += "\\" + input.at(ts->position + 2);
+								buffer += "\\" + get_next(ts->position + 2, input);
+								// TODO verify not '\0'
 								ts->position += 2;
 							} else if (current == '"') {
 								buffer += '"';
@@ -213,7 +224,7 @@ namespace fusion {
 						ts->position++; /* incr past ' */
 						char current = '\0';
 						while (current != '\'') {
-							buffer += input.at(ts->position++);
+							buffer += get_next(ts->position++, input); // TODO verify !'\0'
 						} /* end while */
 						ts->tokens.push_back({token::TOK_STRING, buffer});
 						break;
@@ -228,12 +239,14 @@ namespace fusion {
 						break;
 					} /* end case */
 					default: {
-						char current_char = input.at(ts->position);
+						char current_char = get_next(ts->position, input);
 						if (isalpha(current_char) || current_char == '_') {
 							std::string word = "";
 							while (isalnum(current_char) || current_char == '_') {
 								word += current_char;
-								current_char = input.at(++ts->position);
+								current_char = get_next(++ts->position);
+								if (current_char == '\0')
+									break;
 							} /* end while */
 								/* fully captured word, check if reserved keyword */
 							bool is_reserved = false;
@@ -254,8 +267,8 @@ namespace fusion {
 								/* used as an identifier */
 						} else {
 							ts->tokens.push_back({
-								static_cast<token::token_t>(input.at(ts->position)),
-								std::string(1, input.at(ts->position))
+								static_cast<token::token_t>(get_next(ts->position, input)),
+								std::string(1, get_next(ts->position, input))
 							});
 							ts->position++;
 						} /* end else */

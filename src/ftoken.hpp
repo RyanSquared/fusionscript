@@ -1,10 +1,12 @@
 /* vim:set noet sts=0 sw=2 ts=2: */
+#pragma once
+
 #include <string>
 #include <vector>
 
 #define FIRST_TOKEN 256
 /* 256 possible for char, plus one */
-#define f_check_next(pos, test_char)	input.at(pos) == test_char
+#define f_check_next(pos, test_char)	get_next(pos, input) == test_char
 #define f_iswhitespace(test_char) test_char == ' ' || \
 	test_char == '\t' || \
 	test_char == '\n' || \
@@ -12,7 +14,6 @@
 	test_char == '\f'
 
 namespace fusion {
-
 	struct token {
 		enum token_t {
 			/* keywords */
@@ -22,7 +23,7 @@ namespace fusion {
 			TOK_BOOLAND, TOK_BOOLOR, TOK_RSHIFT, TOK_LSHIFT, TOK_EQ, TOK_NEQ, TOK_GE,
 			TOK_LE, TOK_CONCAT, TOK_FLOORDIV,
 			/* extra tokens */
-			TOK_VARARG, TOK_INT, TOK_NUM, TOK_STRING, TOK_NAME, TOK_END, TOK_WHITE
+			TOK_VARARG, TOK_NUM, TOK_STRING, TOK_NAME, TOK_END, TOK_WHITE
 		} type;
 		std::string self;
 	};
@@ -37,4 +38,10 @@ namespace fusion {
 	const struct TokenizerState TOKENIZER_STATE_DEFAULT = {
 		1, 0, std::vector<token>(), ""
 	};
+
+	char get_next(uint32_t position, std::string input);
+
+	std::pair<bool, std::string> try_parse_num(TokenizerState *ts);
+
+	void tokenize(TokenizerState *ts, std::string input);
 }
