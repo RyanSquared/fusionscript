@@ -1,6 +1,6 @@
 describe("lexer", function()
 	local lexer = require("fusion.core.lexer")
-	it("can do basic assignment", function()
+	it("can parse basic assignment", function()
 		assert.same(lexer:match("a = b;"), {
 			{"assignment", {
 				variable_list = {
@@ -12,7 +12,7 @@ describe("lexer", function()
 			}}
 		})
 	end)
-	it("can do local assignment", function()
+	it("can parse local assignment", function()
 		assert.same(lexer:match("local a = b;"), {
 			{"assignment", {
 				variable_list = {
@@ -25,7 +25,21 @@ describe("lexer", function()
 			}}
 		})
 	end)
-	it("can do multi value assignment", function()
+	it("can parse destructuring local assignment", function()
+		assert.same(lexer:match("local {a} = b;"), {
+			{"assignment", {
+				variable_list = {
+					{"variable", "a"},
+					is_destructuring = true
+				},
+				expression_list = {
+					{"variable", "b"}
+				},
+				is_local = true
+			}}
+		})
+	end)
+	it("can parse multi value assignment", function()
 		assert.same(lexer:match("a, b = c, d;"), {
 			{"assignment", {
 				variable_list = {
@@ -39,7 +53,7 @@ describe("lexer", function()
 			}}
 		})
 	end)
-	it("can do replacement assignment", function()
+	it("can parse replacement assignment", function()
 		assert.same(lexer:match("a, b = b, a;"), {
 			{"assignment", {
 				variable_list = {
@@ -53,7 +67,7 @@ describe("lexer", function()
 			}}
 		})
 	end)
-	it("can do complex expressions", function()
+	it("can parse complex expressions", function()
 		assert.same(lexer:match("a = (+ (^ b c) (/ d e));"), {
 			{"assignment", {
 				variable_list = {
