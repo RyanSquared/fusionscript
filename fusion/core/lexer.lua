@@ -30,7 +30,10 @@ pattern = re.compile([[
 		(ex_factor) ws {:operator: [+-] :} ws expression
 	|} / ex_factor
 	ex_factor <- {| '' -> 'expression'
-		ex_power ws {:operator: ([*/%] / '//') :} ws ex_power
+		ex_unary ws {:operator: ([*/%] / '//') :} ws ex_unary
+	|} / ex_unary
+	ex_unary <- {| '' -> 'expression'
+		{:operator: [-!#~] :} ws ex_power
 	|} / ex_power
 	ex_power <- {| '' -> 'expression'
 		value ws {:operator: '^' :} ws value
@@ -78,5 +81,5 @@ pattern = re.compile([[
 
 
 pretty.dump(pattern:match([[
-a = 1 + 2 * 3;
+a = 1 + 2 * -3;
 ]]));
