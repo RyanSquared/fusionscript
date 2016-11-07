@@ -3,6 +3,12 @@ local re = require("re"); -- vim:set noet sts=0 sw=3 ts=3:
 
 local defs = {}
 
+function defs:transform_binary_expression()
+	table.insert(self, 1, 'expression')
+	self.type = 'binary'
+	return self
+end
+
 pattern = re.compile([[
 	statement_list <- {| (statement ws)* |}
 	statement_block <- '{' ws statement_list ws '}'
@@ -25,43 +31,44 @@ pattern = re.compile([[
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)* 
 	|} :}
+
 	expression <- ex_or
-	ex_or <- {| '' -> 'expression' {:type: '' -> 'binary' :}
-		ex_and ws {:operator: '||' :} ws ex_and
-	|} / ex_and
-	ex_and <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	ex_or <- {|
+		(ex_and ws {:operator: '||' :} ws ex_and)
+	|} -> transform_binary_expression / ex_and
+	ex_and <- {|
 		ex_equality ws {:operator: '&&' :} ws ex_equality
-	|} / ex_equality
-	ex_equality <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_equality
+	ex_equality <- {|
 		ex_binary_or ws {:operator: ([<>!=] '=' / [<>]) :} ws ex_binary_or
-	|} / ex_binary_or
-	ex_binary_or <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_binary_or
+	ex_binary_or <- {|
 		ex_binary_xor ws {:operator: '|' :} ws ex_binary_xor
-	|} / ex_binary_xor
-	ex_binary_xor <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_binary_xor
+	ex_binary_xor <- {|
 		ex_binary_and ws {:operator: '~' :} ws ex_binary_and
-	|} / ex_binary_and
-	ex_binary_and <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_binary_and
+	ex_binary_and <- {|
 		ex_binary_shift ws {:operator: '&' :} ws ex_binary_shift
-	|} / ex_binary_shift
-	ex_binary_shift <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_binary_shift
+	ex_binary_shift <- {|
 		ex_concat ws {:operator: ('<<' / '>>') :} ws ex_concat
-	|} / ex_concat
-	ex_concat <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_concat
+	ex_concat <- {|
 		ex_term ws {:operator: '..' :} ws ex_term
-	|} / ex_term
-	ex_term <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_term
+	ex_term <- {|
 		ex_factor ws {:operator: [+-] :} ws expression
-	|} / ex_factor
-	ex_factor <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	|} -> transform_binary_expression / ex_factor
+	ex_factor <- {|
 		ex_unary ws {:operator: ([*/%] / '//') :} ws ex_unary
-	|} / ex_unary
+	|} -> transform_binary_expression / ex_unary
 	ex_unary <- {| '' -> 'expression' {:type: '' -> 'unary' :}
 		{:operator: [-!#~] :} ws ex_power
 	|} / ex_power
-	ex_power <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+	ex_power <- {|
 		value ws {:operator: '^' :} ws value
-	|} / value
+	|} -> transform_binary_expression / value
 	value <-
 		literal /
 		variable /
