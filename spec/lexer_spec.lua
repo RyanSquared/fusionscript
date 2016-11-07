@@ -151,4 +151,15 @@ describe("lexer", function()
 			}}
 		}}})
 	end)
+	it("can parse tables with variable non-numeric indexes", function()
+		assert.same(lexer:match("a = {[x] = a in y};"), {{"assignment", {
+			variable_list = {{"variable", "a"}},
+			expression_list = {{"table",
+				{"generator",
+					{{"variable", "a"}, index = {"variable", "x"}},
+					{"variable", "y"}
+				}
+			}}
+		}}})
+	end)
 end)
