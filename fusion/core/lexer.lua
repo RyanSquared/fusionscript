@@ -7,16 +7,23 @@ pattern = re.compile([[
 	statement_list <- {| (statement ws)* |}
 	statement_block <- '{' ws statement_list ws '}'
 	statement <- (
-		assignment
-	) ';' / (
+		assignment /
+		function_call
+	) ws ';' ws / (
 		statement_block
 	)
+
+	function_call <- {| '' -> 'function_call' (
+		value ws args /
+		value ws ':' ws variable ws args -- test
+	) |}
+	args <- '(' expression_list? ')'
 
 	assignment <- {| '' -> 'assignment'
 		{| variable_list ws '=' ws expression_list |}
 	|}
 	expression_list <- {:expression_list: {|
-		expression (ws ',' ws expression)*
+		expression (ws ',' ws expression)* 
 	|} :}
 	expression <- 
 		value /
@@ -24,13 +31,13 @@ pattern = re.compile([[
 			unop ws value /
 			value ws binop ws expression
 		) |}
-	unop <- {:operator: [-!~#] :}
+	unop <- {:operator: [-!~#] :} {:type: '' -> 'un' :}
 	binop <- {:operator:
 		'-' /
 		'+' /
 		'*' /
 		'/'
-	:}
+	:} {:type: '' -> 'bi' :}
 	value <-
 		literal /
 		variable /
@@ -46,16 +53,21 @@ pattern = re.compile([[
 		string /
 		{| '' -> 'boolean' { 'true' / 'false' } |} /
 		{| {'nil' -> 'nil'} |}
-	number <- base16num / base10num
-	base10num <- {| '' -> 'base10num' {
+	number <- {| '' -> 'number' (
+		base16num /
+		base10num
+	) |}
+	base10num <- {:type: '' -> 'base10' :} {
 		((integer '.' integer) /
 		(integer '.') /
 		('.' integer) /
 		integer) int_exponent?
-	} |}
+	}
 	integer <- [0-9]+
 	int_exponent <- [eE] [+-]? integer
-	base16num <- {| '' -> 'base16num' { '0' [Xx] [0-9A-Fa-f]+ hex_exponent? } |}
+	base16num <- {:type: '' -> 'base16' :} {
+		'0' [Xx] [0-9A-Fa-f]+ hex_exponent?
+	}
 	hex_exponent <- [pP] [+-]? integer
 
 	string <- {| dqstring / sqstring / blstring |}
@@ -68,4 +80,6 @@ pattern = re.compile([[
 ]], defs);
 
 
-pretty.dump(pattern:match([[a = y;]]));
+pretty.dump(pattern:match([[
+a = -1;
+]]));
