@@ -96,6 +96,16 @@ describe("lexer", function()
 			{"variable", "func"}
 		}})
 	end)
+	it("can parse a generated function loop", function()
+		assert.same(lexer:match("func(a for a in b);"), {{"function_call",
+			{"variable", "func"},
+			generator = {
+				{"variable", "a"},
+				{"variable", "b"},
+				variable_list = {{"variable", "a"}}
+			}
+		}})
+	end)
 	it("can parse arguments passed to a function", function()
 		assert.same(lexer:match("func(test, test_two);"), {{"function_call",
 			{"variable", "func"},
