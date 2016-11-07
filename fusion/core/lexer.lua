@@ -18,15 +18,18 @@ pattern = re.compile([[
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)*
 	|} :}
-	expression <- variable / literal
+	expression <- literal / variable
 	variable_list <- {:variable_list: {| 
 		variable (ws ',' ws variable)*
 	|} :}
 	variable <- {| '' -> 'variable' {[A-Za-z_][A-Za-z0-9_]*} |}
 
 	literal <-
+		{| '' -> 'vararg' { '...' } |} /
 		number /
-		string
+		string /
+		{| '' -> 'boolean' { 'true' / 'false' } |} /
+		{| {'nil' -> 'nil'} |}
 	number <- base16num / base10num
 	base10num <- {| '' -> 'base10num' {
 		((integer '.' integer) /
@@ -49,4 +52,4 @@ pattern = re.compile([[
 ]], defs);
 
 
-pretty.dump(pattern:match([[a = "test";]]));
+pretty.dump(pattern:match([[a = true;]]));
