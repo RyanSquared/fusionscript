@@ -15,7 +15,7 @@ pattern = re.compile([[
 
 	function_call <- {| '' -> 'function_call' (
 		value ws args /
-		value ws ':' ws variable ws args -- test
+		value ws ':' ws variable ws args
 	) |}
 	args <- '(' expression_list? ')'
 
@@ -33,10 +33,14 @@ pattern = re.compile([[
 		(unary_expression / value) ws binop ws expression
 	|}
 	unary_expression <- {| '' -> 'expression'
+		unop ws {| '' -> 'expression' -- NOTE01 special case for ^ operator
+			value ws power_op ws value
+		|} /
 		unop ws value
 	|}
 	unop <- {:operator: [-!~#] :} {:type: '' -> 'un' :}
-	binop <- {:operator:
+	power_op <- {:operator: '^' :} {:type: '' -> 'bi' :} -- see NOTE01
+	binop <- {:operator: -- do not add ^, see NOTE01
 		'-' /
 		'+' /
 		'*' /
@@ -85,5 +89,5 @@ pattern = re.compile([[
 
 
 pretty.dump(pattern:match([[
-a = #5 + 1;
+a = #5 ^ 2;
 ]]));
