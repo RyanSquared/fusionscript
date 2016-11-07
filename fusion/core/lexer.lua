@@ -1,5 +1,5 @@
 local pretty = require("pl.pretty");
-local re = require("re"); -- vim:set noet sts=0 sw=3 ts=3:
+local re = require("re");
 
 local defs = {}
 
@@ -116,7 +116,6 @@ pattern = re.compile([[
 
 	ws <- %s*
 ]], defs);
-
 
 pretty.dump(pattern:match([[
 a = b.c;
