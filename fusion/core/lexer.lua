@@ -4,6 +4,7 @@ local defs = {}
 
 defs['true'] = function() return true end
 defs['false'] = function() return false end
+defs['numberify'] = tonumber
 
 function defs:transform_binary_expression()
 	table.insert(self, 1, 'expression')
@@ -26,7 +27,7 @@ local pattern = re.compile([[
 				{:index_class: ws '<' ws {value} ws '>' :}? )?
 			ws function_args
 	) |}
-	function_args <- '(' expression_list? ')'
+	function_args <- '(' ws expression_list? ws ')'
 
 	assignment <- {| '' -> 'assignment'
 		{| variable_list ws '=' ws expression_list |}
@@ -35,43 +36,9 @@ local pattern = re.compile([[
 		expression (ws ',' ws expression)*
 	|} :}
 
-	expression <- ex_or
-	ex_or <- {|
-		(ex_and ws {:operator: '||' :} ws ex_and)
-	|} -> transform_binary_expression / ex_and
-	ex_and <- {|
-		ex_equality ws {:operator: '&&' :} ws ex_equality
-	|} -> transform_binary_expression / ex_equality
-	ex_equality <- {|
-		ex_binary_or ws {:operator: ([<>!=] '=' / [<>]) :} ws ex_binary_or
-	|} -> transform_binary_expression / ex_binary_or
-	ex_binary_or <- {|
-		ex_binary_xor ws {:operator: '|' :} ws ex_binary_xor
-	|} -> transform_binary_expression / ex_binary_xor
-	ex_binary_xor <- {|
-		ex_binary_and ws {:operator: '~' :} ws ex_binary_and
-	|} -> transform_binary_expression / ex_binary_and
-	ex_binary_and <- {|
-		ex_binary_shift ws {:operator: '&' :} ws ex_binary_shift
-	|} -> transform_binary_expression / ex_binary_shift
-	ex_binary_shift <- {|
-		ex_concat ws {:operator: ('<<' / '>>') :} ws ex_concat
-	|} -> transform_binary_expression / ex_concat
-	ex_concat <- {|
-		ex_term ws {:operator: '..' :} ws ex_term
-	|} -> transform_binary_expression / ex_term
-	ex_term <- {|
-		ex_factor ws {:operator: [+-] :} ws expression
-	|} -> transform_binary_expression / ex_factor
-	ex_factor <- {|
-		ex_unary ws {:operator: ([*/%] / '//') :} ws ex_unary
-	|} -> transform_binary_expression / ex_unary
-	ex_unary <- {| '' -> 'expression' {:type: '' -> 'unary' :}
-		{:operator: [-!#~] :} ws ex_power
-	|} / ex_power
-	ex_power <- {|
-		value ws {:operator: '^' :} ws value
-	|} -> transform_binary_expression / value
+	expression <- value / {| '' -> 'expression'
+		'(' ws {:operator: [-+*/^%] :} (ws expression)+ ws ')'
+	|}
 	value <-
 		function_call /
 		literal /
@@ -86,12 +53,13 @@ local pattern = re.compile([[
 	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
 	literal <-
+		table /
 		{| '' -> 'vararg' { '...' } |} /
 		number /
 		string /
 		{| '' -> 'boolean' { 'true' / 'false' } |} /
 		{| {'nil' -> 'nil'} |}
-	number <- {| '' -> 'number' (
+	number <- {| '' -> 'number' {:is_negative: '-' -> true :}? (
 		base16num /
 		base10num
 	) |}
@@ -100,12 +68,12 @@ local pattern = re.compile([[
 		(integer '.') /
 		('.' integer) /
 		integer) int_exponent?
-	}
+	} -> numberify
 	integer <- [0-9]+
 	int_exponent <- [eE] [+-]? integer
 	base16num <- {:type: '' -> 'base16' :} {
 		'0' [Xx] [0-9A-Fa-f]+ hex_exponent?
-	}
+	} -> numberify
 	hex_exponent <- [pP] [+-]? integer
 
 	string <- {| dqstring / sqstring / blstring |}
@@ -113,6 +81,14 @@ local pattern = re.compile([[
 	sqstring <- '' -> 'sqstring' "'" { [^\r\n']* } "'"
 	blstring <- '' -> 'blstring' '[' {:eq: '='* :} '[' blclose
 	blclose <- ']' =eq ']' / . blclose
+
+	table <- {| '' -> 'table' '{' ws -- TODO `for` constructor
+		(table_field (ws ',' ws table_field)*)?
+	ws '}' |}
+	table_field <-
+		{| '[' ws {:index: variable :} ws ']' ws '=' ws expression |} /
+		{| {:name: name :} ws '=' ws expression |} /
+		expression
 
 	ws <- %s*
 ]], defs);
