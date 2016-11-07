@@ -106,7 +106,7 @@ describe("lexer", function()
 		}})
 	end)
 	it("can parse a complex function call", function()
-		assert.same(lexer:match("table.instance:method<subclass>(argument);"),{{
+		assert.same(lexer:match("table.instance:method<subclass>(argument);"), {{
 			"function_call",
 			{"variable", "table", "instance"}, -- tables parse -this- way
 			{"variable", "method"},
@@ -182,6 +182,19 @@ describe("lexer", function()
 				expression_list = {{"sqstring", "hi!"}}
 			},
 			condition = {"boolean", true}
+		}})
+	end)
+	it("can parse short numeric for loops", function()
+		assert.same(lexer:match("for (i=1, 100, 5) print(i);"),
+		{{"numeric_for_loop",
+			{"function_call",
+				{"variable", "print"},
+				expression_list = {{"variable", "i"}}
+			},
+			start = {"number", 1, type = "base10"},
+			stop = {"number", 100, type = "base10"},
+			step = {"number", 5, type="base10"},
+			incremented_variable = "i"
 		}})
 	end)
 end)
