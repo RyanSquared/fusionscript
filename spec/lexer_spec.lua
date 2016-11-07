@@ -2,9 +2,9 @@ describe("lexer", function()
 	local lexer = require("fusion.core.lexer")
 	it("can do basic assignment", function()
 		assert.same(lexer:match("a = b;"), {
-			{ "assignment", {
+			{"assignment", {
 				variable_list = {
-					{"variable", "a"},
+					{"variable", "a"}
 				},
 				expression_list = {
 					{"variable", "b"}
@@ -12,9 +12,22 @@ describe("lexer", function()
 			}}
 		})
 	end)
+	it("can do local assignment", function()
+		assert.same(lexer:match("local a = b;"), {
+			{"assignment", {
+				variable_list = {
+					{"variable", "a"}
+				},
+				expression_list = {
+					{"variable", "b"}
+				},
+				is_local = true
+			}}
+		})
+	end)
 	it("can do multi value assignment", function()
 		assert.same(lexer:match("a, b = c, d;"), {
-			{ "assignment", {
+			{"assignment", {
 				variable_list = {
 					{"variable", "a"},
 					{"variable", "b"}
@@ -28,7 +41,7 @@ describe("lexer", function()
 	end)
 	it("can do replacement assignment", function()
 		assert.same(lexer:match("a, b = b, a;"), {
-			{ "assignment", {
+			{"assignment", {
 				variable_list = {
 					{"variable", "a"},
 					{"variable", "b"}
