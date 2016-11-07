@@ -49,9 +49,12 @@ local pattern = re.compile([[
 	function_call <- {| '' -> 'function_call' (
 		variable ({:has_self: ':' -> true :} variable ws
 				{:index_class: ws '<' ws {value} ws '>' :}? )?
-			ws function_args
+			ws '(' ws function_call_body? ws ')'
 	) |}
-	function_args <- '(' ws expression_list? ws ')'
+	function_call_body <- {:generator: {|
+		expression (ws 'for' ws variable_list)? ws 'in' ws expression
+	|} :} / function_args
+	function_args <- expression_list?
 
 	assignment <- {| '' -> 'assignment'
 		{|
