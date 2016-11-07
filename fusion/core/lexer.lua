@@ -25,27 +25,16 @@ pattern = re.compile([[
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)* 
 	|} :}
-	expression <- 
-		binary_expression /
-		unary_expression /
-		value
-	binary_expression <- {| '' -> 'expression'
-		(unary_expression / value) ws binop ws expression
-	|}
-	unary_expression <- {| '' -> 'expression'
-		unop ws {| '' -> 'expression' -- NOTE01 special case for ^ operator
-			value ws power_op ws value
-		|} /
-		unop ws value
-	|}
-	unop <- {:operator: [-!~#] :} {:type: '' -> 'un' :}
-	power_op <- {:operator: '^' :} {:type: '' -> 'bi' :} -- see NOTE01
-	binop <- {:operator: -- do not add ^, see NOTE01
-		'-' /
-		'+' /
-		'*' /
-		'/'
-	:} {:type: '' -> 'bi' :}
+	expression <- ex_term
+	ex_term <- {| '' -> 'expression'
+		(ex_factor) ws {:operator: [+-] :} ws expression
+	|} / ex_factor
+	ex_factor <- {| '' -> 'expression'
+		ex_power ws {:operator: ([*/%] / '//') :} ws ex_power
+	|} / ex_power
+	ex_power <- {| '' -> 'expression'
+		value ws {:operator: '^' :} ws value
+	|} / value
 	value <-
 		literal /
 		variable /
@@ -89,5 +78,5 @@ pattern = re.compile([[
 
 
 pretty.dump(pattern:match([[
-a = #5 ^ 2;
+a = 1 + 2 * 3;
 ]]));
