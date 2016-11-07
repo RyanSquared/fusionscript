@@ -30,8 +30,16 @@ local pattern = re.compile([[
 	function_args <- '(' ws expression_list? ws ')'
 
 	assignment <- {| '' -> 'assignment'
-		{| variable_list ws '=' ws expression_list |}
+		{|
+			(variable_list ws '=' ws expression_list) /
+			({:is_local: 'local' -> true :} space local_name_list ws '=' ws
+				expression_list)
+		|}
 	|}
+	local_name_list <- {:variable_list: {|
+		local_name (ws ',' ws local_name)*
+	|} :}
+	local_name <- {| '' -> 'variable' name |}
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)*
 	|} :}
