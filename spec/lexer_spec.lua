@@ -41,7 +41,7 @@ describe("lexer", function()
 		})
 	end)
 	it("can do complex expressions", function()
-		assert.same(lexer:match("a = b ^ c + d / e;"), {
+		assert.same(lexer:match("a = (+ (^ b c) (/ d e));"), {
 			{"assignment", {
 				variable_list = {
 					{"variable", "a"}
@@ -51,16 +51,13 @@ describe("lexer", function()
 						{"variable", "b"},
 						{"variable", "c"},
 						operator = "^",
-						type = "binary"
 					},
 					{"expression",
 						{"variable", "d"},
 						{"variable", "e"},
 						operator = "/",
-						type = "binary"
 					},
 					operator = "+",
-					type = "binary"
 				}}
 			}}
 		})
@@ -74,13 +71,9 @@ describe("lexer", function()
 					{"variable", "c"}
 				},
 				expression_list = {
-					{"number", "5", type = "base10"},
-					{"expression",
-						{"number", "3", type = "base10"},
-						operator = "-",
-						type = "unary"
-					},
-					{"number", "0xAF", type = "base16"}
+					{"number", 5, type = "base10"},
+					{"number", 3, type = "base10", is_negative = true},
+					{"number", 0xAF, type = "base16"}
 				}
 			}}
 		})
@@ -110,5 +103,17 @@ describe("lexer", function()
 			has_self = true,
 			index_class = "subclass"
 		}})
+	end)
+	it("can parse a table", function()
+		assert.same(lexer:match("a = {1, b = 2, [c] = 3};"), {{"assignment", {
+			variable_list = {{"variable", "a"}},
+			expression_list= {
+				{"table",
+					{"number", 1, type = "base10"},
+					{{"number", 2, type = "base10"}, name = "b"},
+					{{"number", 3, type = "base10"}, index = {"variable", "c"}}
+				}
+			}
+		}}})
 	end)
 end)
