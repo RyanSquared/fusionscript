@@ -1,4 +1,3 @@
-local pretty = require("pl.pretty");
 local re = require("re");
 
 local defs = {}
