@@ -175,4 +175,13 @@ describe("lexer", function()
 			}}
 		}}})
 	end)
+	it("can parse while loops", function()
+		assert.same(lexer:match("while true print('hi!');"), {{"while_loop",
+			{"function_call",
+				{"variable", "print"},
+				expression_list = {{"sqstring", "hi!"}}
+			},
+			condition = {"boolean", true}
+		}})
+	end)
 end)
