@@ -25,17 +25,41 @@ pattern = re.compile([[
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)* 
 	|} :}
-	expression <- ex_term
-	ex_term <- {| '' -> 'expression'
-		(ex_factor) ws {:operator: [+-] :} ws expression
+	expression <- ex_or
+	ex_or <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_and ws {:operator: '||' :} ws ex_and
+	|} / ex_and
+	ex_and <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_equality ws {:operator: '&&' :} ws ex_equality
+	|} / ex_equality
+	ex_equality <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_binary_or ws {:operator: ([<>!=] '=' / [<>]) :} ws ex_binary_or
+	|} / ex_binary_or
+	ex_binary_or <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_binary_xor ws {:operator: '|' :} ws ex_binary_xor
+	|} / ex_binary_xor
+	ex_binary_xor <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_binary_and ws {:operator: '~' :} ws ex_binary_and
+	|} / ex_binary_and
+	ex_binary_and <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_binary_shift ws {:operator: '&' :} ws ex_binary_shift
+	|} / ex_binary_shift
+	ex_binary_shift <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_concat ws {:operator: ('<<' / '>>') :} ws ex_concat
+	|} / ex_concat
+	ex_concat <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_term ws {:operator: '..' :} ws ex_term
+	|} / ex_term
+	ex_term <- {| '' -> 'expression' {:type: '' -> 'binary' :}
+		ex_factor ws {:operator: [+-] :} ws expression
 	|} / ex_factor
-	ex_factor <- {| '' -> 'expression'
+	ex_factor <- {| '' -> 'expression' {:type: '' -> 'binary' :}
 		ex_unary ws {:operator: ([*/%] / '//') :} ws ex_unary
 	|} / ex_unary
-	ex_unary <- {| '' -> 'expression'
+	ex_unary <- {| '' -> 'expression' {:type: '' -> 'unary' :}
 		{:operator: [-!#~] :} ws ex_power
 	|} / ex_power
-	ex_power <- {| '' -> 'expression'
+	ex_power <- {| '' -> 'expression' {:type: '' -> 'binary' :}
 		value ws {:operator: '^' :} ws value
 	|} / value
 	value <-
@@ -81,5 +105,5 @@ pattern = re.compile([[
 
 
 pretty.dump(pattern:match([[
-a = 1 + 2 * -3;
+a = test || asdf;
 ]]));
