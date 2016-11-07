@@ -3,6 +3,9 @@ local re = require("re"); -- vim:set noet sts=0 sw=3 ts=3:
 
 local defs = {}
 
+defs['true'] = function() return true end
+defs['false'] = function() return false end
+
 function defs:transform_binary_expression()
 	table.insert(self, 1, 'expression')
 	self.type = 'binary'
@@ -20,16 +23,17 @@ pattern = re.compile([[
 	)
 
 	function_call <- {| '' -> 'function_call' (
-		value ws args /
-		value ws ':' ws variable ws args
+		variable ({:has_self: ':' -> true :} value ws
+				{:index_class: ws '<' ws {value} ws '>' :}? )?
+			ws function_args
 	) |}
-	args <- '(' expression_list? ')'
+	function_args <- '(' expression_list? ')'
 
 	assignment <- {| '' -> 'assignment'
 		{| variable_list ws '=' ws expression_list |}
 	|}
 	expression_list <- {:expression_list: {|
-		expression (ws ',' ws expression)* 
+		expression (ws ',' ws expression)*
 	|} :}
 
 	expression <- ex_or
@@ -73,10 +77,13 @@ pattern = re.compile([[
 		literal /
 		variable /
 		'(' expression ')'
-	variable_list <- {:variable_list: {| 
+	variable_list <- {:variable_list: {|
 		variable (ws ',' ws variable)*
 	|} :}
-	variable <- {| '' -> 'variable' {[A-Za-z_][A-Za-z0-9_]*} |}
+	variable <- {| '' -> 'variable'
+		name ws ('.' ws name / ws '[' ws value ws ']')*
+	|}
+	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
 	literal <-
 		{| '' -> 'vararg' { '...' } |} /
@@ -112,5 +119,5 @@ pattern = re.compile([[
 
 
 pretty.dump(pattern:match([[
-a = test || asdf;
+a = b.c;
 ]]));
