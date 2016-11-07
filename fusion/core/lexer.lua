@@ -99,7 +99,7 @@ local pattern = re.compile([[
 		)?
 	ws '}' |}
 	table_generator <- {| '' -> 'generator'
-		expression (ws 'for' ws variable_list)? ws 'in' ws expression
+		table_field (ws 'for' ws variable_list)? ws 'in' ws expression
 	|}
 	table_field <-
 		{| '[' ws {:index: variable :} ws ']' ws '=' ws expression |} /
