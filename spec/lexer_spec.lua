@@ -184,7 +184,7 @@ describe("lexer", function()
 			condition = {"boolean", true}
 		}})
 	end)
-	it("can parse short numeric for loops", function()
+	it("can parse numeric for loops", function()
 		assert.same(lexer:match("for (i=1, 100, 5) print(i);"),
 		{{"numeric_for_loop",
 			{"function_call",
@@ -195,6 +195,17 @@ describe("lexer", function()
 			stop = {"number", 100, type = "base10"},
 			step = {"number", 5, type="base10"},
 			incremented_variable = "i"
+		}})
+	end)
+	it("can parse iterative for loops", function()
+		assert.same(lexer:match("for (i in x) print(i);"),
+		{{"iterative_for_loop",
+			{"variable", "x"},
+			{"function_call",
+				{"variable", "print"},
+				expression_list = {{"variable", "i"}}
+			},
+			variable_list = {{"variable", "i"}}
 		}})
 	end)
 end)
