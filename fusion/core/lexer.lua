@@ -22,12 +22,24 @@ local pattern = re.compile([[
 	) ws ';' ws / (
 		statement_block
 	) / (
-		while_loop
+		while_loop /
+		numeric_for_loop
 	)
 
 	while_loop <- {| '' -> 'while_loop'
 		'while' ws {:condition: expression :} ws statement
 	|}
+
+	numeric_for_loop <- {| '' -> 'numeric_for_loop'
+		'for' ws numeric_for_assignment ws statement
+	|}
+
+	numeric_for_assignment <- '('
+		{:incremented_variable: name :} ws '=' ws
+		{:start: expression :} ws
+		',' ws {:stop: expression :} ws
+		(',' ws {:step: expression :})?
+	')'
 
 	function_call <- {| '' -> 'function_call' (
 		variable ({:has_self: ':' -> true :} variable ws
