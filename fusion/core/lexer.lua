@@ -37,8 +37,18 @@ local pattern = re.compile([[
 	|} :}
 
 	expression <- value / {| '' -> 'expression'
-		'(' ws {:operator: [-+*/^%] :} (ws expression)+ ws ')'
+		'(' ws operator (ws expression)+ ws ')'
 	|}
+	operator <- {:operator:
+		'//' /
+		'>>' /
+		'<<' /
+		[=!<>] '=' /
+		'&&' /
+		'||' /
+		'..' /
+		[-!#~+*/%^&|<>]
+	:}
 	value <-
 		function_call /
 		literal /
