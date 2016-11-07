@@ -104,16 +104,51 @@ describe("lexer", function()
 			index_class = "subclass"
 		}})
 	end)
-	it("can parse a table", function()
+	it("can parse a non-generated table", function()
 		assert.same(lexer:match("a = {1, b = 2, [c] = 3};"), {{"assignment", {
 			variable_list = {{"variable", "a"}},
-			expression_list= {
+			expression_list = {
 				{"table",
 					{"number", 1, type = "base10"},
 					{{"number", 2, type = "base10"}, name = "b"},
 					{{"number", 3, type = "base10"}, index = {"variable", "c"}}
 				}
 			}
+		}}})
+	end)
+	it("can parse a generated table", function()
+		assert.same(lexer:match("a = {x in y};"), {{"assignment", {
+			variable_list = {{"variable", "a"}},
+			expression_list = {{"table",
+				{"generator",
+					{"variable", "x"}, -- left hand side
+					{"variable", "y"}
+				}
+			}}
+		}}})
+	end)
+	it("can parse a complex generated table", function()
+		assert.same(lexer:match("a = {(.. x ': ' z) for x, z in y(a, b)};"),
+		{{"assignment", {
+			variable_list = {{"variable", "a"}},
+			expression_list = {{"table",
+				{"generator",
+					variable_list = {{"variable", "x"}, {"variable", "z"}},
+					{"expression",
+						{"variable", "x"},
+						{"sqstring", ": "},
+						{"variable", "z"},
+						operator = ".."
+					},
+					{"function_call",
+						{"variable", "y"},
+						expression_list = {
+							{"variable", "a"},
+							{"variable", "b"}
+						}
+					}
+				}
+			}}
 		}}})
 	end)
 end)
