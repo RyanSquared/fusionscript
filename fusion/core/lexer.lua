@@ -21,7 +21,13 @@ local pattern = re.compile([[
 		assignment
 	) ws ';' ws / (
 		statement_block
+	) / (
+		while_loop
 	)
+
+	while_loop <- {| '' -> 'while_loop'
+		'while' ws {:condition: expression :} ws statement
+	|}
 
 	function_call <- {| '' -> 'function_call' (
 		variable ({:has_self: ':' -> true :} variable ws
