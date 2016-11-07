@@ -18,7 +18,23 @@ pattern = re.compile([[
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)*
 	|} :}
-	expression <- literal / variable
+	expression <- 
+		value /
+		{| '' -> 'expression' (
+			unop ws value /
+			value ws binop ws expression
+		) |}
+	unop <- {:operator: [-!~#] :}
+	binop <- {:operator:
+		'-' /
+		'+' /
+		'*' /
+		'/'
+	:}
+	value <-
+		literal /
+		variable /
+		'(' expression ')'
 	variable_list <- {:variable_list: {| 
 		variable (ws ',' ws variable)*
 	|} :}
@@ -52,4 +68,4 @@ pattern = re.compile([[
 ]], defs);
 
 
-pretty.dump(pattern:match([[a = true;]]));
+pretty.dump(pattern:match([[a = y;]]));
