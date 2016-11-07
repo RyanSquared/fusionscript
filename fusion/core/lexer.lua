@@ -12,18 +12,18 @@ function defs:transform_binary_expression()
 	return self
 end
 
-pattern = re.compile([[
+local pattern = re.compile([[
 	statement_list <- {| (statement ws)* |}
 	statement_block <- '{' ws statement_list ws '}'
 	statement <- (
-		assignment /
-		function_call
+		function_call /
+		assignment
 	) ws ';' ws / (
 		statement_block
 	)
 
 	function_call <- {| '' -> 'function_call' (
-		variable ({:has_self: ':' -> true :} value ws
+		variable ({:has_self: ':' -> true :} variable ws
 				{:index_class: ws '<' ws {value} ws '>' :}? )?
 			ws function_args
 	) |}
@@ -74,6 +74,7 @@ pattern = re.compile([[
 		value ws {:operator: '^' :} ws value
 	|} -> transform_binary_expression / value
 	value <-
+		function_call /
 		literal /
 		variable /
 		'(' expression ')'
@@ -117,6 +118,4 @@ pattern = re.compile([[
 	ws <- %s*
 ]], defs);
 
-pretty.dump(pattern:match([[
-a = b.c;
-]]));
+return pattern
