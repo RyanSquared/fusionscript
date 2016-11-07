@@ -23,11 +23,16 @@ local pattern = re.compile([[
 		statement_block
 	) / (
 		while_loop /
-		numeric_for_loop
+		numeric_for_loop /
+		iterative_for_loop
 	)
 
 	while_loop <- {| '' -> 'while_loop'
 		'while' ws {:condition: expression :} ws statement
+	|}
+
+	iterative_for_loop <- {| '' -> 'iterative_for_loop'
+		'for' ws '(' ws name_list ws 'in' ws expression ws ')' ws statement
 	|}
 
 	numeric_for_loop <- {| '' -> 'numeric_for_loop'
@@ -51,11 +56,11 @@ local pattern = re.compile([[
 	assignment <- {| '' -> 'assignment'
 		{|
 			(variable_list ws '=' ws expression_list) /
-			({:is_local: 'local' -> true :} space local_name_list ws '=' ws
+			({:is_local: 'local' -> true :} space name_list ws '=' ws
 				expression_list)
 		|}
 	|}
-	local_name_list <- {:variable_list: {|
+	name_list <- {:variable_list: {|
 		local_name (ws ',' ws local_name)*
 	|} :}
 	local_name <- {| '' -> 'variable' name |}
