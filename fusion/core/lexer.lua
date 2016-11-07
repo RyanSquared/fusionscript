@@ -93,14 +93,21 @@ local pattern = re.compile([[
 	blclose <- ']' =eq ']' / . blclose
 
 	table <- {| '' -> 'table' '{' ws -- TODO `for` constructor
-		(table_field (ws ',' ws table_field)*)?
+		(
+			table_generator /
+			table_field (ws ',' ws table_field)*
+		)?
 	ws '}' |}
+	table_generator <- {| '' -> 'generator'
+		expression (ws 'for' ws variable_list)? ws 'in' ws expression
+	|}
 	table_field <-
 		{| '[' ws {:index: variable :} ws ']' ws '=' ws expression |} /
 		{| {:name: name :} ws '=' ws expression |} /
 		expression
 
 	ws <- %s*
+	space <- %s+
 ]], defs);
 
 return pattern
