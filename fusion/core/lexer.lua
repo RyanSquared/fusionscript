@@ -26,11 +26,15 @@ pattern = re.compile([[
 		expression (ws ',' ws expression)* 
 	|} :}
 	expression <- 
-		value /
-		{| '' -> 'expression' (
-			unop ws value /
-			value ws binop ws expression
-		) |}
+		binary_expression /
+		unary_expression /
+		value
+	binary_expression <- {| '' -> 'expression'
+		(unary_expression / value) ws binop ws expression
+	|}
+	unary_expression <- {| '' -> 'expression'
+		unop ws value
+	|}
 	unop <- {:operator: [-!~#] :} {:type: '' -> 'un' :}
 	binop <- {:operator:
 		'-' /
@@ -81,5 +85,5 @@ pattern = re.compile([[
 
 
 pretty.dump(pattern:match([[
-a = -1;
+a = #5 + 1;
 ]]));
