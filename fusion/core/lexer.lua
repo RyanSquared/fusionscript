@@ -60,12 +60,15 @@ local pattern = re.compile([[
 		{|
 			(variable_list ws '=' ws expression_list) /
 			({:is_local: 'local' -> true :} space name_list ws '=' ws
-				expression_list)
+				expression_list) /
 		|}
 	|}
 	name_list <- {:variable_list: {|
 		local_name (ws ',' ws local_name)*
-	|} :}
+	|} :} / {:variable_list: {|
+		{:is_destructuring: '' -> true :}
+		'{' ws local_name (ws ',' ws local_name)* ws '}'
+	|} :} 
 	local_name <- {| '' -> 'variable' name |}
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)*
