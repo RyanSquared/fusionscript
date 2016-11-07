@@ -4,6 +4,7 @@ local defs = {}
 
 defs['true'] = function() return true end
 defs['false'] = function() return false end
+defs['bool'] = function(...) return defs[(...)]() end
 defs['numberify'] = tonumber
 
 function defs:transform_binary_expression()
@@ -75,7 +76,9 @@ local pattern = re.compile([[
 		{| '' -> 'vararg' { '...' } |} /
 		number /
 		string /
-		{| '' -> 'boolean' { 'true' / 'false' } |} /
+		{| '' -> 'boolean'
+			('true' / 'false') -> bool
+		|} /
 		{| {'nil' -> 'nil'} |}
 	number <- {| '' -> 'number' {:is_negative: '-' -> true :}? (
 		base16num /
