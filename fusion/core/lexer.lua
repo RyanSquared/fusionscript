@@ -28,8 +28,20 @@ local pattern = re.compile([[
 		numeric_for_loop /
 		iterative_for_loop /
 		function_definition /
-		if
+		if /
+		class
 	)
+
+	class <- {| 'new' -> 'class' space {:name: name :}
+		(ws 'extends' ws {:extends: variable :})? ws
+		'{' ws {| (class_field ws)* |} ws '}'
+	|}
+	class_field <-
+		function_definition /
+		{| '' -> 'class_field'
+			({:name: name :} ws '=' ws expression ws ';') /
+			('[' ws {:name: name :} ws ']' ws '=' ws expression ws ';')
+		|}
 
 	return <- {| {'return' / 'yield'} ws expression_list? |}
 
