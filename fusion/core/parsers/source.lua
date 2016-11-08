@@ -2,9 +2,10 @@ local lexer = require("fusion.core.lexer")
 
 local parser = {}
 local handlers = {}
+local indentation_level = 0
 
-function transform(node)
-	return handlers[node[1]](node)
+function transform(node, ...)
+	return handlers[node[1]](node, ...)
 end
 
 function transform_expression_list(node)
@@ -23,6 +24,22 @@ function transform_variable_list(node)
 		output[#output + 1] = transform(list[i])
 	end
 	return table.concat(output, ",")
+end
+
+handlers['block'] = function(root_node, pre_word) -- ::TODO:: check for block
+	local lines = {}
+	if pre_word then -- change this in `if` loops ::TODO::
+		lines[1] = pre_word
+	else
+		lines[1] = 'do'
+	end
+	indentation_level = indentation_level + 1
+	for i, node in ipairs(root_node[2]) do
+		lines[#lines + 1] = ("\t"):rep(indentation_level) .. transform(node)
+	end
+	lines[#lines + 1] = 'end'
+	indentation_level = indentation_level - 1
+	return table.concat(lines, '\n')
 end
 
 handlers['expression'] = function(node)
