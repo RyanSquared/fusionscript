@@ -39,8 +39,10 @@ local pattern = re.compile([[
 	class_field <-
 		function_definition /
 		{| '' -> 'class_field'
-			({:name: name :} ws '=' ws expression ws ';') /
-			('[' ws {:name: name :} ws ']' ws '=' ws expression ws ';')
+			(
+				'[' ws {:name: variable :} ws ']' ws '=' ws expression ws ';' /
+				{:name: name :} ws '=' ws expression ws ';'
+			)
 		|}
 
 	return <- {| {'return' / 'yield'} ws expression_list? |}
