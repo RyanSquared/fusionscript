@@ -232,4 +232,31 @@ describe("lexer", function()
 			variable_list = {{"variable", "i"}}
 		}})
 	end)
+	it("can parse function definitions", function()
+		assert.same(lexer:match("test(a, b='c')-> return a, b;"),
+		{{"function_definition",
+			{"variable", "test"},
+			{
+				{name = "a"},
+				{
+					name = "b",
+					default = {"sqstring", "c"}
+				}
+			},
+			{"return",
+				expression_list = {
+					{"variable", "a"},
+					{"variable", "b"}
+				}
+			}
+		}})
+	end)
+	it("can parse lambda definitions", function()
+		assert.same(lexer:match("a = ()-> 'hi';"), {{"assignment", {
+			variable_list = {{"variable", "a"}},
+			expression_list = {{"lambda",
+				expression_list = {{"sqstring", "hi"}}
+			}}
+		}}})
+	end)
 end)
