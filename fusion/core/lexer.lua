@@ -19,7 +19,8 @@ local pattern = re.compile([[
 	statement <- (
 		function_call /
 		assignment /
-		return
+		return /
+		{| {'break'} |}
 	) ws ';' ws / (
 		statement_block
 	) / (
@@ -29,7 +30,7 @@ local pattern = re.compile([[
 		function_definition
 	)
 
-	return <- {| {'return'} ws expression_list |}
+	return <- {| {'return' / 'yield'} ws expression_list? |}
 
 	lambda <- {| '' -> 'lambda'
 		function_body
