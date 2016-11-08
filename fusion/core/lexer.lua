@@ -36,6 +36,7 @@ local pattern = re.compile([[
 		function_body
 	|}
 	function_definition <- {| '' -> 'function_definition'
+		{:is_async: 'async' -> true :}? ws
 		variable ws function_body
 	|}
 	function_body <- 
