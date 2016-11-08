@@ -354,4 +354,26 @@ describe("lexer", function()
 			is_async = true
 		}})
 	end)
+	it("can parse simple if statements", function()
+		assert.same(lexer:match("if x print('test');"), {{"if",
+			condition = {"variable", "x"},
+			{"function_call",
+				{"variable", "print"},
+				expression_list = {{"sqstring", "test"}}
+			}
+		}})
+	end)
+	it("can parse complex if statements", function()
+		assert.same(lexer:match("if x print('test'); else print(x);"), {{"if",
+			condition = {"variable", "x"},
+			{"function_call",
+				{"variable", "print"},
+				expression_list = {{"sqstring", "test"}}
+			},
+			['else'] = {"function_call",
+				{"variable", "print"},
+				expression_list = {{"variable", "x"}}
+			}
+		}})
+	end)
 end)
