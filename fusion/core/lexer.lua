@@ -27,7 +27,8 @@ local pattern = re.compile([[
 		while_loop /
 		numeric_for_loop /
 		iterative_for_loop /
-		function_definition
+		function_definition /
+		if
 	)
 
 	return <- {| {'return' / 'yield'} ws expression_list? |}
@@ -65,6 +66,11 @@ local pattern = re.compile([[
 		',' ws {:stop: expression :} ws
 		(',' ws {:step: expression :})?
 	')'
+
+	if <- {|
+		{'if'} ws {:condition: expression :} ws statement
+		(ws 'else' ws {:else: statement :})?
+	|}
 
 	function_call <- {| '' -> 'function_call' (
 		variable ({:has_self: ':' -> true :} variable ws
