@@ -50,6 +50,31 @@ describe("lexer", function()
 			}}
 		})
 	end)
+	it("can parse self indexing", function()
+		assert.same(lexer:match("local a = @b;"), {
+			{"assignment", {
+				variable_list = {
+					{"variable", "a"}
+				},
+				expression_list = {
+					{"variable", "self", "b"}
+				},
+				is_local = true
+			}}
+		})
+	end)
+	it("can parse assigning to self", function()
+		assert.same(lexer:match("@a = b;"), {
+			{"assignment", {
+				variable_list = {
+					{"variable", "self", "a"}
+				},
+				expression_list = {
+					{"variable", "b"}
+				}
+			}}
+		})
+	end)
 	it("can parse destructuring local assignment", function()
 		assert.same(lexer:match("local {a} = b;"), {
 			{"assignment", {
