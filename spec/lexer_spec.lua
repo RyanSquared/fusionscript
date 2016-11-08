@@ -284,4 +284,74 @@ describe("lexer", function()
 			}}
 		}}})
 	end)
+	it("can parse method definitions", function()
+		assert.same(lexer:match("test(a, b='c')=> return a, b;"),
+		{{"function_definition",
+			{"variable", "test"},
+			{
+				{name = "a"},
+				{
+					name = "b",
+					default = {"sqstring", "c"}
+				}
+			},
+			{"return",
+				expression_list = {
+					{"variable", "a"},
+					{"variable", "b"}
+				}
+			},
+			is_self = true
+		}})
+	end)
+	it("can parse lambda method definitions", function()
+		assert.same(lexer:match("a = ()=> 'hi';"), {{"assignment", {
+			variable_list = {{"variable", "a"}},
+			expression_list = {{"lambda",
+				expression_list = {{"sqstring", "hi"}},
+				is_self = true
+			}}
+		}}})
+	end)
+	it("can parse async function definitions", function()
+		assert.same(lexer:match("async test(a, b='c')-> return a, b;"),
+		{{"function_definition",
+			{"variable", "test"},
+			{
+				{name = "a"},
+				{
+					name = "b",
+					default = {"sqstring", "c"}
+				}
+			},
+			{"return",
+				expression_list = {
+					{"variable", "a"},
+					{"variable", "b"}
+				}
+			},
+			is_async = true
+		}})
+	end)
+	it("can parse async method definitions", function()
+		assert.same(lexer:match("async test(a, b='c')=> return a, b;"),
+		{{"function_definition",
+			{"variable", "test"},
+			{
+				{name = "a"},
+				{
+					name = "b",
+					default = {"sqstring", "c"}
+				}
+			},
+			{"return",
+				expression_list = {
+					{"variable", "a"},
+					{"variable", "b"}
+				}
+			},
+			is_self = true,
+			is_async = true
+		}})
+	end)
 end)
