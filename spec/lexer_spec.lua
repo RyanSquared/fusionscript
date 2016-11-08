@@ -376,4 +376,33 @@ describe("lexer", function()
 			}
 		}})
 	end)
+	it("can parse basic classes", function()
+		assert.same(lexer:match("new x {}"), {{"class", {}, name = "x"}})
+	end)
+	it("can parse classes with methods", function()
+		assert.same(lexer:match("new x { y()-> z }"), {{"class",
+			{
+				{"function_definition",
+					{"variable", "y"},
+					expression_list = {{"variable", "z"}}
+				}
+			},
+			name = "x"
+		}})
+	end)
+	it("can parse classes with statically named values", function()
+		assert.same(lexer:match("new x { y = z; }"), {{"class",
+			{
+				{"class_field", {"variable", "z"}, name = "y"}
+			},
+			name = "x"
+		}})
+	end)
+	it("can parse extended classes", function()
+		assert.same(lexer:match("new x extends y {}"), {{"class",
+			{},
+			name = "x",
+			extends = {"variable", "y"}
+		}})
+	end)
 end)
