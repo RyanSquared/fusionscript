@@ -1,5 +1,30 @@
 describe("lexer", function()
 	local lexer = require("fusion.core.lexer")
+	it("can parse break statements", function()
+		assert.same(lexer:match("break;"), {{"break"}})
+	end)
+	it("can parse simple yield statements", function()
+		assert.same(lexer:match("yield;"), {{"yield"}})
+	end)
+	it("can parse complex yield statements", function()
+		assert.same(lexer:match("yield a, b;"), {{"yield",
+			expression_list = {
+				{"variable", "a"},
+				{"variable", "b"}
+			}
+		}})
+	end)
+	it("can parse simple return statements", function()
+		assert.same(lexer:match("return;"), {{"return"}})
+	end)
+	it("can parse complex return statements", function()
+		assert.same(lexer:match("return a, b;"), {{"return",
+			expression_list = {
+				{"variable", "a"},
+				{"variable", "b"}
+			}
+		}})
+	end)
 	it("can parse basic assignment", function()
 		assert.same(lexer:match("a = b;"), {
 			{"assignment", {
