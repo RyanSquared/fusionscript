@@ -18,27 +18,45 @@ local pattern = re.compile([[
 	statement_block <- '{' ws statement_list ws '}'
 	statement <- (
 		function_call /
-		assignment
+		assignment /
+		return
 	) ws ';' ws / (
 		statement_block
 	) / (
 		while_loop /
 		numeric_for_loop /
-		iterative_for_loop
+		iterative_for_loop /
+		function_definition
 	)
+
+	return <- {| {'return'} ws expression_list |}
+
+	lambda <- {| '' -> 'lambda'
+		function_body
+	|}
+	function_definition <- {| '' -> 'function_definition'
+		variable ws function_body
+	|}
+	function_body <- 
+		'(' ws function_defined_arguments? ws ')' ws 
+			({:is_self: '=' -> true :} / '-') '>' ws
+			(statement / expression_list)
+	function_defined_arguments <- {|
+		function_argument (ws ',' ws function_argument)*
+	|}
+	function_argument <- {|
+		{:name: name :} (ws '=' ws {:default: expression :})?
+	|}
 
 	while_loop <- {| '' -> 'while_loop'
 		'while' ws {:condition: expression :} ws statement
 	|}
-
 	iterative_for_loop <- {| '' -> 'iterative_for_loop'
 		'for' ws '(' ws name_list ws 'in' ws expression ws ')' ws statement
 	|}
-
 	numeric_for_loop <- {| '' -> 'numeric_for_loop'
 		'for' ws numeric_for_assignment ws statement
 	|}
-
 	numeric_for_assignment <- '('
 		{:incremented_variable: name :} ws '=' ws
 		{:start: expression :} ws
@@ -60,7 +78,7 @@ local pattern = re.compile([[
 		{|
 			(variable_list ws '=' ws expression_list) /
 			({:is_local: 'local' -> true :} space name_list ws '=' ws
-				expression_list) /
+				expression_list)
 		|}
 	|}
 	name_list <- {:variable_list: {|
@@ -88,6 +106,7 @@ local pattern = re.compile([[
 		[-!#~+*/%^&|<>]
 	:}
 	value <-
+		lambda /
 		function_call /
 		literal /
 		variable /
