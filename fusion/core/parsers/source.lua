@@ -26,18 +26,18 @@ function transform_variable_list(node)
 	return table.concat(output, ",")
 end
 
-handlers['block'] = function(root_node, pre_word) -- ::TODO:: check for block
+handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 	local lines = {}
-	if pre_word then -- change this in `if` loops ::TODO::
-		lines[1] = pre_word
-	else
+	if not is_logical then
 		lines[1] = 'do'
 	end
 	indentation_level = indentation_level + 1
 	for i, node in ipairs(root_node[2]) do
 		lines[#lines + 1] = ("\t"):rep(indentation_level) .. transform(node)
 	end
-	lines[#lines + 1] = 'end'
+	if not is_logical then
+		lines[#lines + 1] = 'end'
+	end
 	indentation_level = indentation_level - 1
 	return table.concat(lines, '\n')
 end
