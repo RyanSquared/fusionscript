@@ -15,7 +15,7 @@ end
 
 local pattern = re.compile([[
 	statement_list <- {| (statement ws)* |}
-	statement_block <- '{' ws statement_list ws '}'
+	statement_block <- {| '' -> 'block' '{' ws statement_list ws '}' |}
 	statement <- (
 		function_call /
 		assignment /
