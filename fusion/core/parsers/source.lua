@@ -25,8 +25,36 @@ function transform_variable_list(node)
 	return table.concat(output, ",")
 end
 
+handlers['expression'] = function(node)
+	local output = {}
+	if #node > 3 then
+		local expr = {}
+		for i = 2, #node do
+			expr[#expr + 1] = transform(node[i])
+		end
+		error("too many values in expression", '(' .. node.operator .. ' ' ..
+			table.concat(node, ' ') ')')
+	elseif #node == 3 then
+		return ("(%s %s %s)"):format(transform(node[2]), node.operator,
+			transform(node[3]))
+	elseif #node == 2 then
+		return ("(%s%s)"):format(node.operator, transform(node[2]))
+	end
+end
+
+handlers['number'] = function(node)
+	if node.type == "base10" then
+		if math.floor(node[2]) == node[2] then
+			return ("%i"):format(node[2])
+		else
+			return ("%f"):format(node[2])
+		end
+	else
+		return ("0x%x"):format(node[2])
+	end
+end
+
 handlers['assignment'] = function(node)
-	require("pl.pretty").dump(node[2])
 	local output = {}
 	if node[2].is_local then
 		output[1] = "local "
