@@ -167,8 +167,9 @@ local pattern = re.compile([[
 	hex_exponent <- [pP] [+-]? integer
 
 	string <- {| dqstring / sqstring / blstring |}
-	dqstring <- '' -> 'dqstring' '"' { (('\\' .) / ([^\r\n"]))* } '"'
-	sqstring <- '' -> 'sqstring' "'" { [^\r\n']* } "'"
+	dqstring <- '' -> 'dqstring' '"' { (('\' .) /
+		([^]] .. '\r\n' .. [["]))* } '"' -- no escape codes in block quotes
+	sqstring <- '' -> 'sqstring' "'" { [^]] .. '\r\n' .. [[']* } "'"
 	blstring <- '' -> 'blstring' '[' {:eq: '='* :} '[' blclose
 	blclose <- ']' =eq ']' / . blclose
 
