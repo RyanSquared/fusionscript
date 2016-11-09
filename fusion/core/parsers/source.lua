@@ -2,7 +2,6 @@ local lexer = require("fusion.core.lexer")
 
 local parser = {}
 local handlers = {}
-local indentation_level = 0
 
 function transform(node, ...)
 	assert(handlers[node[1]], ("Can't find node handler for (%s)"):format(node[1]))
@@ -51,14 +50,12 @@ handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 	if not is_logical then
 		lines[1] = 'do'
 	end
-	indentation_level = indentation_level + 1
 	for i, node in ipairs(root_node[2]) do
-		lines[#lines + 1] = ("\t"):rep(indentation_level) .. transform(node)
+		lines[#lines + 1] = transform(node)
 	end
 	if not is_logical then
 		lines[#lines + 1] = 'end'
 	end
-	indentation_level = indentation_level - 1
 	return table.concat(lines, '\n')
 end
 
@@ -71,6 +68,17 @@ handlers['while_loop'] = function(node)
 		output[#output + 1] = transform(node[2])
 	end
 	return table.concat(output, " ")
+end
+
+handlers['if'] = function(node)
+	local output = {("if (%s) then"):format(transform(node.condition))}
+	if node[2][1] == "block" then
+		output[#output + 1] = handlers['block'](node[2], true)
+	else
+		output[#output + 1] = transform(node[2])
+	end
+	output[#output + 1] = "end"
+	return table.concat(output, "\n")
 end
 
 handlers['expression'] = function(node)
