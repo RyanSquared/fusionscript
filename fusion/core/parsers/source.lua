@@ -5,10 +5,14 @@ local handlers = {}
 local indentation_level = 0
 
 function transform(node, ...)
+	assert(handlers[node[1]], ("Can't find node handler for (%s)"):format(node[1]))
 	return handlers[node[1]](node, ...)
 end
 
 function transform_expression_list(node)
+	if not node.expression_list then
+		return ""
+	end
 	local output = {}
 	local list = node.expression_list
 	for i=1, #list do
@@ -26,6 +30,22 @@ function transform_variable_list(node)
 	return table.concat(output, ",")
 end
 
+handlers['boolean'] = function(node)
+	return node[2]
+end
+
+handlers['break'] = function(node)
+	return node[1]
+end
+
+handlers['yield'] = function(node)
+	return ("coroutine.yield(%s)"):format(transform_expression_list(node))
+end
+
+handlers['return'] = function(node)
+	return ("return %s"):format(transform_expression_list(node))
+end
+
 handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 	local lines = {}
 	if not is_logical then
@@ -40,6 +60,17 @@ handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 	end
 	indentation_level = indentation_level - 1
 	return table.concat(lines, '\n')
+end
+
+handlers['while_loop'] = function(node)
+	local output = {"while"}
+	output[#output + 1] = transform(node.condition)
+	if node[2][1] ~= "block" then
+		output[#output + 1] = transform({"block", {node[2]}})
+	else
+		output[#output + 1] = transform(node[2])
+	end
+	return table.concat(output, " ")
 end
 
 handlers['expression'] = function(node)
@@ -155,14 +186,14 @@ end
 function parser.load_file(file)
 	local content = table.concat(parser.read_file(file))
 	if loadstring then
-		return loadstring(content)
+		return assert(loadstring(content))
 	else
-		return load(content)
+		return assert(load(content))
 	end
 end
 
 function parser.do_file(file)
-	return parser.load_file(file)()
+	return (parser.load_file(file)())
 end
 
 return parser
