@@ -3,3 +3,6 @@ root = true
 [*.lua]
 indent_style = tab
 indent_size = 3
+[*.fuse]
+indent_style = tab
+indent_size = 3
