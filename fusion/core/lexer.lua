@@ -14,13 +14,14 @@ function defs:transform_binary_expression()
 end
 
 local pattern = re.compile([[
-	statement_list <- {| (statement ws)* |}
+	statement_list <- ws {| (statement ws)* |}
 	statement_block <- {| '' -> 'block' '{' ws statement_list ws '}' |}
 	statement <- (
 		function_call /
 		assignment /
 		return /
-		{| {'break'} |}
+		{| {'break'} |} /
+		'--' [^;]*
 	) ws ';' ws / (
 		statement_block
 	) / (
