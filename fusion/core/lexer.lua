@@ -58,13 +58,13 @@ end
 
 local pattern = re.compile([[
 	statement_list <- ws {| ((! '}') statement ws)* |}
-	statement_block <- {| '' -> 'block' '{' ws statement_list ws '}' |}
+	statement_block <- {| {:block: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
 		function_call /
 		assignment /
 		return /
-		{| {'break'} |} /
-		'--' {| '' -> 'comment' ws {[^;]*} |}
+		{| {:type: 'break' :} |} /
+		'--' {| {:type: '' -> 'comment' :} ws {[^;]*} |}
 	) ws ';' ws / (
 		statement_block /
 		while_loop /
@@ -76,25 +76,25 @@ local pattern = re.compile([[
 	)
 	rstatement <- statement / required
 	required <- ({} {'.'}) -> incomplete_statement
-	class <- {| 'new' -> 'class' space {:name: name :}
+	class <- {| {:type: 'new' -> 'class' :} space {:name: name :}
 		(ws 'extends' ws {:extends: variable :})? ws
 		'{' ws {| (class_field ws)* |} ws '}'
 	|}
 	class_field <-
 		function_definition /
-		{| '' -> 'class_field'
+		{| {:type: '' -> 'class_field' :}
 			(
 				'[' ws {:name: variable :} ws ']' ws '=' ws expression ws ';' /
 				{:name: name :} ws '=' ws expression ws ';'
 			)
 		|}
 
-	return <- {| {'return' / 'yield'} ws expression_list? |}
+	return <- {| {:type: {'return' / 'yield'} :} ws expression_list? |}
 
-	lambda <- {| '' -> 'lambda'
+	lambda <- {| {:type: '' -> 'lambda' :}
 		function_body
 	|}
-	function_definition <- {| '' -> 'function_definition'
+	function_definition <- {| {:type: '' -> 'function_definition' :}
 		{:is_async: 'async' -> true :}? ws
 		variable ws function_body
 	|}
@@ -109,13 +109,13 @@ local pattern = re.compile([[
 		{:name: name :} (ws '=' ws {:default: expression :})?
 	|}
 
-	while_loop <- {| '' -> 'while_loop'
+	while_loop <- {| {:type: '' -> 'while_loop' :}
 		'while' ws {:condition: expression :} ws rstatement
 	|}
-	iterative_for_loop <- {| '' -> 'iterative_for_loop'
+	iterative_for_loop <- {| {:type: '' -> 'iterative_for_loop' :}
 		'for' ws '(' ws name_list ws 'in' ws expression ws ')' ws rstatement
 	|}
-	numeric_for_loop <- {| '' -> 'numeric_for_loop'
+	numeric_for_loop <- {| {:type: '' -> 'numeric_for_loop' :}
 		'for' ws numeric_for_assignment ws rstatement
 	|}
 	numeric_for_assignment <- '('
@@ -126,11 +126,11 @@ local pattern = re.compile([[
 	')'
 
 	if <- {|
-		{'if'} ws {:condition: expression :} ws rstatement
+		{:type: 'if' :} ws {:condition: expression :} ws rstatement
 		(ws 'else' ws {:else: rstatement :})?
 	|}
 
-	function_call <- {| '' -> 'function_call' (
+	function_call <- {| {:type: '' -> 'function_call' :} (
 		variable ({:has_self: ':' -> true :} variable ws
 				{:index_class: ws '<' ws {value} ws '>' :}? )?
 			ws '(' ws function_call_body? ws ')'
@@ -140,7 +140,7 @@ local pattern = re.compile([[
 	|} :} / function_args
 	function_args <- expression_list?
 
-	assignment <- {| '' -> 'assignment'
+	assignment <- {| {:type: '' -> 'assignment' :}
 		(variable_list ws '=' ws expression_list /
 		{:is_local: 'local' -> true :} space name_list ws '=' ws
 			expression_list)
@@ -148,15 +148,15 @@ local pattern = re.compile([[
 	name_list <- {:variable_list: {|
 		local_name (ws ',' ws local_name)*
 	|} :} / {:variable_list: {|
-		{:is_destructuring: '' -> true :}
-		'{' ws local_name (ws ',' ws local_name)* ws '}'
+		{:is_destructuring: '{' -> true :} ws local_name
+		(ws ',' ws local_name)* ws '}'
 	|} :} 
-	local_name <- {| '' -> 'variable' name |}
+	local_name <- {| {:type: '' -> 'variable' :} name |}
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws expression)*
 	|} :}
 
-	expression <- value / {| '' -> 'expression'
+	expression <- value / {| {:type: '' -> 'expression' :}
 		'(' ws operator (ws expression)+ ws ')'
 	|}
 	operator <- {:operator:
@@ -178,21 +178,21 @@ local pattern = re.compile([[
 	variable_list <- {:variable_list: {|
 		variable (ws ',' ws variable)*
 	|} :}
-	variable <- {| '' -> 'variable' ('@' -> 'self')?
+	variable <- {| {:type: '' -> 'variable' :} ('@' -> 'self')?
 		name ws ('.' ws name / ws '[' ws value ws ']')*
 	|}
 	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
 	literal <-
 		table /
-		{| '' -> 'vararg' { '...' } |} /
+		{| {:type: '' -> 'vararg' :} { '...' } |} /
 		number /
 		string /
-		{| '' -> 'boolean'
+		{| {:type: '' -> 'boolean' :}
 			('true' / 'false') -> bool
 		|} /
 		{| {'nil' -> 'nil'} |}
-	number <- {| '' -> 'number' {:is_negative: '-' -> true :}? (
+	number <- {| {:type: '' -> 'number' :} {:is_negative: '-' -> true :}? (
 		base16num /
 		base10num
 	) |}
@@ -210,19 +210,19 @@ local pattern = re.compile([[
 	hex_exponent <- [pP] [+-]? integer
 
 	string <- {| dqstring / sqstring / blstring |}
-	dqstring <- '' -> 'dqstring' '"' { (('\' .) /
+	dqstring <- {:type: '' -> 'dqstring' :} '"' { (('\' .) /
 		([^]] .. '\r\n' .. [["]))* } '"' -- no escape codes in block quotes
-	sqstring <- '' -> 'sqstring' "'" { [^]] .. '\r\n' .. [[']* } "'"
-	blstring <- '' -> 'blstring' '[' {:eq: '='* :} '[' blclose
+	sqstring <- {:type: '' -> 'sqstring' :} "'" { [^]] .. '\r\n' .. [[']* } "'"
+	blstring <- {:type: '' -> 'blstring' :} '[' {:eq: '='* :} '[' blclose
 	blclose <- ']' =eq ']' / . blclose
 
-	table <- {| '' -> 'table' '{' ws -- TODO `for` constructor
+	table <- {| {:type: '' -> 'table' :} '{' ws -- TODO `for` constructor
 		(
 			table_generator /
 			table_field (ws ',' ws table_field)*
 		)?
 	ws '}' |}
-	table_generator <- {| '' -> 'generator'
+	table_generator <- {| {:type: '' -> 'generator' :}
 		table_field (ws 'for' ws variable_list)? ws 'in' ws expression
 	|}
 	table_field <-
