@@ -6,10 +6,10 @@ _string:escape()=> return @gsub("%%%.%+%-%*%^%?%[%]%(%)", "%%%1");
 
 _string:split(separator = ",")=> {
     type(separator, "string");
-    if (#separator != 1)
-        error(Error("Argument #1 (%s) is longer than one character" % separator));
+    if (!= (#separator) 1)
+        error(Error((% "Argument #1 (%s) is longer than one character" separator)));
     local tOutput = {};
-    for (word in @gmatch(("[^" .. separator .. "]"):escape()))
+    for (word in @gmatch((.. "[^" separator "]")))
         table.insert(tOutput, word);
     return tOutput;
 }
@@ -19,9 +19,9 @@ local {error, TypeError} = require("core.error");
 local _string_metatable = getmetatable("");
 
 _string_metatable.__mod(tFormatOptions)=>
-    if (type(tFormatOptions) == "string")
+    if (== type(tFormatOptions) "string")
         return @format(tFormatOptions);
-    else if (type(tFormatOptions) == "table")
+    else if (== type(tFormatOptions) "table")
         return @format(unpack(tFormatOperations));
     else
         error(TypeError(tFormatOptions, "string/table"));
