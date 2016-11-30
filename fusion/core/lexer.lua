@@ -45,9 +45,6 @@ defs.incomplete_statement = function(pos, char)
 		("Input: %q"):format(input);
 		(" "):rep(tab_len + math.max(pos - msg_start, 0)) .. "^";
 	}
-	if current_file:match("^[^;}]", line_end) then
-		errormsg_table[#errormsg_table + 1] = "Did you forget a semicolon?"
-	end
 	errormsg = {
 		pos = {
 			y = line;
