@@ -63,6 +63,19 @@ describe("lexer", function()
 			}
 		})
 	end)
+	it("can parse complex self indexing", function()
+		assert.same(lexer:match("local a = @[b];"), {
+			{type = "assignment",
+				variable_list = {
+					{type = "variable", "a"}
+				},
+				expression_list = {
+					{type = "variable", "self", {type = "variable", "b"}}
+				},
+				is_local = true
+			}
+		})
+	end)
 	it("can parse assigning to self", function()
 		assert.same(lexer:match("@a = b;"), {
 			{type = "assignment",
