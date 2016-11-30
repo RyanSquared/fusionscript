@@ -63,7 +63,7 @@ end
 
 local pattern = re.compile([[
 	statement_list <- ws {| ((! '}') rstatement ws)* |}
-	statement_block <- {| {:block: '' -> 'block' :} '{' ws statement_list ws '}' |}
+	statement_block <- {| {:type: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
 		function_call /
 		assignment /
@@ -101,7 +101,7 @@ local pattern = re.compile([[
 	|}
 	function_definition <- {| {:type: '' -> 'function_definition' :}
 		{:is_async: 'async' -> true space :}? ws
-		variable ({:is_self: ws ':' -> true :} ws name)? ws function_body
+		variable ws function_body -- Do NOT write functions with :
 	|}
 	function_body <- 
 		'(' ws function_defined_arguments? ws ')' ws 
