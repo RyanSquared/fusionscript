@@ -41,7 +41,7 @@ defs.incomplete_statement = function(pos, char)
 	end
 	errormsg_table = {
 		"SyntaxError";
-		("Couldn't find statement on line %d"):format(line);
+		("Unfinished statement on line %d"):format(line);
 		("Input: %q"):format(input);
 		(" "):rep(tab_len + math.max(pos - msg_start, 0)) .. "^";
 	}
