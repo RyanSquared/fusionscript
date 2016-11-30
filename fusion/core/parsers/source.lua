@@ -29,12 +29,80 @@ function transform_variable_list(node)
 	return table.concat(output, ",")
 end
 
+local _tablegen_level = 0
+
+handlers['table'] = function(node)
+	if node[1].type == "generator" then
+		_tablegen_level = _tablegen_level + 1
+		local output = {"(function()", ("local _generator_%s = {}"):format(
+			_tablegen_level)}
+		local generator = node[1]
+		if generator[1].index then -- complex
+			output[#output + 1] = transform({
+				generator[2]; -- loop iterator
+				{type = "assignment";
+					variable_list = {{("_generator_%s"):format(_tablegen_level);
+						generator[1].index;
+						type = "variable";
+					}};
+					expression_list = {generator[1][1]};
+				};
+				type = "iterative_for_loop";
+				variable_list = generator.variable_list;
+			})
+		else -- simpler
+			output[#output + 1] = transform({
+				generator[2]; -- loop iterator
+				{type = "assignment";
+					variable_list = {{("_generator_%s"):format(_tablegen_level);
+						("#_generator_%s + 1"):format(_tablegen_level);
+						type = "variable";
+					}};
+					expression_list = {generator[1]};
+				};
+				type = "iterative_for_loop";
+				variable_list = generator.variable_list or {generator[1]};
+			})
+		end
+		output[#output + 1] =( "return _generator_%s"):format(_tablegen_level)
+		output[#output + 1] = "end)()"
+		_tablegen_level = _tablegen_level - 1
+		return table.concat(output, "\n")
+	end
+	local output = {'{'}
+	local named = {}
+	for _, item in ipairs(node) do
+		if not item.index and not item.name then
+			-- not named, add to normal output
+			output[#output + 1] = transform(item) .. ";"
+		else
+			if item.index then
+				named[#named + 1] = ("[%s] = %s;"):format(transform(item.index),
+					transform(item[1]))
+			else
+				if item.name:match("^[A-Za-z_][A-Za-z0-9_]*$") then
+					named[#named + 1] = ("%s = %s;"):format(item.name,
+						transform(item[1]))
+				else
+					named[#named + 1] = ("[%q] = %s;"):format(item.name,
+						transform(item[1]))
+				end
+			end
+		end
+	end
+	for _, item in ipairs(named) do
+		output[#output + 1] = item
+	end
+	output[#output + 1] = "}"
+	return table.concat(output, "\n")
+end
+
 handlers['boolean'] = function(node)
-	return node[1]
+	return tostring(node[1])
 end
 
 handlers['break'] = function(node)
-	return node[1]
+	return node.type
 end
 
 handlers['yield'] = function(node)
@@ -50,7 +118,7 @@ handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 	if not is_logical then
 		lines[1] = 'do'
 	end
-	for i, node in ipairs(root_node[2]) do
+	for i, node in ipairs(root_node[1]) do
 		lines[#lines + 1] = transform(node)
 	end
 	if not is_logical then
@@ -65,6 +133,32 @@ handlers['while_loop'] = function(node)
 	if node[1].type ~= "block" then
 		output[#output + 1] = transform({type = "block", {node[1]}})
 	else
+		output[#output + 1] = transform(node[1])
+	end
+	return table.concat(output, " ")
+end
+
+handlers['numeric_for_loop'] = function(node)
+	local output = {"for", node.incremented_variable, "=", transform(
+		node.start), ",", transform(node.stop)}
+	if node.step then
+		output[#output + 1] = ","
+		output[#output + 1] = transform(node.step)
+	end
+	if node[1].type ~= "block" then
+		output[#output + 1] = transform({type = "block", {node[1]}})
+	else
+		output[#output + 1] = transform(node[1])
+	end
+	return table.concat(output, " ")
+end
+
+handlers['iterative_for_loop'] = function(node)
+	local output = {"for", transform_variable_list(node), "in",
+		transform(node[1])}
+	if node[2].type ~= "block" then
+		output[#output + 1] = transform({type = "block", {node[2]}})
+	else
 		output[#output + 1] = transform(node[2])
 	end
 	return table.concat(output, " ")
@@ -76,6 +170,61 @@ handlers['if'] = function(node)
 		output[#output + 1] = ha1dlers['block'](node[1], true)
 	else
 		output[#output + 1] = transform(node[1])
+	end
+	output[#output + 1] = "end"
+	return table.concat(output, "\n")
+end
+
+handlers['function_definition'] = function(node)
+	local is_interpretable_raw = true
+	for _, name in ipairs(node[1]) do
+		-- if type is not string, issue with `function x.y.z()` syntax
+		-- can't do function a[b] in Lua, for example
+		if type(name) ~= "string" then
+			is_interpretable_raw = false
+		end
+	end
+	local name = transform(node[1])
+	local output = {}
+	local header = {}
+	if is_interpretable_raw then
+		header[1] = ("function %s("):format(name)
+	else
+		header[1] = ("%s = function("):format(name)
+	end
+	local defaults, args = {}, {}
+	if node.is_self then
+		args[1] = "self"
+	end
+	for _, arg in ipairs(node[2]) do
+		if arg.default then
+			defaults[arg.name] = transform(arg.default)
+		end
+		args[#args + 1] = arg.name
+	end
+	header[2] = table.concat(args, ", ") .. ")"
+	output[1] = table.concat(header)
+	for name, default in pairs(defaults) do
+		output[#output + 1] = ("if not %s then"):format(name)
+		output[#output + 1] = ("%s = %s"):format(name, default)
+		output[#output + 1] = "end"
+	end
+	if node.expression_list then
+		output[#output + 1] = "return " .. transform_expression_list(node)
+	else
+		if node.is_async then
+			-- wrap block in `return coroutine.wrap(function()`
+			output[#output + 1] = "return coroutine.wrap(function()"
+		end
+		if node[#node].type == "block" then
+			output[#output + 1] = handlers['block'](node[#node], true)
+		else
+			output[#output + 1] = transform(node[#node])
+		end
+		if node.is_async then
+			-- wrap block in `return coroutine.wrap(function()`
+			output[#output + 1] = "end)"
+		end
 	end
 	output[#output + 1] = "end"
 	return table.concat(output, "\n")
@@ -99,25 +248,25 @@ handlers['expression'] = function(node)
 end
 
 handlers['number'] = function(node)
-	if node.type == "base10" then
+	is_negative = node.is_negative and "-" or ""
+	if node.base == "10" then
 		if math.floor(node[1]) == node[1] then
-			return ("%i"):format(node[1])
+			return is_negative .. ("%i"):format(node[1])
 		else
-			return ("%f"):format(node[1])
+			return is_negative .. ("%f"):format(node[1])
 		end
 	else
-		return ("0x%x"):format(node[1])
+		return is_negative .. ("0x%x"):format(node[1])
 	end
 end
 
 handlers['assignment'] = function(node)
 	local output = {}
 	if node.is_local then
-		output = "local "
+		output[1] = "local "
 	end
-	if node[1].variable_list.is_destructuring then
-		-- ::TODO:: change node[1] to node in lexer
-		local expression = transform(node[2].expression_list[1])
+	if node.variable_list.is_destructuring then
+		local expression = transform(node.expression_list[1])
 		local last = {} -- capture all last values
 		for i, v in ipairs(node.variable_list) do
 			local value = transform(v)
@@ -138,11 +287,39 @@ handlers['assignment'] = function(node)
 end
 
 handlers['function_call'] = function(node)
-	local name = transform(node[1])
-	if node.expression_list then -- has expressions, return with expressions
-		return name .. "(" .. transform_expression_list(node) .. ")"
+	if node.generator then
+		return transform {
+			node.generator[2];
+			variable_list = {node.generator[1]};
+			{type = "function_call";
+				node[1];
+				node[2];
+				has_self = node.has_self;
+				index_class = node.index_class;
+				expression_list = {node.generator[1]};
+			};
+			type = "iterative_for_loop"; -- `in` without `for` only 1 var   V
+			variable_list = node.generator.variable_list or {node.generator[1]}
+		}
 	else
-		return name .. "()"
+		local name
+		if node.has_self then
+			if node.index_class then
+				node.expression_list = node.expression_list or {}
+				table.insert(node.expression_list, 1, node[1])
+				node[1] = {type = "variable", node.index_class}
+				name = transform(node[1]) .. "." .. transform(node[2])
+			else
+				name = transform(node[1]) .. ":" .. transform(node[2])
+			end
+		else
+			name = transform(node[1])
+		end
+		if node.expression_list then
+			return name .. "(" .. transform_expression_list(node) .. ")"
+		else
+			return name .. "()"
+		end
 	end
 end
 
@@ -164,6 +341,10 @@ end
 
 handlers['sqstring'] = function(node)
 	return ("%q"):format(node[1]:gsub("\\", "\\\\"))  -- \ is ignored in '' strings
+end
+
+handlers['dqstring'] = function(node)
+	return ('"%s"'):format(node[1])
 end
 
 function parser.compile(input_stream, output_stream)
