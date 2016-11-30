@@ -148,9 +148,9 @@ describe("lexer", function()
 					{"variable", "c"}
 				},
 				expression_list = {
-					{"number", 5, type = "base10"},
-					{"number", 3, type = "base10", is_negative = true},
-					{"number", 0xAF, type = "base16"}
+					{"number", 5, base = "10"},
+					{"number", 3, base = "10", is_negative = true},
+					{"number", 0xAF, base = "16"}
 				}
 			}
 		})
@@ -196,9 +196,9 @@ describe("lexer", function()
 			variable_list = {{"variable", "a"}},
 			expression_list = {
 				{"table",
-					{"number", 1, type = "base10"},
-					{{"number", 2, type = "base10"}, name = "b"},
-					{{"number", 3, type = "base10"}, index = {"variable", "c"}}
+					{"number", 1, base = "10"},
+					{{"number", 2, base = "10"}, name = "b"},
+					{{"number", 3, base = "10"}, index = {"variable", "c"}}
 				}
 			}
 		}})
@@ -265,9 +265,9 @@ describe("lexer", function()
 				{"variable", "print"},
 				expression_list = {{"variable", "i"}}
 			},
-			start = {"number", 1, type = "base10"},
-			stop = {"number", 100, type = "base10"},
-			step = {"number", 5, type="base10"},
+			start = {"number", 1, base = "10"},
+			stop = {"number", 100, base = "10"},
+			step = {"number", 5, base = "10"},
 			incremented_variable = "i"
 		}})
 	end)
