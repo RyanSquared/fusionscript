@@ -14,9 +14,9 @@ defs.incomplete_statement = function(pos, char)
 	local line = 1
 	local start = 1
 	local line_start = 0
-	while start > pos do
-		if current_file:sub(pos, pos):find("\n") then
-			line_start = start
+	while start < pos do
+		if current_file:find("^\n", start) then
+			line_start = start + 1
 			line = line + 1
 		end
 		start = start + 1
