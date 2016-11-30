@@ -24,7 +24,8 @@ build = {
 	},
 	install = {
 		bin = {
-			["fuse-ast"] = "fuse/ast.lua"
+			["fuse-ast"] = "fuse/ast.lua";
+			["fuse-source"] = "fuse/source.lua";
 		}
 	}
 }
