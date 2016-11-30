@@ -183,8 +183,9 @@ local pattern = re.compile([[
 	variable_list <- {:variable_list: {|
 		variable (ws ',' ws variable)*
 	|} :}
-	variable <- {| {:type: '' -> 'variable' :} ('@' -> 'self')?
-		name ws ('.' ws name / ws '[' ws value ws ']')*
+	variable <- {| {:type: '' -> 'variable' :}
+		((name ws ('.' ws name / ws '[' ws value ws ']')*) /
+		('@' -> 'self' name? ws ('.' ws name / ws '[' ws value ws ']')*))
 	|}
 	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
