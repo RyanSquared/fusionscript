@@ -7,12 +7,7 @@ new Async {
         @errors = LimitedArray(500);
         @evqueue = cqueues.new();
         for (k, v in pairs(self)) {
-            /*
-             * This works best if you extend the async class,
-             * then fill the extended class with functions to
-             * be run asynchronously.
-             */
-            assert(type(v) == "function", TypeError(v, "function"));
+            assert((== type(v) "function"), TypeError(v, "function"));
             @evqueue:append(v);
         }
         while (!@evqueue:empty()) {
@@ -21,7 +16,8 @@ new Async {
                 if (@handler)
                     @handler(ok, error);
                 else
-                    @errors[@errors + 1] = error;
+                    @errors[(+ @errors 1)] = error;
         }
-        return @errors
+        return @errors;
+	 }
 }
