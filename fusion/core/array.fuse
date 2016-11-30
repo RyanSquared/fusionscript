@@ -14,9 +14,9 @@ new Array {
 		@size = (+ @size 1);
 	}
 	remove(key)=> {
-		local value = table.remove(self, key)
-			if (!= value nil)
-				@size = (- @size 1);
+		local value = table.remove(self, key);
+		if (!= value nil)
+			@size = (- @size 1);
 		return value;
 	}
 	append(value)=> {
@@ -34,17 +34,18 @@ new LimitedArray extends Array {
 		assert((== math.type(limit) "integer"), TypeError("integer", limit));
 		@limit = limit;
 	}
-	__newindex(k, v)=>
+	__newindex(k, v)=> {
 		@__super.__newindex(self, math.min((+ @size 1), k), v);
-	if (> @size (* @limit 1.1))
-		for (i=1, (@limit 10)) {
-			if (@handle_output) {
-				local item = table.remove(self, 1);
-				@handle_output(item);
-			} else
-				table.remove(self, 1);
-			@size = (+ @size 1);
-		}
+		if (> @size (* @limit 1.1))
+			for (i=1, @limit, 10) {
+				if (@handle_output) {
+					local item = table.remove(self, 1);
+					@handle_output(item);
+				} else
+					table.remove(self, 1);
+				@size = (+ @size 1);
+			}
+	}
 }
 
 new QueueDirectionError extends Error {
@@ -63,7 +64,7 @@ new Queue {
 	__new(direction)=> {
 		assert((== math.type(direction) "integer"), TypeError("integer",
 			direction));
-		assert((&& (>= direction 0x0) (<= direction 0x1),
+		assert((&& (>= direction 0x0) (<= direction 0x1)),
 					QueueDirectionError(direction));
 		@size = 0;
 	}
@@ -77,7 +78,7 @@ new Queue {
 		return @[index];
 	}
 	push(value)=> {
-		table.insert(self, @size + 1, value);
+		table.insert(self, (+ @size 1), value);
 		@size = (+ @size 1);
 	}
 	pop()=> {
@@ -103,4 +104,4 @@ new FILO extends Queue {
 return {
 	Array = Array,
 	LimitedArray = LimitedArray
-}
+};
