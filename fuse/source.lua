@@ -2,10 +2,14 @@
 local parser = require("fusion.core.parsers.source")
 
 function process(file)
-	print(parser.read_file(file))
+	assert(file:match("%.fuse$"), ("Incorrect filetype: %s"):format(file))
+	local base = file:match("^(.+)%.fuse$")
+	local output = parser.read_file(file)
+	local output_file = io.open(base .. ".lua", "w")
+	output_file:write(output .. "\n")
+	output_file:close()
+	print(("Built file %s -> %s"):format(file, base .. ".lua"))
 end
-
--- ::TODO:: output to respective .lua files
 
 local args = {...}
 if #args > 1 then
