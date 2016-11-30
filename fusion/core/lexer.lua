@@ -57,7 +57,7 @@ defs.incomplete_statement = function(pos, char)
 end
 
 local pattern = re.compile([[
-	statement_list <- ws {| ((! '}') statement ws)* |}
+	statement_list <- ws {| ((! '}') rstatement ws)* |}
 	statement_block <- {| {:block: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
 		function_call /
@@ -75,7 +75,7 @@ local pattern = re.compile([[
 		class
 	)
 	rstatement <- statement / required
-	required <- ({} {'.'}) -> incomplete_statement
+	required <- ({} {.}) -> incomplete_statement
 	class <- {| {:type: 'new' -> 'class' :} space {:name: name :}
 		(ws 'extends' ws {:extends: variable :})? ws
 		'{' ws {| (class_field ws)* |} ws '}'
