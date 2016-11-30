@@ -100,8 +100,8 @@ local pattern = re.compile([[
 		function_body
 	|}
 	function_definition <- {| {:type: '' -> 'function_definition' :}
-		{:is_async: 'async' -> true :}? ws
-		variable ws function_body
+		{:is_async: 'async' -> true space :}? ws
+		variable ({:is_self: ws ':' -> true :} ws name)? ws function_body
 	|}
 	function_body <- 
 		'(' ws function_defined_arguments? ws ')' ws 
@@ -136,10 +136,9 @@ local pattern = re.compile([[
 	|}
 
 	function_call <- {| {:type: '' -> 'function_call' :} (
-		variable ({:has_self: ':' -> true :} variable ws
-				{:index_class: ws '<' ws {value} ws '>' :}? )?
-			ws '(' ws function_call_body? ws ')'
-	) |}
+		(variable / '(' value ')') ({:has_self: ':' -> true :} variable ws
+		{:index_class: ws '<' ws {value} ws '>' :}? )?
+	) ws '(' ws function_call_body? ws ')' |}
 	function_call_body <- {:generator: {|
 		expression (ws 'for' ws variable_list)? ws 'in' ws expression
 	|} :} / function_args
