@@ -4,8 +4,8 @@ local parser = {}
 local handlers = {}
 
 function transform(node, ...)
-	assert(handlers[node[1]], ("Can't find node handler for (%s)"):format(node[1]))
-	return handlers[node[1]](node, ...)
+	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
+	return handlers[node.type](node, ...)
 end
 
 function transform_expression_list(node)
@@ -30,7 +30,7 @@ function transform_variable_list(node)
 end
 
 handlers['boolean'] = function(node)
-	return node[2]
+	return node[1]
 end
 
 handlers['break'] = function(node)
@@ -62,8 +62,8 @@ end
 handlers['while_loop'] = function(node)
 	local output = {"while"}
 	output[#output + 1] = transform(node.condition)
-	if node[2][1] ~= "block" then
-		output[#output + 1] = transform({"block", {node[2]}})
+	if node[1].type ~= "block" then
+		output[#output + 1] = transform({type = "block", {node[1]}})
 	else
 		output[#output + 1] = transform(node[2])
 	end
@@ -72,10 +72,10 @@ end
 
 handlers['if'] = function(node)
 	local output = {("if (%s) then"):format(transform(node.condition))}
-	if node[2][1] == "block" then
-		output[#output + 1] = handlers['block'](node[2], true)
+	if node[1].type == "block" then
+		output[#output + 1] = ha1dlers['block'](node[1], true)
 	else
-		output[#output + 1] = transform(node[2])
+		output[#output + 1] = transform(node[1])
 	end
 	output[#output + 1] = "end"
 	return table.concat(output, "\n")
@@ -83,47 +83,47 @@ end
 
 handlers['expression'] = function(node)
 	local output = {}
-	if #node > 3 then
+	if #node > 2 then -- TODO chain operators
 		local expr = {}
-		for i = 2, #node do
+		for i = 1, #node do
 			expr[#expr + 1] = transform(node[i])
 		end
 		error("too many values in expression", '(' .. node.operator .. ' ' ..
 			table.concat(node, ' ') ')')
-	elseif #node == 3 then
-		return ("(%s %s %s)"):format(transform(node[2]), node.operator,
-			transform(node[3]))
 	elseif #node == 2 then
-		return ("(%s%s)"):format(node.operator, transform(node[2]))
+		return ("(%s %s %s)"):format(transform(node[1]), node.operator,
+			transform(node[2]))
+	elseif #node == 1 then
+		return ("(%s%s)"):format(node.operator, transform(node[1]))
 	end
 end
 
 handlers['number'] = function(node)
 	if node.type == "base10" then
-		if math.floor(node[2]) == node[2] then
-			return ("%i"):format(node[2])
+		if math.floor(node[1]) == node[1] then
+			return ("%i"):format(node[1])
 		else
-			return ("%f"):format(node[2])
+			return ("%f"):format(node[1])
 		end
 	else
-		return ("0x%x"):format(node[2])
+		return ("0x%x"):format(node[1])
 	end
 end
 
 handlers['assignment'] = function(node)
 	local output = {}
-	if node[2].is_local then
-		output[1] = "local "
+	if node.is_local then
+		output = "local "
 	end
-	if node[2].variable_list.is_destructuring then
+	if node[1].variable_list.is_destructuring then
 		-- ::TODO:: change node[1] to node in lexer
 		local expression = transform(node[2].expression_list[1])
 		local last = {} -- capture all last values
-		for i, v in ipairs(node[2].variable_list) do
+		for i, v in ipairs(node.variable_list) do
 			local value = transform(v)
 			last[#last + 1] = expression .. "." .. value
 			output[#output + 1] = value
-			if node[2].variable_list[i + 1] then
+			if node.variable_list[i + 1] then
 				output[#output + 1] = ','
 			end
 		end
@@ -131,14 +131,14 @@ handlers['assignment'] = function(node)
 		output[#output + 1] = table.concat(last, ',')
 		return table.concat(output)
 	end
-	output[#output + 1] = transform_variable_list(node[2]) -- ::TODO::
+	output[#output + 1] = transform_variable_list(node) -- ::TODO::
 	output[#output + 1] = " = "
-	output[#output + 1] = transform_expression_list(node[2]) -- ::TODO::
+	output[#output + 1] = transform_expression_list(node) -- ::TODO::
 	return table.concat(output)
 end
 
 handlers['function_call'] = function(node)
-	local name = transform(node[2])
+	local name = transform(node[1])
 	if node.expression_list then -- has expressions, return with expressions
 		return name .. "(" .. transform_expression_list(node) .. ")"
 	else
@@ -147,8 +147,8 @@ handlers['function_call'] = function(node)
 end
 
 handlers['variable'] = function(node)
-	local name = {node[2]}
-	for i=3, #node do
+	local name = {node[1]}
+	for i=2, #node do
 		if type(node[i]) == "string" then
 			if node[i]:match("^[_A-Za-z][_A-Za-z0-9]*$") then
 				name[#name + 1] = "." .. node[i]
@@ -163,7 +163,7 @@ handlers['variable'] = function(node)
 end
 
 handlers['sqstring'] = function(node)
-	return "'" .. node[2]:gsub("\\", "\\\\") .. "'"  -- \ is ignored in '' strings
+	return ("%q"):format(node[1]:gsub("\\", "\\\\"))  -- \ is ignored in '' strings
 end
 
 function parser.compile(input_stream, output_stream)
@@ -188,7 +188,7 @@ function parser.read_file(file, dump)
 			coroutine.yield(value)
 		end
 	end), append)
-	return output
+	return table.concat(output, "\n")
 end
 
 function parser.load_file(file)
