@@ -48,7 +48,15 @@ defs.incomplete_statement = function(pos, char)
 	if current_file:match("^[^;}]", line_end) then
 		errormsg_table[#errormsg_table + 1] = "Did you forget a semicolon?"
 	end
-	errormsg = setmetatable({position = pos, line = line}, {
+	errormsg = {
+		pos = {
+			y = line;
+			x = pos - line_start;
+		};
+		context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
+		quick = "syntax"
+	}
+	setmetatable(errormsg, {
 		__tostring = function()
 			return table.concat(errormsg_table, "\n")
 		end
