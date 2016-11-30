@@ -1,30 +1,72 @@
 local re = require("re");
 
 local defs = {}
+local current_file;
 
 defs['true'] = function() return true end
 defs['false'] = function() return false end
 defs['bool'] = function(...) return defs[(...)]() end
 defs['numberify'] = tonumber
 
-function defs:transform_binary_expression()
-	table.insert(self, 1, 'expression')
-	self.type = 'binary'
-	return self
+defs.print = print
+
+defs.incomplete_statement = function(pos, char)
+	local line = 1
+	local start = 1
+	local line_start = 0
+	while start > pos do
+		if current_file:sub(pos, pos):find("\n") then
+			line_start = start
+			line = line + 1
+		end
+		start = start + 1
+	end
+	local line_end = current_file:find("\n", pos)
+	if not line_end then
+		line_end = #current_file
+	else
+		line_end = line_end - 1
+	end
+	local msg_start = math.max(pos - 5, line_start)
+	local msg_end = math.min(pos + 5, line_end)
+	local input = ""
+	local tab_len = 8
+	if msg_start == pos - 5 and msg_start ~= line_start then
+		tab_len = 11
+		input = "..."
+	end
+	input = input .. current_file:sub(msg_start, msg_end)
+	if msg_end ~= line_end and msg_end == pos + 5 then
+		input = input .. "..."
+	end
+	errormsg_table = {
+		"SyntaxError";
+		("Couldn't find statement on line %d"):format(line);
+		("Input: %q"):format(input);
+		(" "):rep(tab_len + math.max(pos - msg_start, 0)) .. "^";
+	}
+	if current_file:match("^[^;}]", line_end) then
+		errormsg_table[#errormsg_table + 1] = "Did you forget a semicolon?"
+	end
+	errormsg = setmetatable({position = pos, line = line}, {
+		__tostring = function()
+			return table.concat(errormsg_table, "\n")
+		end
+	})
+	error(errormsg,0)
 end
 
 local pattern = re.compile([[
-	statement_list <- ws {| (statement ws)* |}
+	statement_list <- ws {| ((! '}') statement ws)* |}
 	statement_block <- {| '' -> 'block' '{' ws statement_list ws '}' |}
 	statement <- (
 		function_call /
 		assignment /
 		return /
 		{| {'break'} |} /
-		'--' [^;]*
+		'--' {| '' -> 'comment' ws {[^;]*} |}
 	) ws ';' ws / (
-		statement_block
-	) / (
+		statement_block /
 		while_loop /
 		numeric_for_loop /
 		iterative_for_loop /
@@ -32,7 +74,8 @@ local pattern = re.compile([[
 		if /
 		class
 	)
-
+	rstatement <- statement / required
+	required <- ({} {'.'}) -> incomplete_statement
 	class <- {| 'new' -> 'class' space {:name: name :}
 		(ws 'extends' ws {:extends: variable :})? ws
 		'{' ws {| (class_field ws)* |} ws '}'
@@ -58,7 +101,7 @@ local pattern = re.compile([[
 	function_body <- 
 		'(' ws function_defined_arguments? ws ')' ws 
 			({:is_self: '=' -> true :} / '-') '>' ws
-			(statement / expression_list)
+			(statement / expression_list / required)
 	function_defined_arguments <- {|
 		function_argument (ws ',' ws function_argument)*
 	|}
@@ -67,13 +110,13 @@ local pattern = re.compile([[
 	|}
 
 	while_loop <- {| '' -> 'while_loop'
-		'while' ws {:condition: expression :} ws statement
+		'while' ws {:condition: expression :} ws rstatement
 	|}
 	iterative_for_loop <- {| '' -> 'iterative_for_loop'
-		'for' ws '(' ws name_list ws 'in' ws expression ws ')' ws statement
+		'for' ws '(' ws name_list ws 'in' ws expression ws ')' ws rstatement
 	|}
 	numeric_for_loop <- {| '' -> 'numeric_for_loop'
-		'for' ws numeric_for_assignment ws statement
+		'for' ws numeric_for_assignment ws rstatement
 	|}
 	numeric_for_assignment <- '('
 		{:incremented_variable: name :} ws '=' ws
@@ -83,8 +126,8 @@ local pattern = re.compile([[
 	')'
 
 	if <- {|
-		{'if'} ws {:condition: expression :} ws statement
-		(ws 'else' ws {:else: statement :})?
+		{'if'} ws {:condition: expression :} ws rstatement
+		(ws 'else' ws {:else: rstatement :})?
 	|}
 
 	function_call <- {| '' -> 'function_call' (
@@ -153,7 +196,7 @@ local pattern = re.compile([[
 		base16num /
 		base10num
 	) |}
-	base10num <- {:type: '' -> 'base10' :} {
+	base10num <- {:base: '' -> '10' :} {
 		((integer '.' integer) /
 		(integer '.') /
 		('.' integer) /
@@ -161,7 +204,7 @@ local pattern = re.compile([[
 	} -> numberify
 	integer <- [0-9]+
 	int_exponent <- [eE] [+-]? integer
-	base16num <- {:type: '' -> 'base16' :} {
+	base16num <- {:base: '' -> '16' :} {
 		'0' [Xx] [0-9A-Fa-f]+ hex_exponent?
 	} -> numberify
 	hex_exponent <- [pP] [+-]? integer
@@ -191,4 +234,9 @@ local pattern = re.compile([[
 	space <- %s+
 ]], defs);
 
-return pattern
+return {
+	match = function(self, input)
+		current_file = input
+		return pattern:match(input)
+	end
+}
