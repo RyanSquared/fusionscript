@@ -83,7 +83,7 @@ local pattern = re.compile([[
 	required <- ({} {.}) -> incomplete_statement
 	class <- {| {:type: 'new' -> 'class' :} space {:name: name :}
 		(ws 'extends' ws {:extends: variable :})? ws
-		'{' ws {| (class_field ws)* |} ws '}'
+		'{' ws {| ((! '}') (class_field / required) ws)* |} ws '}'
 	|}
 	class_field <-
 		function_definition /
