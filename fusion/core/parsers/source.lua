@@ -2,9 +2,11 @@ local lexer = require("fusion.core.lexer")
 
 local parser = {}
 local handlers = {}
+local last_node = {}
 
 function transform(node, ...)
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
+	last_node = node
 	return handlers[node.type](node, ...)
 end
 
@@ -30,6 +32,8 @@ function transform_variable_list(node)
 end
 
 local _tablegen_level = 0
+
+handlers['nil'] = function() return 'nil' end
 
 handlers['table'] = function(node)
 	if node[1].type == "generator" then
@@ -230,8 +234,15 @@ handlers['function_definition'] = function(node)
 	return table.concat(output, "\n")
 end
 
+local operator_transformations = {
+	["!="] = "~="
+}
+
 handlers['expression'] = function(node)
 	local output = {}
+	if operator_transformations[node.operator] then
+		node.operator = operator_transformations[node.operator]
+	end
 	if #node > 2 then -- TODO chain operators
 		local expr = {}
 		for i = 1, #node do
@@ -373,7 +384,7 @@ function parser.read_file(file, dump)
 end
 
 function parser.load_file(file)
-	local content = table.concat(parser.read_file(file))
+	local content = parser.read_file(file)
 	if loadstring then
 		return assert(loadstring(content))
 	else
