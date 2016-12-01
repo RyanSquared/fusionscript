@@ -36,7 +36,9 @@ local _tablegen_level = 0
 handlers['nil'] = function() return 'nil' end
 
 handlers['table'] = function(node)
-	if node[1].type == "generator" then
+	if #node == 0 then
+		return '{}'
+	elseif node[1].type == "generator" then
 		_tablegen_level = _tablegen_level + 1
 		local output = {"(function()", ("local _generator_%s = {}"):format(
 			_tablegen_level)}
@@ -235,7 +237,10 @@ handlers['function_definition'] = function(node)
 end
 
 local operator_transformations = {
-	["!="] = "~="
+	["!="] = "~=";
+	["&&"] = "and";
+	["||"] = "or";
+	["!"] = "not "; -- rare case; usually symbols instead of kw,
 }
 
 handlers['expression'] = function(node)
