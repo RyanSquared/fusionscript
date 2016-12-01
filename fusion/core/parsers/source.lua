@@ -1,5 +1,6 @@
 local lexer = require("fusion.core.lexer")
 
+local indent = 0
 local parser = {}
 local handlers = {}
 local last_node = {}
@@ -8,6 +9,10 @@ function transform(node, ...)
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	last_node = node
 	return handlers[node.type](node, ...)
+end
+
+function l(line)
+	return ("\t"):rep(indent) .. line
 end
 
 function transform_expression_list(node)
@@ -40,11 +45,12 @@ handlers['table'] = function(node)
 		return '{}'
 	elseif node[1].type == "generator" then
 		_tablegen_level = _tablegen_level + 1
-		local output = {"(function()", ("local _generator_%s = {}"):format(
+		local output = {"(function()", l("\tlocal _generator_%s = {}"):format(
 			_tablegen_level)}
 		local generator = node[1]
 		if generator[1].index then -- complex
-			output[#output + 1] = transform({
+			indent = indent + 1
+			output[#output + 1] = l(transform({
 				generator[2]; -- loop iterator
 				{type = "assignment";
 					variable_list = {{("_generator_%s"):format(_tablegen_level);
@@ -55,9 +61,11 @@ handlers['table'] = function(node)
 				};
 				type = "iterative_for_loop";
 				variable_list = generator.variable_list;
-			})
+			}))
+			indent = indent - 1
 		else -- simpler
-			output[#output + 1] = transform({
+			indent = indent + 1
+			output[#output + 1] = l(transform({
 				generator[2]; -- loop iterator
 				{type = "assignment";
 					variable_list = {{("_generator_%s"):format(_tablegen_level);
@@ -68,15 +76,17 @@ handlers['table'] = function(node)
 				};
 				type = "iterative_for_loop";
 				variable_list = generator.variable_list or {generator[1]};
-			})
+			}))
+			indent = indent - 1
 		end
-		output[#output + 1] =( "return _generator_%s"):format(_tablegen_level)
-		output[#output + 1] = "end)()"
+		output[#output + 1] = (l"\treturn _generator_%s"):format(_tablegen_level)
+		output[#output + 1] = l"end)()"
 		_tablegen_level = _tablegen_level - 1
 		return table.concat(output, "\n")
 	end
 	local output = {'{'}
 	local named = {}
+	indent = indent + 1
 	for _, item in ipairs(node) do
 		if not item.index and not item.name then
 			-- not named, add to normal output
@@ -99,6 +109,7 @@ handlers['table'] = function(node)
 	for _, item in ipairs(named) do
 		output[#output + 1] = item
 	end
+	indent = indent - 1
 	output[#output + 1] = "}"
 	return table.concat(output, "\n")
 end
@@ -124,11 +135,13 @@ handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 	if not is_logical then
 		lines[1] = 'do'
 	end
+	indent = indent + 1
 	for i, node in ipairs(root_node[1]) do
-		lines[#lines + 1] = transform(node)
+		lines[#lines + 1] = l(transform(node))
 	end
+	indent = indent - 1
 	if not is_logical then
-		lines[#lines + 1] = 'end'
+		lines[#lines + 1] = l'end'
 	end
 	return table.concat(lines, '\n')
 end
@@ -173,11 +186,11 @@ end
 handlers['if'] = function(node)
 	local output = {("if (%s) then"):format(transform(node.condition))}
 	if node[1].type == "block" then
-		output[#output + 1] = ha1dlers['block'](node[1], true)
+		output[#output + 1] = handlers['block'](node[1], true)
 	else
-		output[#output + 1] = transform(node[1])
+		output[#output + 1] = l("\t" .. transform(node[1]))
 	end
-	output[#output + 1] = "end"
+	output[#output + 1] = l"end"
 	return table.concat(output, "\n")
 end
 
@@ -202,37 +215,75 @@ handlers['function_definition'] = function(node)
 	if node.is_self then
 		args[1] = "self"
 	end
-	for _, arg in ipairs(node[2]) do
-		if arg.default then
-			defaults[arg.name] = transform(arg.default)
+	if not node[2].type then -- empty parameter list
+		for _, arg in ipairs(node[2]) do
+			if arg.default then
+				defaults[arg.name] = transform(arg.default)
+			end
+			args[#args + 1] = arg.name
 		end
-		args[#args + 1] = arg.name
 	end
 	header[2] = table.concat(args, ", ") .. ")"
 	output[1] = table.concat(header)
+	indent = indent + 1
 	for name, default in pairs(defaults) do
-		output[#output + 1] = ("if not %s then"):format(name)
-		output[#output + 1] = ("%s = %s"):format(name, default)
-		output[#output + 1] = "end"
+		output[#output + 1] = l(("if not %s then"):format(name))
+		output[#output + 1] = l(("\t%s = %s"):format(name, default))
+		output[#output + 1] = l"end"
 	end
+	indent = indent - 1
 	if node.expression_list then
-		output[#output + 1] = "return " .. transform_expression_list(node)
+		output[#output + 1] = l"\treturn " .. transform_expression_list(node)
 	else
 		if node.is_async then
 			-- wrap block in `return coroutine.wrap(function()`
-			output[#output + 1] = "return coroutine.wrap(function()"
+			indent = indent + 1
+			output[#output + 1] = l"return coroutine.wrap(function()"
 		end
+		if node[#node].type == "block" then
+			output[#output + 1] = handlers['block'](node[#node], true)
+		else
+			output[#output + 1] = l(transform(node[#node]))
+		end
+		if node.is_async then
+			-- wrap block in `return coroutine.wrap(function()`
+			output[#output + 1] = l"end)"
+			indent = indent - 1
+		end
+	end
+	output[#output + 1] = l"end"
+	return table.concat(output, "\n")
+end
+
+handlers['lambda'] = function(node)
+	local output = {}
+	local defaults, args = {}, {}
+	if not node[1].type then -- empty parameter list
+		for _, arg in ipairs(node[1]) do
+			if arg.default then
+				defaults[arg.name] = transform(arg.default)
+			end
+			args[#args + 1] = arg.name
+		end
+	end
+	output[1] = "(function(" .. table.concat(args, ", ") .. ")"
+	indent = indent + 1
+	for name, default in pairs(defaults) do
+		output[#output + 1] = l(("if not %s then"):format(name))
+		output[#output + 1] = l(("\t%s = %s"):format(name, default))
+		output[#output + 1] = l"end"
+	end
+	indent = indent - 1
+	if node.expression_list then
+		output[#output + 1] = l"return " .. transform_expression_list(node)
+	else
 		if node[#node].type == "block" then
 			output[#output + 1] = handlers['block'](node[#node], true)
 		else
 			output[#output + 1] = transform(node[#node])
 		end
-		if node.is_async then
-			-- wrap block in `return coroutine.wrap(function()`
-			output[#output + 1] = "end)"
-		end
 	end
-	output[#output + 1] = "end"
+	output[#output + 1] = l"end)"
 	return table.concat(output, "\n")
 end
 
