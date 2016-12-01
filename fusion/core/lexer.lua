@@ -196,7 +196,7 @@ local pattern = re.compile([[
 		{| {:type: '' -> 'boolean' :}
 			('true' / 'false') -> bool
 		|} /
-		{| {'nil' -> 'nil'} |}
+		{| {:type: {'nil'} :} |}
 	number <- {| {:type: '' -> 'number' :} {:is_negative: '-' -> true :}? (
 		base16num /
 		base10num
