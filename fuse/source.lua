@@ -2,11 +2,9 @@
 local parser = require("fusion.core.parsers.source")
 local lfs = require("lfs")
 
-local stp = require("StackTracePlus")
-
 function process(file, does_output)
 	assert(file:match("%.fuse$"), ("Incorrect filetype: %s"):format(file))
-	xpcall(parser.do_file, function()print(stp.stacktrace())end, file)
+	parser.do_file(file)
 end
 
 local args = {...}
