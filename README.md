@@ -1,50 +1,78 @@
 # FusionScript
 The programming language of ultimate dankliness
 
-**Warning:** This project is considered volatile and should not be used unless
-you know what you're doing; also, I have no clue how to write a programming
-language so good luck figuring out what the hell I'm doing.
+**Warning:** This project is not yet released and possibly has many bugs. If
+your code does not compile, it is *very* likely a problem in the compiler
+instead of your code. Please feel free to add an issue if any errors arise that
+you believe were caused by the compiler.
+
+## Commands
+
+As of 01-12-2016, no commands have any command line flags.
+
+### `fuse-ast`: Compile a file into an abstract syntax tree (AST).
+
+This program will load a file and print out a syntax tree for the file. The
+program will generate a syntax error and exit with error code `1` if a file has
+a syntax error.
+
+### `fuse`: Run FusionScript files
+
+The `fuse` program (which at the current time is an alias to `fuse-source`) can
+load syntaxes from `.fuse` files, compile them, and run them. As of 01-12-2016,
+compiled syntax trees are **not** cached. In future releases, either the syntax
+trees or the compiled Lua output might be cached to allow faster responsiveness
+when loading a program.
+
+### `fuse-source`: Run FusionScript with the Lua VM
+
+The `fuse-source` program compiles FusionScript files at runtime and runs them
+using the same Lua VM. This means that running `fuse-source` will NOT produce
+the same output as `fusec-source` then running the generated file with `lua`.
+This could leave undesired side effects from `lpeg`, `luafilesystem`, and
+`fusion` libraries. However, the libraries themselves should not edit the
+global state and only remain in the `package` table.
+
+### `fusec`: Compile FusionScript
+
+The `fusec` will use whatever alias is currently in place as the compiler. Use
+the documentation for the alias instead of this one to learn more about how the
+compiler works. The default compiler as of 01-12-2016 is `fusec-source`.
+
+### `fusec-source`: Compile FusionScript to Lua
+
+The `fusec-source` compiler can take FusionScript files and compile them to
+formatted Lua source. Because the compilation is from source to source, some
+things may look awkwardly formatted when compiled. As of 01-12-2016, there is
+no way to automatically compile FusionScript code to Lua bytecode.
 
 ## Examples
 
 ### Hello World
 
 ```
-/* ::TODO::
- * The example in this code example is just for testing
- * and will not actually run as of 9/9/2016
- */
-
-local {stdout} = io;
-stdout:write("Hello World!");
+print("Hello World!\n");
 ```
 
 ### Factorial
 
 ```
-/* ::TODO::
- * The example in this code example is just for testing
- * and will not actually run as of 9/9/2016
- */
-
-local {stdout} = io;
-
 factorial(n)->
-    if n == 0
+    if (== n 0)
         return 1;
     else
-        return n * factorial(n-1);
+        return (* n factorial((- n 1)));
 
-stdout:write(tostring(factorial(5)));
+print(tostring(factorial(5)));
 ```
 
 ### Account (from Lua Demo)
 
 ```
-/* ::TODO::
- * The example in this code example is just for testing
- * and will not actually run as of 9/9/2016
- */
+-- ::TODO::
+ The example in this code example is just for testing
+ and will not actually run as of 9/9/2016
+ ;
 
 new Account {
     __new(balance = 0)=> {
@@ -52,17 +80,15 @@ new Account {
     }
 
     deposit(amount)=> {
-        @balance += amount;
+        @balance = (+ @balance amount);
         return true;
     }
 
     withdraw(amount)=> {
-        if (amount > @balance)
+        if (> amount @balance)
             return false;
-            /* one-line statement, no brackets */
-            /* comments don't count towards lines */
         else {
-            @balance -= amount;
+            @balance = (- @balance amount);
             return true;
         }
     }
@@ -80,19 +106,19 @@ assert(bob:withdraw(math.max)); /* errors */
 ### Asynchronous Networking
 
 ```
-/* ::TODO::
- * The example in this code example is just for testing
- * and will not actually run as of 9/9/2016
- */
+-- ::TODO::
+ The example in this code example is just for testing
+ and will not actually run as of 9/9/2016
+ ;
 
 local {Async} = require("core.async");
 local {TCPSocket, TCPServer} = require("core.async.net");
 
-/*
- * The server MUST be started before the asynchronization
- * due to the fact the client can attempt connecting before
- * the server is initialized.
- */
+--
+ The server MUST be started before the asynchronization
+ due to the fact the client can attempt connecting before
+ the server is initialized.
+ ;
 
 server = TCPServer("localhost", 9999);
 
@@ -100,7 +126,7 @@ new ExampleAsyncApp extends Async {
     client()-> {
         socket = TCPSocket("localhost", 9999);
         socket:send("echo");
-        print(socket:recv(4) == "echo");
+        print((== socket:recv(4) "echo"));
         socket:close();
     }
 
@@ -122,5 +148,5 @@ ExampleAsyncApp:run();
 ### Building
 
 ```sh
-make
+luarocks make --local
 ```
