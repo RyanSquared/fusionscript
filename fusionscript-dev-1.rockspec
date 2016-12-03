@@ -16,6 +16,8 @@ dependencies = {
 	"lpeg >= 1.0"
 }
 
+local default = "source"
+
 build = {
 	type = "builtin",
 	modules = {
@@ -24,11 +26,11 @@ build = {
 	},
 	install = {
 		bin = {
-			["fuse-ast"] = "fuse/ast.lua";
-			["fuse"] = "fuse/source.lua";
-			["fusec"] = "fuse/source-c.lua";
-			["fuse-source"] = "fuse/source.lua";
-			["fusec-source"] = "fuse/source-c.lua";
+			["fusion-ast"] = "bin/util/ast.lua";
+			["fusion"] = ("bin/interpreter/%s.lua"):format(default);
+			["fusionc"] = ("bin/compiler/%s.lua"):format(default);
+			["fusion-source"] = "bin/interpreter//source.lua";
+			["fusionc-source"] = "bin/compiler/source.lua";
 		}
 	}
 }
