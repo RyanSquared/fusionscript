@@ -58,7 +58,7 @@ defs.incomplete_statement = function(pos, char)
 			return table.concat(errormsg_table, "\n")
 		end
 	})
-	error(errormsg,0)
+	error(errormsg, 0)
 end
 
 local pattern = re.compile([[
@@ -183,8 +183,8 @@ local pattern = re.compile([[
 		variable (ws ',' ws variable)*
 	|} :}
 	variable <- {| {:type: '' -> 'variable' :}
-		((('@' -> 'self')? name / '(' expression ')') ws ('.' ws name / '[' ws
-		expression ws ']')*)
+		((('@' -> 'self' name? / name) / '(' expression ')') ws ('.' ws name /
+		'[' ws expression ws ']')*)
 	|}
 	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
