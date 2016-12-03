@@ -185,11 +185,28 @@ handlers['iterative_for_loop'] = function(node)
 end
 
 handlers['if'] = function(node)
-	local output = {("if (%s) then"):format(transform(node.condition))}
+	local output = {l("if %s then"):format(transform(node.condition))}
 	if node[1].type == "block" then
 		output[#output + 1] = handlers['block'](node[1], true)
 	else
 		output[#output + 1] = l("\t" .. transform(node[1]))
+	end
+	for _, blk in ipairs(node['elseif']) do
+		output[#output + 1] = l("elseif %s then"):format(transform(
+			blk.condition))
+		if blk.type == "block" then
+			output[#output + 1] = handlers['block'](blk[1], true)
+		else
+			output[#output + 1] = l("\t" .. transform(blk[1]))
+		end
+	end
+	if node["else"] then
+		output[#output + 1] = l("else")
+		if node["else"].type == "block" then
+			output[#output + 1] = handlers['block'](node["else"], true)
+		else
+			output[#output + 1] = l("\t" .. transform(node["else"]))
+		end
 	end
 	output[#output + 1] = l"end"
 	return table.concat(output, "\n")
