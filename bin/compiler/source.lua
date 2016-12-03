@@ -2,7 +2,7 @@
 local parser = require("fusion.core.parsers.source")
 local lfs = require("lfs")
 
-function process(file, does_output)
+local function process(file, does_output)
 	assert(file:match("%.fuse$"), ("Incorrect filetype: %s"):format(file))
 	local base = file:match("^(.+)%.fuse$")
 	local output = parser.read_file(file)
@@ -14,9 +14,9 @@ function process(file, does_output)
 	end
 end
 
-function walk(file_func, dir)
+local function walk(file_func, dir)
 	for item in lfs.dir(dir) do
-		if item:sub(1, 1) == "." then
+		if item:sub(1, 1) == "." then -- luacheck: ignore 
 			-- pass
 		elseif lfs.attributes(dir .. "/" .. item, "mode") == "directory" then
 			walk(file_func, dir .. "/" .. item)

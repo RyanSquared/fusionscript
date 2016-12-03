@@ -4,19 +4,19 @@ local lfs = require("lfs")
 local indent = 0
 local parser = {}
 local handlers = {}
-local last_node = {}
+local last_node = {} -- luacheck: ignore 231
 
-function transform(node, ...)
+local function transform(node, ...)
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	last_node = node
 	return handlers[node.type](node, ...)
 end
 
-function l(line)
+local function l(line)
 	return ("\t"):rep(indent) .. line
 end
 
-function transform_expression_list(node)
+local function transform_expression_list(node)
 	if not node.expression_list then
 		return ""
 	end
@@ -28,7 +28,7 @@ function transform_expression_list(node)
 	return table.concat(output, ",")
 end
 
-function transform_variable_list(node)
+local function transform_variable_list(node)
 	local output = {}
 	local list = node.variable_list
 	for i=1, #list do
@@ -137,7 +137,7 @@ handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
 		lines[1] = 'do'
 	end
 	indent = indent + 1
-	for i, node in ipairs(root_node[1]) do
+	for i, node in ipairs(root_node[1]) do -- luacheck: ignore 213
 		lines[#lines + 1] = l(transform(node))
 	end
 	indent = indent - 1
@@ -244,9 +244,9 @@ handlers['function_definition'] = function(node)
 	header[2] = table.concat(args, ", ") .. ")"
 	output[1] = table.concat(header)
 	indent = indent + 1
-	for name, default in pairs(defaults) do
-		output[#output + 1] = l(("if not %s then"):format(name))
-		output[#output + 1] = l(("\t%s = %s"):format(name, default))
+	for arg_name, default in pairs(defaults) do
+		output[#output + 1] = l(("if not %s then"):format(arg_name))
+		output[#output + 1] = l(("\t%s = %s"):format(arg_name, default))
 		output[#output + 1] = l"end"
 	end
 	indent = indent - 1
@@ -313,7 +313,6 @@ local operator_transformations = {
 }
 
 handlers['expression'] = function(node)
-	local output = {}
 	if operator_transformations[node.operator] then
 		node.operator = operator_transformations[node.operator]
 	end
@@ -333,7 +332,7 @@ handlers['expression'] = function(node)
 end
 
 handlers['number'] = function(node)
-	is_negative = node.is_negative and "-" or ""
+	local is_negative = node.is_negative and "-" or ""
 	if node.base == "10" then
 		if math.floor(node[1]) == node[1] then
 			return is_negative .. ("%i"):format(node[1])
@@ -375,7 +374,6 @@ handlers['function_call'] = function(node)
 	if node.generator then
 		return transform {
 			node.generator[2];
-			variable_list = {node.generator[1]};
 			{type = "function_call";
 				node[1];
 				node[2];
@@ -455,7 +453,7 @@ function parser.read_file(file, dump)
 	local node = lexer:match(source_file:read("*a"))
 	source_file:close()
 	parser.compile(coroutine.wrap(function()
-		for key, value in pairs(node) do
+		for key, value in pairs(node) do -- luacheck: ignore 213
 			coroutine.yield(value)
 		end
 	end), append)
@@ -464,8 +462,8 @@ end
 
 function parser.load_file(file)
 	local content = parser.read_file(file)
-	if loadstring then
-		return assert(loadstring(content))
+	if loadstring then -- luacheck: ignore 113
+		return assert(loadstring(content)) -- luacheck: ignore 113
 	else
 		return assert(load(content))
 	end
@@ -478,7 +476,7 @@ end
 function parser.search_for(name)
 	local module_path = name:gsub("%.", "/")
 
-	local file, file_path
+	local file_path
 	for _, path in ipairs(package.fusepath_t) do
 		file_path = path:gsub("?", module_path)
 		if lfs.attributes(file_path) then
@@ -492,7 +490,7 @@ function parser.search_for(name)
 	return nil, "\n" .. table.concat(msg, "\n")
 end
 
-function parser.inject_loader(name)
+function parser.inject_loader()
 	for _, loader in ipairs(package.searchers) do
 		if loader == parser.search_for then
 			return false

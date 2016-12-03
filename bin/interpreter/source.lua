@@ -21,8 +21,8 @@ while arg_index <= #arg do
 				check(name)
 			end
 			for _, name in ipairs(opts) do
-				value = module[name]
-				_type = type(value)
+				local value = module[name]
+				local _type = type(value)
 				if _type == "string" then
 					print(("['%s'] = %q"):format(name, value))
 				else

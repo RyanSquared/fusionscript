@@ -10,7 +10,7 @@ defs['numberify'] = tonumber
 
 defs.print = print
 
-balanced_borders = re.compile [=[
+local balanced_borders = re.compile [=[
 	match <- { parens / square / curly }
 	parens <- "(" ([^()] / parens)^-10 ")"?
 	square <- "[" ([^][] / square)^-10 "]"?
@@ -29,13 +29,13 @@ defs.err = function(pos, char)
 		start = start + 1
 	end
 	local input = current_file:sub(pos, pos + 7):gsub("[\r\n\t]", "")
-	errormsg_table = {
+	local errormsg_table = {
 		"SyntaxError";
 		("Unexpected character on line %d"):format(line);
-		("Token: %s"):format(current_file:sub(pos, pos));
+		("Token: %s"):format(char);
 		("Input: >> %q <<"):format(input);
 	}
-	errormsg = {
+	local errormsg = {
 		pos = {
 			y = line;
 			x = pos - line_start;
@@ -101,8 +101,8 @@ local pattern = re.compile([[
 		{:is_async: 'async' -> true space :}? ws
 		variable ws function_body -- Do NOT write functions with :
 	|}
-	function_body <- 
-		'(' ws function_defined_arguments? ws ')' ws 
+	function_body <-
+		'(' ws function_defined_arguments? ws ')' ws
 			({:is_self: '=' -> true :} / '-') '>' ws
 			(statement / expression_list / r)
 	function_defined_arguments <- {|
@@ -157,7 +157,7 @@ local pattern = re.compile([[
 	|} :} / {:variable_list: {|
 		{:is_destructuring: '{' -> true :} ws local_name
 		(ws ',' ws (local_name / r))* ws '}'
-	|} :} 
+	|} :}
 	local_name <- {| {:type: '' -> 'variable' :} name |}
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws (expression / r))*
@@ -243,7 +243,7 @@ local pattern = re.compile([[
 ]], defs);
 
 return {
-	match = function(self, input)
+	match = function(self, input) -- luacheck: ignore 212
 		current_file = input
 		return pattern:match(input)
 	end
