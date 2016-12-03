@@ -17,7 +17,7 @@ balanced_borders = re.compile [=[
 	curly <- "{" ([^{}] / parens)^-10 "}"?
 ]=]
 
-defs.incomplete_statement = function(pos, char)
+defs.err = function(pos, char)
 	local line = 1
 	local start = 1
 	local line_start = 0
@@ -28,42 +28,25 @@ defs.incomplete_statement = function(pos, char)
 		end
 		start = start + 1
 	end
-	local line_end = current_file:find("\n", pos)
-	if not line_end then
-		line_end = #current_file
-	else
-		line_end = line_end - 1
-	end
-	local msg_start = math.max(pos - 5, line_start)
-	local msg_end = math.min(pos + 5, line_end)
-	local input = ""
-	local tab_len = 8
-	if msg_start == pos - 5 and msg_start ~= line_start then
-		tab_len = 11
-		input = "..."
-	end
-	input = input .. current_file:sub(msg_start, msg_end)
-	if msg_end ~= line_end and msg_end == pos + 5 then
-		input = input .. "..."
-	end
+	local input = current_file:sub(pos, pos + 7):gsub("[\r\n\t]", "")
 	errormsg_table = {
 		"SyntaxError";
-		("Unfinished statement on line %d"):format(line);
-		("Input: %q"):format(input);
-		(" "):rep(tab_len + math.max(pos - msg_start, 0)) .. "^";
+		("Unexpected character on line %d"):format(line);
+		("Token: %s"):format(current_file:sub(pos, pos));
+		("Input: >> %q <<"):format(input);
 	}
 	errormsg = {
 		pos = {
 			y = line;
 			x = pos - line_start;
 		};
-		context = current_file:sub(pos, pos + 10);
+		context = current_file:sub(pos, pos + 5);
 		quick = "syntax"
 	}
-	if current_file:match("[A-Za-z_]") then
+	if current_file:match("^[A-Za-z_]", pos) then
 		-- found text, match as context
 		errormsg.context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
-	elseif current_file:match("%[%]{}%(%)") then
+	elseif current_file:match("^%[%]{}%(%)", pos-30) then
 		-- found brackets, match text up to newline as context
 		errormsg.context = balanced_borders:match(current_file:sub(pos, pos+30));
 	end
@@ -93,18 +76,19 @@ local pattern = re.compile([[
 		if /
 		class
 	)
-	rstatement <- statement / required
-	required <- ({} {.}) -> incomplete_statement
-	class <- {| {:type: 'new' -> 'class' :} space {:name: name :}
-		(ws 'extends' ws {:extends: variable :})? ws
-		'{' ws {| ((! '}') (class_field / required) ws)* |} ws '}'
+	rstatement <- statement / r
+	r <- ({} {.}) -> err
+	class <- {| {:type: 'new' -> 'class' :} space {:name: name / r :}
+		(ws 'extends' ws {:extends: variable / r :})? ws
+		'{' ws {| ((! '}') (class_field / r) ws)* |} ws '}'
 	|}
 	class_field <-
 		function_definition /
 		{| {:type: '' -> 'class_field' :}
 			(
-				'[' ws {:name: variable :} ws ']' ws '=' ws expression ws ';' /
-				{:name: name :} ws '=' ws expression ws ';'
+				'[' ws {:name: expression / r :} ws ']' ws ('=' / r) ws (expression
+				/ r) ws (';' / r)
+				/ {:name: name / r :} ws ('=' / r) ws (expression / r) ws (';' / r)
 			)
 		|}
 
@@ -120,66 +104,67 @@ local pattern = re.compile([[
 	function_body <- 
 		'(' ws function_defined_arguments? ws ')' ws 
 			({:is_self: '=' -> true :} / '-') '>' ws
-			(statement / expression_list / required)
+			(statement / expression_list / r)
 	function_defined_arguments <- {|
-		function_argument (ws ',' ws function_argument)*
+		function_argument ((! ')') ws (',' / r) ws function_argument)*
 	|}
 	function_argument <- {|
-		{:name: name :} (ws '=' ws {:default: expression :})?
+		{:name: ((! ")") (name / r)) :} (ws '=' ws {:default: expression / r:})?
 	|}
 
 	while_loop <- {| {:type: '' -> 'while_loop' :}
-		'while' ws {:condition: expression :} ws rstatement
+		'while' ws {:condition: expression / r :} ws rstatement
 	|}
 	iterative_for_loop <- {| {:type: '' -> 'iterative_for_loop' :}
-		'for' ws '(' ws name_list ws 'in' ws expression ws ')' ws rstatement
+		'for' ws '(' ws (name_list / r) ws 'in' ws (expression / r) ws ')' ws
+		rstatement
 	|}
 	numeric_for_loop <- {| {:type: '' -> 'numeric_for_loop' :}
 		'for' ws numeric_for_assignment ws rstatement
 	|}
 	numeric_for_assignment <- '('
-		{:incremented_variable: name :} ws '=' ws
+		{:incremented_variable: name / r :} ws '=' ws
 		{:start: expression :} ws
 		',' ws {:stop: expression :} ws
-		(',' ws {:step: expression :})?
+		(',' ws {:step: expression / r :})?
 	')'
 
 	if <- {|
-		{:type: 'if' :} ws {:condition: expression :} ws rstatement
+		{:type: 'if' :} ws {:condition: expression / r :} ws rstatement
 		{:elseif: {| (ws {|
-			'elseif' ws {:condition: expression :} ws rstatement
+			'elseif' ws {:condition: expression / r :} ws rstatement
 		|})* |} :}
 		(ws 'else' ws {:else: rstatement :})?
 	|}
 
 	function_call <- {| {:type: '' -> 'function_call' :} (
-		variable ({:has_self: ':' -> true :} variable ws
+		variable ({:has_self: ':' -> true :} (variable / r) ws
 		{:index_class: ws '<' ws {expression} ws '>' :}? )?
 		) ws '(' ws function_call_body? ws ')'
 	|}
 	function_call_body <- {:generator: {|
-		expression (ws 'for' ws variable_list)? ws 'in' ws expression
+		expression (ws 'for' ws variable_list / r)? ws 'in' ws (expression / r)
 	|} :} / function_args
 	function_args <- expression_list?
 
 	assignment <- {| {:type: '' -> 'assignment' :}
-		(variable_list ws '=' ws expression_list /
-		{:is_local: 'local' -> true :} space name_list ws '=' ws
-			expression_list)
+		(variable_list ws '=' ws (expression_list / r) /
+		{:is_local: 'local' -> true :} space (name_list / r) ws ('=' / r) ws
+			(expression_list / r))
 	|}
 	name_list <- {:variable_list: {|
-		local_name (ws ',' ws local_name)*
+		local_name (ws ',' ws (local_name / r))*
 	|} :} / {:variable_list: {|
 		{:is_destructuring: '{' -> true :} ws local_name
-		(ws ',' ws local_name)* ws '}'
+		(ws ',' ws (local_name / r))* ws '}'
 	|} :} 
 	local_name <- {| {:type: '' -> 'variable' :} name |}
 	expression_list <- {:expression_list: {|
-		expression (ws ',' ws expression)*
+		expression (ws ',' ws (expression / r))*
 	|} :}
 
 	expression <- value / {| {:type: '' -> 'expression' :}
-		'(' ws operator (ws expression)+ ws ')'
+		'(' ws operator (((! ')') ws expression)+ / r) ws ')'
 	|}
 	operator <- {:operator:
 		'//' /
@@ -197,11 +182,11 @@ local pattern = re.compile([[
 		literal /
 		variable
 	variable_list <- {:variable_list: {|
-		variable (ws ',' ws variable)*
+		variable (ws ',' ws (variable / r))*
 	|} :}
 	variable <- {| {:type: '' -> 'variable' :}
-		((('@' -> 'self' name? / name) / '(' expression ')') ws ('.' ws name /
-		'[' ws expression ws ']')*)
+		((('@' -> 'self' name? / name) / '(' expression ')') ws ('.' ws (name / r
+		) / '[' ws (expression / r) ws ']')*)
 	|}
 	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
@@ -233,10 +218,11 @@ local pattern = re.compile([[
 
 	string <- {| dqstring / sqstring / blstring |}
 	dqstring <- {:type: '' -> 'dqstring' :} '"' { (('\' .) /
-		([^]] .. '\r\n' .. [["]))* } '"' -- no escape codes in block quotes
-	sqstring <- {:type: '' -> 'sqstring' :} "'" { [^]] .. '\r\n' .. [[']* } "'"
+		([^]] .. '\r\n' .. [["]))* } ('"' / r) -- no escape codes in block quotes
+	sqstring <- {:type: '' -> 'sqstring' :} "'" { [^]] .. '\r\n' .. [[']* }
+		("'" / r)
 	blstring <- {:type: '' -> 'blstring' :} '[' {:eq: '='* :} '[' blclose
-	blclose <- ']' =eq ']' / . blclose
+	blclose <- ']' =eq ']' / . blclose / r
 
 	table <- {| {:type: '' -> 'table' :} '{' ws -- TODO `for` constructor
 		(
@@ -245,11 +231,11 @@ local pattern = re.compile([[
 		)?
 	ws '}' |}
 	table_generator <- {| {:type: '' -> 'generator' :}
-		table_field (ws 'for' ws variable_list)? ws 'in' ws expression
+		table_field (ws 'for' ws (variable_list / r))? ws 'in' ws (expression / r)
 	|}
 	table_field <-
-		{| '[' ws {:index: variable :} ws ']' ws '=' ws expression |} /
-		{| {:name: name :} ws '=' ws expression |} /
+		{| '[' ws {:index: variable :} ws ']' ws '=' ws (expression / r) |} /
+		{| {:name: name :} ws '=' ws (expression / r) |} /
 		expression
 
 	ws <- %s*
