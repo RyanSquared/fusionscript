@@ -1,0 +1,28 @@
+language: python
+
+sudo: false
+
+env:
+  matrix:
+    - LUA="lua 5.1"
+    - LUA="lua 5.2"
+    - LUA="lua 5.3"
+
+before_install:
+  - pip install hererocks
+  - hererocks ~/hererocks -r^ --$LUA
+  - export PATH=$PATH:~/hererocks/bin
+  - eval `luarocks path --bin`
+  - luarocks install luacheck
+  - luarocks install busted
+
+install:
+  - luarocks make
+
+script:
+  - luacheck .
+  - busted
+
+cache:
+  directories:
+    - $HOME/.cache/hererocks
