@@ -416,7 +416,8 @@ describe("lexer", function()
 			{type = "function_call",
 				{type = "variable", "print"},
 				expression_list = {{type = "sqstring", "test"}}
-			}
+			},
+			["elseif"] = {}
 		}})
 	end)
 	it("can parse complex if statements", function()
@@ -430,7 +431,8 @@ describe("lexer", function()
 				['else'] = {type = "function_call",
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "x"}}
-				}
+				},
+				["elseif"] = {}
 			}
 		})
 	end)
