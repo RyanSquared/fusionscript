@@ -10,38 +10,48 @@ you believe were caused by the compiler.
 
 As of 01-12-2016, no commands have any command line flags.
 
-### `fuse-ast`: Compile a file into an abstract syntax tree (AST).
+### `fusion-ast`: Compile a file into an abstract syntax tree (AST).
 
 This program will load a file and print out a syntax tree for the file. The
 program will generate a syntax error and exit with error code `1` if a file has
 a syntax error.
 
-### `fuse`: Run FusionScript files
+### `fusion`: Run FusionScript files
 
-The `fuse` program (which at the current time is an alias to `fuse-source`) can
-load syntaxes from `.fuse` files, compile them, and run them. As of 01-12-2016,
-compiled syntax trees are **not** cached. In future releases, either the syntax
-trees or the compiled Lua output might be cached to allow faster responsiveness
-when loading a program.
+The `fusion` program (which at the current time is an alias to `fusion-source`)
+can load syntaxes from `.fuse` files, compile them, and run them. As of
+02-12-2016, compiled syntax trees are **not** cached. In future releases,
+either the syntax trees or the compiled Lua output might be cached to allow
+faster responsiveness when loading a program.
 
-### `fuse-source`: Run FusionScript with the Lua VM
+### `fusion-source`: Run FusionScript with the Lua VM
 
-The `fuse-source` program compiles FusionScript files at runtime and runs them
-using the same Lua VM. This means that running `fuse-source` will NOT produce
-the same output as `fusec-source` then running the generated file with `lua`.
-This could leave undesired side effects from `lpeg`, `luafilesystem`, and
-`fusion` libraries. However, the libraries themselves should not edit the
-global state and only remain in the `package` table.
+The `fusion-source` program compiles FusionScript files at runtime and runs
+them using the same Lua VM. This means that running `fusion-source` will NOT
+produce the same output as `fusionc-source` then running the generated file
+with `lua`.  This could leave undesired side effects from `lpeg`, `fusion`,,
+and `luafilesystem` libraries. However, the libraries themselves should not
+edit the global state and only remain in the `package` table.
 
-### `fusec`: Compile FusionScript
+There are two command line flags that can be used with the `fusion-source`
+program:
 
-The `fusec` will use whatever alias is currently in place as the compiler. Use
-the documentation for the alias instead of this one to learn more about how the
-compiler works. The default compiler as of 01-12-2016 is `fusec-source`.
+**`-m`** - Load the `main` module of the supplied `package` argument and exit.
+This is somewhat similar to the Python `-m` flag.
 
-### `fusec-source`: Compile FusionScript to Lua
+**`--metadata`** - Load the `metadata` module of the supplied `package`
+argument and print out the compatible information. Acceptable fields are
+documented [here](https://github.com/ChickenNuggers/FusionScript/wiki/Modules).
 
-The `fusec-source` compiler can take FusionScript files and compile them to
+### `fusionc`: Compile FusionScript
+
+The `fusionc` will use whatever alias is currently in place as the compiler.
+Use the documentation for the alias instead of this one to learn more about how
+the compiler works. The default compiler as of 01-12-2016 is `fusionc-source`.
+
+### `fusionc-source`: Compile FusionScript to Lua
+
+The `fusionc-source` compiler can take FusionScript files and compile them to
 formatted Lua source. Because the compilation is from source to source, some
 things may look awkwardly formatted when compiled. As of 01-12-2016, there is
 no way to automatically compile FusionScript code to Lua bytecode.
