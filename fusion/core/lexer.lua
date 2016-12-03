@@ -136,9 +136,10 @@ local pattern = re.compile([[
 	|}
 
 	function_call <- {| {:type: '' -> 'function_call' :} (
-		(variable / '(' expression ')') ({:has_self: ':' -> true :} variable ws
+		variable ({:has_self: ':' -> true :} variable ws
 		{:index_class: ws '<' ws {expression} ws '>' :}? )?
-	) ws '(' ws function_call_body? ws ')' |}
+		) ws '(' ws function_call_body? ws ')'
+	|}
 	function_call_body <- {:generator: {|
 		expression (ws 'for' ws variable_list)? ws 'in' ws expression
 	|} :} / function_args
@@ -177,14 +178,13 @@ local pattern = re.compile([[
 		lambda /
 		function_call /
 		literal /
-		variable /
-		'(' expression ')'
+		variable
 	variable_list <- {:variable_list: {|
 		variable (ws ',' ws variable)*
 	|} :}
 	variable <- {| {:type: '' -> 'variable' :}
-		((name ws ('.' ws name / ws '[' ws expression ws ']')*) /
-		('@' -> 'self' name? ws ('.' ws name / ws '[' ws expression ws ']')*))
+		((('@' -> 'self')? name / '(' expression ')') ws ('.' ws name / '[' ws
+		expression ws ']')*)
 	|}
 	name <- {[A-Za-z_][A-Za-z0-9_]*}
 
