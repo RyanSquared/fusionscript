@@ -1,4 +1,5 @@
 local lexer = require("fusion.core.lexer")
+local lfs = require("lfs")
 
 local indent = 0
 local parser = {}
@@ -450,6 +451,44 @@ end
 
 function parser.do_file(file)
 	return (parser.load_file(file)())
+end
+
+function parser.search_for(name)
+	local module_path = name:gsub("%.", "/")
+
+	local file, file_path
+	for _, path in ipairs(package.fusepath_t) do
+		file_path = path:gsub("?", module_path)
+		if lfs.attributes(file_path) then
+			return function() return parser.do_file(file_path) end, file_path
+		end
+	end
+	local msg = {}
+	for _, path in ipairs(package.fusepath_t) do
+		msg[#msg + 1] = ("\tno file %q"):format(path:gsub("?", module_path))
+	end
+	return nil, "\n" .. table.concat(msg, "\n")
+end
+
+function parser.inject_loader(name)
+	for _, loader in ipairs(package.searchers) do
+		if loader == parser.search_for then
+			return false
+		end
+		package.searchers[2] = parser.search_for
+	end
+end
+
+if not package.fusepath then
+	local paths = {}
+	for path in package.path:gmatch("[^;]+") do
+		local match = path:match("^(.+)%.lua$")
+		if match then
+			paths[#paths + 1] = match .. ".fuse"
+		end
+	end
+	package.fusepath = table.concat(paths, ";")
+	package.fusepath_t = paths
 end
 
 return parser
