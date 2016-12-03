@@ -20,8 +20,8 @@ install:
   - luarocks make
 
 script:
-  - luacheck .
-  - busted
+  - luacheck . --no-color --codes
+  - busted -o plainTerminal
 
 cache:
   directories:
