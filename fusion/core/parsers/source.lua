@@ -396,7 +396,7 @@ handlers['variable'] = function(node)
 	if type(node[1]) == "table" then
 		name[1] = "(" .. transform(node[1]) .. ")"
 	else
-		local name = {node[1]}
+		name[1] = node[1]
 	end
 	for i=2, #node do
 		if type(node[i]) == "string" then
