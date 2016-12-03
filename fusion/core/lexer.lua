@@ -10,6 +10,13 @@ defs['numberify'] = tonumber
 
 defs.print = print
 
+balanced_borders = re.compile [=[
+	match <- { parens / square / curly }
+	parens <- "(" ([^()] / parens)^-10 ")"?
+	square <- "[" ([^][] / square)^-10 "]"?
+	curly <- "{" ([^{}] / parens)^-10 "}"?
+]=]
+
 defs.incomplete_statement = function(pos, char)
 	local line = 1
 	local start = 1
@@ -50,9 +57,16 @@ defs.incomplete_statement = function(pos, char)
 			y = line;
 			x = pos - line_start;
 		};
-		context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
+		context = current_file:sub(pos, pos + 10);
 		quick = "syntax"
 	}
+	if current_file:match("[A-Za-z_]") then
+		-- found text, match as context
+		errormsg.context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
+	elseif current_file:match("%[%]{}%(%)") then
+		-- found brackets, match text up to newline as context
+		errormsg.context = balanced_borders:match(current_file:sub(pos, pos+30));
+	end
 	setmetatable(errormsg, {
 		__tostring = function()
 			return table.concat(errormsg_table, "\n")
