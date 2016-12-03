@@ -185,7 +185,7 @@ handlers['iterative_for_loop'] = function(node)
 end
 
 handlers['if'] = function(node)
-	local output = {l("if %s then"):format(transform(node.condition))}
+	local output = {("if %s then"):format(transform(node.condition))}
 	if node[1].type == "block" then
 		output[#output + 1] = handlers['block'](node[1], true)
 	else
@@ -293,12 +293,12 @@ handlers['lambda'] = function(node)
 	end
 	indent = indent - 1
 	if node.expression_list then
-		output[#output + 1] = l"return " .. transform_expression_list(node)
+		output[#output + 1] = l"\treturn " .. transform_expression_list(node)
 	else
 		if node[#node].type == "block" then
 			output[#output + 1] = handlers['block'](node[#node], true)
 		else
-			output[#output + 1] = transform(node[#node])
+			output[#output + 1] = l("\t" .. transform(node[#node]))
 		end
 	end
 	output[#output + 1] = l"end)"
