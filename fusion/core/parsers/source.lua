@@ -392,7 +392,12 @@ handlers['function_call'] = function(node)
 end
 
 handlers['variable'] = function(node)
-	local name = {node[1]}
+	local name = {}
+	if type(node[1]) == "table" then
+		name[1] = "(" .. transform(node[1]) .. ")"
+	else
+		local name = {node[1]}
+	end
 	for i=2, #node do
 		if type(node[i]) == "string" then
 			if node[i]:match("^[_A-Za-z][_A-Za-z0-9]*$") then
