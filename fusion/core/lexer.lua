@@ -132,6 +132,9 @@ local pattern = re.compile([[
 
 	if <- {|
 		{:type: 'if' :} ws {:condition: expression :} ws rstatement
+		{:elseif: {| (ws {|
+			'elseif' ws {:condition: expression :} ws rstatement
+		|})* |} :}
 		(ws 'else' ws {:else: rstatement :})?
 	|}
 
