@@ -58,15 +58,57 @@ defs.err = function(pos, char)
 	error(errormsg, 0)
 end
 
+defs.semicolon = function(pos)
+	local line = 1
+	local start = 1
+	local line_start = 0
+	while start < pos do
+		if current_file:find("^\n", start) then
+			line_start = start + 1
+			line = line + 1
+		end
+		start = start + 1
+	end
+	local input = current_file:sub(math.max(pos - 7, 0), pos):gsub("[\r\n\t]",
+		"")
+	local errormsg_table = {
+		"SyntaxError";
+		("Expected semicolon on line %d"):format(line);
+		("Input: >> %q <<"):format(input);
+	}
+	local errormsg = {
+		pos = {
+			y = line;
+			x = pos - line_start;
+		};
+		context = current_file:sub(pos, pos + 5);
+		quick = "syntax"
+	}
+	if current_file:match("^[A-Za-z_]", pos) then
+		-- found text, match as context
+		errormsg.context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
+	elseif current_file:match("^%[%]{}%(%)", pos-30) then
+		-- found brackets, match text up to newline as context
+		errormsg.context = balanced_borders:match(current_file:sub(pos, pos+30));
+	end
+	setmetatable(errormsg, {
+		__tostring = function()
+			return table.concat(errormsg_table, "\n")
+		end
+	})
+	error(errormsg, 0)
+end
+
 local pattern = re.compile([[
 	statement_list <- ws {| ((! '}') rstatement ws)* |}
 	statement_block <- {| {:type: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
+		{:type: {'using'} :} ws {[A-Za-z]+} /
 		function_call /
 		assignment /
 		return /
 		{| {:type: 'break' :} |}
-	) ws ';' ws / (
+	) ws (';' / {} -> semicolon) ws / (
 		statement_block /
 		while_loop /
 		numeric_for_loop /
