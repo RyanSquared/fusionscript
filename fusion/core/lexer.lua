@@ -65,8 +65,7 @@ local pattern = re.compile([[
 		function_call /
 		assignment /
 		return /
-		{| {:type: 'break' :} |} /
-		'--' {| {:type: '' -> 'comment' :} ws {[^;]*} |}
+		{| {:type: 'break' :} |}
 	) ws ';' ws / (
 		statement_block /
 		while_loop /
@@ -224,7 +223,7 @@ local pattern = re.compile([[
 	blstring <- {:type: '' -> 'blstring' :} '[' {:eq: '='* :} '[' blclose
 	blclose <- ']' =eq ']' / . blclose / r
 
-	table <- {| {:type: '' -> 'table' :} '{' ws -- TODO `for` constructor
+	table <- {| {:type: '' -> 'table' :} '{' ws
 		(
 			table_generator /
 			table_field (ws ',' ws table_field)*
@@ -238,7 +237,7 @@ local pattern = re.compile([[
 		{| {:name: name :} ws '=' ws (expression / r) |} /
 		expression
 
-	ws <- %s*
+	ws <- %s* ('--' [^]] .. '\r\n' .. [[]* ]] .. '\r\n' .. [[?)? %s*
 	space <- %s+
 ]], defs);
 
