@@ -36,19 +36,17 @@ defs.err = function(pos, char)
 		("Input: >> %q <<"):format(input);
 	}
 	local errormsg = {
+		msg = errormsg_table;
 		pos = {
 			y = line;
 			x = pos - line_start;
 		};
-		context = current_file:sub(pos, pos + 5);
+		context = current_file:sub(pos - 2, pos + 5);
 		quick = "syntax"
 	}
 	if current_file:match("^[A-Za-z_]", pos) then
 		-- found text, match as context
 		errormsg.context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
-	elseif current_file:match("^%[%]{}%(%)", pos-30) then
-		-- found brackets, match text up to newline as context
-		errormsg.context = balanced_borders:match(current_file:sub(pos, pos+30));
 	end
 	setmetatable(errormsg, {
 		__tostring = function()
@@ -77,19 +75,20 @@ defs.semicolon = function(pos)
 		("Input: >> %q <<"):format(input);
 	}
 	local errormsg = {
+		msg = errormsg_table;
 		pos = {
 			y = line;
-			x = pos - line_start;
+			x = pos - line_start - 1;
 		};
-		context = current_file:sub(pos, pos + 5);
+		context = current_file:sub(pos - 7, pos);
 		quick = "syntax"
 	}
 	if current_file:match("^[A-Za-z_]", pos) then
-		-- found text, match as context
-		errormsg.context = current_file:match("[A-Za-z_][A-Za-z0-9_]*", pos);
-	elseif current_file:match("^%[%]{}%(%)", pos-30) then
-		-- found brackets, match text up to newline as context
-		errormsg.context = balanced_borders:match(current_file:sub(pos, pos+30));
+		local start_pos = pos
+		while current_file:match("^[A-Za-z_]", start_pos) do
+			start_pos = start_pos - 1
+		end
+		ast.context = current_file:sub(start_pos, pos)
 	end
 	setmetatable(errormsg, {
 		__tostring = function()
@@ -108,7 +107,7 @@ local pattern = re.compile([[
 		assignment /
 		return /
 		{| {:type: 'break' :} |}
-	) ws (';' / {} -> semicolon) ws / (
+	) (';' / {} -> semicolon) ws / (
 		statement_block /
 		while_loop /
 		numeric_for_loop /
