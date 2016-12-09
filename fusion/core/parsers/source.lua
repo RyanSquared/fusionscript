@@ -40,7 +40,7 @@ end
 local _tablegen_level = 0
 
 handlers['nil'] = function() return 'nil' end
-handlers['vararg'] = function(node) return '...' end
+handlers['vararg'] = function(node) return '...' end -- luacheck: ignore 212
 
 handlers['table'] = function(node)
 	if #node == 0 then
