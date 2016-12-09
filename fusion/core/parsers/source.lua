@@ -58,6 +58,7 @@ local function transform_class_function(node)
 			node[3];
 			type = "lambda",
 			expression_list = node[1].expression_list;
+			is_self = node.is_self;
 		}
 	}
 end
@@ -316,6 +317,9 @@ end
 handlers['lambda'] = function(node)
 	local output = {}
 	local defaults, args = {}, {}
+	if node.is_self then
+		args[1] = "self"
+	end
 	if not node[1].type then -- empty parameter list
 		for _, arg in ipairs(node[1]) do
 			if arg.default then
