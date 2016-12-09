@@ -80,9 +80,8 @@ print(tostring(factorial(5)));
 
 ```
 -- ::TODO::
- The example in this code example is just for testing
- and will not actually run as of 9/9/2016
- ;
+-- The example in this code example is just for testing
+-- and will not actually run as of 9/9/2016
 
 new Account {
     __new(balance = 0)=> {
@@ -117,9 +116,8 @@ assert(bob:withdraw(math.max)); /* errors */
 
 ```
 -- ::TODO::
- The example in this code example is just for testing
- and will not actually run as of 9/9/2016
- ;
+-- The example in this code example is just for testing
+-- and will not actually run as of 9/9/2016
 
 local {Async} = require("core.async");
 local {TCPSocket, TCPServer} = require("core.async.net");
