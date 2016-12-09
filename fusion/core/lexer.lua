@@ -254,8 +254,9 @@ local pattern = re.compile([[
 		([^]] .. '\r\n' .. [["]))* } ('"' / r) -- no escape codes in block quotes
 	sqstring <- {:type: '' -> 'sqstring' :} "'" { [^]] .. '\r\n' .. [[']* }
 		("'" / r)
-	blstring <- {:type: '' -> 'blstring' :} '[' {:eq: '='* :} '[' blclose
-	blclose <- ']' =eq ']' / . blclose / r
+	blopen <- '[' {:eq: '='* :} '[' ]] .. "'\r'?'\n'?" .. [[
+	blclose <- ']' =eq ']'
+	blstring <- {:type: '' -> 'blstring' :} blopen {((! blclose) .)*} blclose
 
 	table <- {| {:type: '' -> 'table' :} '{' ws
 		(
