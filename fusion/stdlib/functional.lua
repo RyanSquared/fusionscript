@@ -1,32 +1,50 @@
 local unpack = unpack or table.unpack -- luacheck: ignore 113
 
+local function iter(input, iterator)
+	if not iterator then
+		return iter(input, pairs)
+	end
+	if type(input) == "function" then
+		return input
+	else
+		return iterator(input)
+	end
+end
+
+local function mk_gen(fn)
+	return function(...)
+		local a = {...}
+		return coroutine.wrap(function()
+			return fn(unpack(a))
+		end)
+	end
+end
+
 local function map(fn, input, ...)
 	local _args = {...}
-	for k, v in pairs(input) do
+	for i, v in ipairs(_args) do
+		_args[i] = iter(v)
+	end
+	for k, v in iter(input) do
 		local t0 = {}
 		for i, _v in ipairs(_args) do -- luacheck: ignore 213
-			table.insert(t0, _v[k])
+			table.insert(t0, _v())
 		end
 		input[k] = fn(v, unpack(t0))
+		coroutine.yield(k, fn(v, unpack(t0)))
 	end
-	return input
 end
 
 local function filter(fn, input)
-	local _to_reduce = {}
-	for k, v in pairs(input) do -- luacheck: ignore 213
-		if not fn(input) then
-			_to_reduce[#_to_reduce + 1] = k
+	for k, v in iter(input) do -- luacheck: ignore 213
+		if fn(v) then
+			coroutine.yield(k, v)
 		end
 	end
-	for k, v in pairs(_to_reduce) do -- luacheck: ignore 213
-		input[k] = nil
-	end
-	return input
 end
 
 local function reduce(fn, input, init)
-	for k, v in pairs(input) do -- luacheck: ignore 213
+	for k, v in iter(input) do -- luacheck: ignore 213
 		if not init then
 			init = v
 		else
@@ -90,17 +108,19 @@ local function sum(input)
 	end
 end
 
+local xreduce, xmap = mk_gen(reduce), mk_gen(map)
+
 local function pipe(input, ...)
-	return reduce(function(a, x) map(x, a) end, {...}, input)
+	return xreduce(function(a, x) xmap(x, a) end, {...}, input)
 end
 
 return {
 	all = all;
 	any = any;
-	filter = filter;
+	filter = mk_gen(filter);
 	foldl = foldl;
 	foldr = foldr;
-	map = map;
+	map = mk_gen(map);
 	pipe = pipe;
 	reduce = reduce;
 	sum = sum;
