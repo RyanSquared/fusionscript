@@ -24,6 +24,7 @@ build = {
 		["fusion.stdlib.functional"] = "fusion/stdlib/functional.lua",
 		["fusion.stdlib.table"] = "fusion/stdlib/table.lua",
 		["fusion.stdlib.iterable"] = "fusion/stdlib/iterable.lua",
+		["fusion.stdlib.class"] = "fusion/stdlib/class.lua",
 		["fusion.core.parsers.source"] = "fusion/core/parsers/source.lua",
 		["fusion.core.lexer"] = "fusion/core/lexer.lua"
 	},
