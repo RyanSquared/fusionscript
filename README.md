@@ -79,10 +79,6 @@ print(tostring(factorial(5)));
 ### Account (from Lua Demo)
 
 ```
--- ::TODO::
--- The example in this code example is just for testing
--- and will not actually run as of 9/9/2016
-
 new Account {
     __new(balance = 0)=> {
         @balance = balance;
@@ -106,10 +102,10 @@ new Account {
         return @balance;
 }
 
-bob = Account(500); /* 500  */
-bob:deposit(600);   /* 1100 */
-bob:withdraw(1000); /* 100  */
-assert(bob:withdraw(math.max)); /* errors */
+bob = Account(500); -- 500
+bob:deposit(600);   -- 1100
+bob:withdraw(1000); -- 100
+assert(bob:withdraw(math.max)); -- errors
 ```
 
 ### Asynchronous Networking
