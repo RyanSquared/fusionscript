@@ -7,10 +7,6 @@ local handlers = {}
 local last_node = {} -- luacheck: ignore 231
 
 local function transform(node, ...)
-	for k, v in pairs(node) do
-		print(("%s: %s"):format(k, v))
-	end
-	print()
 	assert(node.type, ("Bad node: %s"):format(node))
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	last_node = node
@@ -55,7 +51,6 @@ handlers['using'] = function(node)
 end
 
 local function transform_class_function(node)
-	require("pl.pretty").dump(node)
 	return {
 		name = transform(node[1]);
 		{
