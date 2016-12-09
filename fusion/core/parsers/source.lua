@@ -7,6 +7,11 @@ local handlers = {}
 local last_node = {} -- luacheck: ignore 231
 
 local function transform(node, ...)
+	for k, v in pairs(node) do
+		print(("%s: %s"):format(k, v))
+	end
+	print()
+	assert(node.type, ("Bad node: %s"):format(node))
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	last_node = node
 	return handlers[node.type](node, ...)
@@ -41,6 +46,45 @@ local _tablegen_level = 0
 
 handlers['nil'] = function() return 'nil' end
 handlers['vararg'] = function(node) return '...' end -- luacheck: ignore 212
+
+handlers['using'] = function(node)
+	local directive = node[1]
+	if directive == "class" then
+		return 'local class = require("fusion.stdlib.class")'
+	end
+end
+
+local function transform_class_function(node)
+	require("pl.pretty").dump(node)
+	return {
+		name = transform(node[1]);
+		{
+			node[2] or {};
+			node[3];
+			type = "lambda",
+			expression_list = node[1].expression_list;
+		}
+	}
+end
+
+handlers['class'] = function(node)
+	node[1].type = 'table'
+	if not node.extends then
+		node.extends = {type = "nil"}
+	end
+	for i, v in ipairs(node[1]) do
+		if v.type == "function_definition" then
+			node[1][i] = transform_class_function(v)
+		end
+	end
+	if node.is_local then
+		return ("local %s = class(%s, %s, %q)"):format(transform(node.name),
+			transform(node[1]), transform(node.extends), transform(node.name))
+	else
+		return ("%s = class(%s, %s, %q)"):format(transform(node.name),
+			transform(node[1]), transform(node.extends), transform(node.name))
+	end
+end
 
 handlers['table'] = function(node)
 	if #node == 0 then
@@ -92,17 +136,17 @@ handlers['table'] = function(node)
 	for _, item in ipairs(node) do
 		if not item.index and not item.name then
 			-- not named, add to normal output
-			output[#output + 1] = transform(item) .. ";"
+			output[#output + 1] = l(transform(item)) .. ";"
 		else
 			if item.index then
-				named[#named + 1] = ("[%s] = %s;"):format(transform(item.index),
+				named[#named + 1] = l("[%s] = %s;"):format(transform(item.index),
 					transform(item[1]))
 			else
 				if item.name:match("^[A-Za-z_][A-Za-z0-9_]*$") then
-					named[#named + 1] = ("%s = %s;"):format(item.name,
+					named[#named + 1] = l("%s = %s;"):format(item.name,
 						transform(item[1]))
 				else
-					named[#named + 1] = ("[%q] = %s;"):format(item.name,
+					named[#named + 1] = l("[%q] = %s;"):format(item.name,
 						transform(item[1]))
 				end
 			end
