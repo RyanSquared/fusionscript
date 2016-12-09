@@ -1,6 +1,11 @@
-local function map(fn, input)
+local function map(fn, input, ...)
+	local _args = {...}
 	for k, v in pairs(input) do
-		input[k] = fn(v)
+		local t0 = {}
+		for i, v in ipairs(_args) do
+			table.insert(t0, v[k])
+		end
+		input[k] = fn(v, unpack(t0))
 	end
 	return input
 end
@@ -74,6 +79,13 @@ local function all(fn, input)
 		end
 	end
 	return true
+end
+
+local function sum(input)
+	local _val = 0
+	for _, v in pairs(input) do
+		_val = _val + assert(tonumber(v))
+	end
 end
 
 local function pipe(input, ...)
