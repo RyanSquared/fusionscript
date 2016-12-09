@@ -437,7 +437,8 @@ describe("lexer", function()
 		})
 	end)
 	it("can parse basic classes", function()
-		assert.same(lexer:match("new x {}"), {{type = "class", {}, name = "x"}})
+		assert.same(lexer:match("new x {}"), {{type = "class", {},
+			name = {type = "variable", "x"}}})
 	end)
 	it("can parse classes with methods", function()
 		assert.same(lexer:match("new x { y()-> z }"), {{type = "class",
@@ -447,7 +448,7 @@ describe("lexer", function()
 					expression_list = {{type = "variable", "z"}}
 				}
 			},
-			name = "x"
+			name = {type = "variable", "x"},
 		}})
 	end)
 	it("can parse classes with dynamically named values", function()
@@ -455,7 +456,7 @@ describe("lexer", function()
 			{
 				{type = "class_field", {type = "variable", "z"}, name = "y"}
 			},
-			name = "x"
+			name = {type = "variable", "x"},
 		}})
 	end)
 	it("can parse classes with dynamically named values", function()
@@ -465,13 +466,13 @@ describe("lexer", function()
 				{type = "variable", "z"},
 				name = {type = "variable", "y"}}
 			},
-			name = "x"
+			name = {type = "variable", "x"},
 		}})
 	end)
 	it("can parse extended classes", function()
 		assert.same(lexer:match("new x extends y {}"), {{type = "class",
 			{},
-			name = "x",
+			name = {type = "variable", "x"},
 			extends = {type = "variable", "y"}
 		}})
 	end)
