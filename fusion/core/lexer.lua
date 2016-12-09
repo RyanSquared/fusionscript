@@ -34,7 +34,8 @@ defs.err = function(pos, char)
 			y = line;
 			x = pos - line_start;
 		};
-		context = current_file:sub(pos - 2, pos + 5);
+		context = current_file:sub(math.max(pos - 2, line_start),
+			math.min(pos + 5, current_file:match("()$")));
 		quick = "syntax"
 	}
 	if current_file:match("^[A-Za-z_]", pos) then
@@ -95,9 +96,11 @@ local pattern = re.compile([[
 	statement_list <- ws {| ((! '}') rstatement ws)* |}
 	statement_block <- {| {:type: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
-		{:type: {'using'} :} ws {[A-Za-z]+} /
-		function_call /
+		function_definition
+	) / (
+		{|{:type: {'using'} :} ws {[A-Za-z]+} |} /
 		assignment /
+		function_call /
 		return /
 		{| {:type: 'break' :} |}
 	) (';' / {} -> semicolon) ws / (
@@ -105,13 +108,13 @@ local pattern = re.compile([[
 		while_loop /
 		numeric_for_loop /
 		iterative_for_loop /
-		function_definition /
 		if /
 		class
 	)
 	rstatement <- statement / r
 	r <- ({} {.}) -> err
-	class <- {| {:type: 'new' -> 'class' :} space {:name: name / r :}
+	class <- {| {:is_local: 'local' -> true space :}?
+		{:type: 'new' -> 'class' :} space {:name: variable / r :}
 		(ws 'extends' ws {:extends: variable / r :})? ws
 		'{' ws {| ((! '}') (class_field / r) ws)* |} ws '}'
 	|}
