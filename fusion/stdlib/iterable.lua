@@ -27,10 +27,17 @@ local function count(start, step)
 	end
 end
 
-local function cycle(pattern, is_ipairs)
-	local pairs_statement = is_ipairs and ipairs or pairs
+local function cycle(pattern)
 	while true do
-		for k, v in pairs_statement(pattern) do
+		for k, v in pairs(pattern) do
+			coroutine.yield(k, v)
+		end
+	end
+end
+
+local function icycle(pattern)
+	while true do
+		for k, v in pairs(pattern) do
 			coroutine.yield(k, v)
 		end
 	end
@@ -104,7 +111,6 @@ local function ichain(...)
 end
 
 local function compress(input, selectors)
-	-- must use ipairs and numeric input/selectors
 	for i=1, math.max(#input, #selectors) do
 		if not input[i] then
 			return
@@ -174,7 +180,7 @@ end
 local xslice = mk_gen(slice)
 
 local function take(n, input)
-	return table.from_generator(xslice(input, n))
+	return table.from_generator(xslice(input, 1, n))
 end
 
 local xcount = mk_gen(count)
@@ -202,7 +208,7 @@ end
 
 local xgroupby = mk_gen(groupby)
 
-local function all_equal(input)
+local function allequal(input)
 	local _iter = xgroupby(input)
 	_iter() -- capture first input
 	if not _iter() then
@@ -237,12 +243,14 @@ local function padnil(input)
 end
 
 local function dotproduct(t0, t1)
-	return fnl.sum(fnl.map((function(a, b) return a * b end), t0, t1))
+	return fnl.sum(fnl.map((function(a, b) return a * b end), table.copy(t0),
+		t1))
 end
 
 return table.join(fnl.map(mk_gen, {
 	count = count;
 	cycle = cycle;
+	icycle = icycle;
 	rep = rep;
 	range = range;
 	accumulate = accumulate;
@@ -259,7 +267,7 @@ return table.join(fnl.map(mk_gen, {
 	tail = tail;
 	consume = consume;
 	nth = nth;
-	all_equal = all_equal;
+	allequal = allequal;
 	quantify = quantify;
 	padnil = padnil;
 	dotproduct = dotproduct;
