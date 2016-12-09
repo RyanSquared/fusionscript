@@ -29,7 +29,6 @@ end
 local args = {...}
 if #args > 1 then
 	for file in ipairs(args) do
-		print(("--- %s ---"):format(file))
 		process(file)
 	end
 elseif lfs.attributes(args[1], "mode") == "directory" then
