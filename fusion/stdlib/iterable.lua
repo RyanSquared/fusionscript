@@ -1,6 +1,8 @@
 local fnl = require("fusion.stdlib.functional")
 local table = require("fusion.stdlib.table")
 
+local unpack = unpack or table.unpack -- luacheck: ignore 113
+
 local function mk_gen(fn)
 	return function(...)
 		local a = {...}
@@ -36,7 +38,7 @@ end
 
 local function rep(element, n)
 	if n then
-		for i=1, n do
+		for i=1, n do -- luacheck: ignore 213
 			coroutine.yield(element)
 		end
 	else
@@ -80,13 +82,13 @@ local function accumulate(input, fn)
 end
 
 local function chain(...)
-	for k, v in pairs({...}) do
+	for k, v in pairs({...}) do -- luacheck: ignore 213
 		if type(v) == "function" then
 			for val in v do
 				coroutine.yield(val)
 			end
 		else
-			for _k, _v in pairs(v) do
+			for _k, _v in pairs(v) do -- luacheck: ignore 213
 				coroutine.yield(_v)
 			end
 		end
@@ -94,8 +96,8 @@ local function chain(...)
 end
 
 local function ichain(...)
-	for i, v in ipairs({...}) do
-		for _i, _v in ipairs(v) do
+	for i, v in ipairs({...}) do -- luacheck: ignore 213
+		for _i, _v in ipairs(v) do -- luacheck: ignore 213
 			coroutine.yield(_v)
 		end
 	end
@@ -116,7 +118,7 @@ end
 
 local function groupby(input)
 	local _prev, _gen
-	for k, v in pairs(input) do
+	for k, v in pairs(input) do -- luacheck: ignore 213
 		_gen = {}
 		if _prev == nil then
 			_prev = v
@@ -133,9 +135,9 @@ local function groupby(input)
 end
 
 local function igroupby(input)
-	local _prev
-	for i, v in ipairs(input) do
-		local _gen = {}
+	local _prev, _gen
+	for k, v in ipairs(input) do -- luacheck: ignore 213
+		_gen = {}
 		if _prev == nil then
 			_prev = v
 		end
@@ -147,6 +149,7 @@ local function igroupby(input)
 			_gen = {v}
 		end
 	end
+	coroutine.yield(_prev, pairs(_gen))
 end
 
 local function slice(input, start, stop, step)
@@ -187,7 +190,7 @@ local function tail(n, input)
 end
 
 local function consume(iterator, n)
-	for i in xrange(n) do
+	for i in xrange(n) do -- luacheck: ignore 213
 		iterator()
 	end
 	return iterator
@@ -247,6 +250,7 @@ return table.join(fnl.map(mk_gen, {
 	ichain = ichain;
 	compress = compress;
 	groupby = groupby;
+	igroupby = igroupby;
 	slice = slice;
 	zip = zip;
 }), {

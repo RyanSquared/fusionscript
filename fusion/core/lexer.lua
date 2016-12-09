@@ -10,13 +10,6 @@ defs['numberify'] = tonumber
 
 defs.print = print
 
-local balanced_borders = re.compile [=[
-	match <- { parens / square / curly }
-	parens <- "(" ([^()] / parens)^-10 ")"?
-	square <- "[" ([^][] / square)^-10 "]"?
-	curly <- "{" ([^{}] / parens)^-10 "}"?
-]=]
-
 defs.err = function(pos, char)
 	local line = 1
 	local start = 1
@@ -88,7 +81,7 @@ defs.semicolon = function(pos)
 		while current_file:match("^[A-Za-z_]", start_pos) do
 			start_pos = start_pos - 1
 		end
-		ast.context = current_file:sub(start_pos, pos)
+		errormsg.context = current_file:sub(start_pos, pos)
 	end
 	setmetatable(errormsg, {
 		__tostring = function()

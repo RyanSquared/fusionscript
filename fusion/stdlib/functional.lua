@@ -1,9 +1,11 @@
+local unpack = unpack or table.unpack -- luacheck: ignore 113
+
 local function map(fn, input, ...)
 	local _args = {...}
 	for k, v in pairs(input) do
 		local t0 = {}
-		for i, v in ipairs(_args) do
-			table.insert(t0, v[k])
+		for i, _v in ipairs(_args) do -- luacheck: ignore 213
+			table.insert(t0, _v[k])
 		end
 		input[k] = fn(v, unpack(t0))
 	end
@@ -12,19 +14,19 @@ end
 
 local function filter(fn, input)
 	local _to_reduce = {}
-	for k, v in pairs(input) do
+	for k, v in pairs(input) do -- luacheck: ignore 213
 		if not fn(input) then
 			_to_reduce[#_to_reduce + 1] = k
 		end
 	end
-	for k, v in pairs(_to_reduce) do
+	for k, v in pairs(_to_reduce) do -- luacheck: ignore 213
 		input[k] = nil
 	end
 	return input
 end
 
 local function reduce(fn, input, init)
-	for k, v in pairs(input) do
+	for k, v in pairs(input) do -- luacheck: ignore 213
 		if not init then
 			init = v
 		else
@@ -61,7 +63,7 @@ local function any(fn, input)
 	if not fn then
 		return any(input, truthy)
 	end
-	for k, v in pairs(input) do
+	for k, v in pairs(input) do -- luacheck: ignore 213
 		if fn(v) then
 			return true
 		end
@@ -73,7 +75,7 @@ local function all(fn, input)
 	if not fn then
 		return all(input, truthy)
 	end
-	for k, v in pairs(input) do
+	for k, v in pairs(input) do -- luacheck: ignore 213
 		if not fn(v) then
 			return false
 		end
@@ -101,4 +103,5 @@ return {
 	map = map;
 	pipe = pipe;
 	reduce = reduce;
+	sum = sum;
 }
