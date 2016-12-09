@@ -1,4 +1,5 @@
 local fnl = require("fusion.stdlib.functional")
+local table = require("fusion.stdlib.table")
 
 local function mk_gen(fn)
 	return function(...)
@@ -15,9 +16,12 @@ local function count(start, step)
 	if not step then
 		return count(start, 1)
 	end
+	if not start then
+		return count(1, step)
+	end
 	while true do
-		start = start + step
 		coroutine.yield(start)
+		start = start + step
 	end
 end
 
@@ -77,8 +81,14 @@ end
 
 local function chain(...)
 	for k, v in pairs({...}) do
-		for _k, _v in pairs(v) do
-			coroutine.yield(_v)
+		if type(v) == "function" then
+			for val in v do
+				coroutine.yield(val)
+			end
+		else
+			for _k, _v in pairs(v) do
+				coroutine.yield(_v)
+			end
 		end
 	end
 end
@@ -104,6 +114,41 @@ local function compress(input, selectors)
 	end
 end
 
+local function groupby(input)
+	local _prev, _gen
+	for k, v in pairs(input) do
+		_gen = {}
+		if _prev == nil then
+			_prev = v
+		end
+		if _prev == v then
+			table.insert(_gen, v)
+		else
+			coroutine.yield(_prev, pairs(_gen))
+			_prev = v
+			_gen = {v}
+		end
+	end
+	coroutine.yield(_prev, pairs(_gen))
+end
+
+local function igroupby(input)
+	local _prev
+	for i, v in ipairs(input) do
+		local _gen = {}
+		if _prev == nil then
+			_prev = v
+		end
+		if _prev == v then
+			table.insert(_gen, v)
+		else
+			coroutine.yield(_prev, pairs(_gen))
+			_prev = v
+			_gen = {v}
+		end
+	end
+end
+
 local function slice(input, start, stop, step)
 	if not step then
 		return slice(input, start, stop, 1)
@@ -123,7 +168,76 @@ end
 
 -- Extended module
 
-return fnl.map(mk_gen, {
+local xslice = mk_gen(slice)
+
+local function take(n, input)
+	return table.from_generator(xslice(input, n))
+end
+
+local xcount = mk_gen(count)
+
+local function tabulate(fn, start)
+	for n in xcount(start or 0) do
+		fn(n)
+	end
+end
+
+local function tail(n, input)
+	return table.from_generator(xslice(input, n))
+end
+
+local function consume(iterator, n)
+	for i in xrange(n) do
+		iterator()
+	end
+	return iterator
+end
+
+local function nth(n, input, default)
+	return input[n] or default
+end
+
+local xgroupby = mk_gen(groupby)
+
+local function all_equal(input)
+	local _iter = xgroupby(input)
+	_iter() -- capture first input
+	if not _iter() then
+		return true
+	else
+		return false
+	end
+end
+
+local function truthy(val)
+	return not not val
+end
+
+local function quantify(input, fn)
+	if not fn then
+		return quantify(input, truthy)
+	end
+	local _val = 0
+	for _, n in pairs(fnl.map(fn, table.copy(input))) do
+		if n then
+			_val = _val + 1
+		end
+	end
+	return _val
+end
+
+local xrep = mk_gen(rep)
+local xchain = mk_gen(chain)
+
+local function padnil(input)
+	return xchain(input, xrep(nil))
+end
+
+local function dotproduct(t0, t1)
+	return fnl.sum(fnl.map((function(a, b) return a * b end), t0, t1))
+end
+
+return table.join(fnl.map(mk_gen, {
 	count = count;
 	cycle = cycle;
 	rep = rep;
@@ -132,6 +246,17 @@ return fnl.map(mk_gen, {
 	chain = chain;
 	ichain = ichain;
 	compress = compress;
+	groupby = groupby;
 	slice = slice;
 	zip = zip;
+}), {
+	take = take;
+	tabulate = tabulate;
+	tail = tail;
+	consume = consume;
+	nth = nth;
+	all_equal = all_equal;
+	quantify = quantify;
+	padnil = padnil;
+	dotproduct = dotproduct;
 })
