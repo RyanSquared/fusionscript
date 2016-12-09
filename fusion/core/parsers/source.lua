@@ -40,6 +40,7 @@ end
 local _tablegen_level = 0
 
 handlers['nil'] = function() return 'nil' end
+handlers['vararg'] = function(node) return '...' end
 
 handlers['table'] = function(node)
 	if #node == 0 then
@@ -439,6 +440,11 @@ end
 
 handlers['dqstring'] = function(node)
 	return ('"%s"'):format(node[1])
+end
+
+handlers['blstring'] = function(node)
+	local eq = ("="):rep(node.eq)
+	return ("[%s[%s]%s]"):format(eq, node[1], eq)
 end
 
 function parser.compile(input_stream, output_stream)
