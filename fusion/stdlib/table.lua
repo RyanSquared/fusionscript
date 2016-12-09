@@ -31,4 +31,11 @@ function table.join(t0, t1)
 	return t2
 end
 
+local _old_sort = table.sort
+
+function table.sort(t, ...)
+	_old_sort(t, ...)
+	return t
+end
+
 return table
