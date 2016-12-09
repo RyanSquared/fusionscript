@@ -3,6 +3,17 @@ local table = require("fusion.stdlib.table")
 
 local unpack = unpack or table.unpack -- luacheck: ignore 113
 
+local function iter(input, iterator)
+	if not iterator then
+		return iter(input, pairs)
+	end
+	if type(input) == "function" then
+		return input
+	else
+		return iterator(input)
+	end
+end
+
 local function mk_gen(fn)
 	return function(...)
 		local a = {...}
@@ -104,8 +115,14 @@ end
 
 local function ichain(...)
 	for i, v in ipairs({...}) do -- luacheck: ignore 213
-		for _i, _v in ipairs(v) do -- luacheck: ignore 213
-			coroutine.yield(_v)
+		if type(v) == "function" then
+			for val in v do
+				coroutine.yield(val)
+			end
+		else
+			for _k, _v in ipairs(v) do -- luacheck: ignore 213
+				coroutine.yield(_v)
+			end
 		end
 	end
 end
@@ -124,7 +141,7 @@ end
 
 local function groupby(input)
 	local _prev, _gen
-	for k, v in pairs(input) do -- luacheck: ignore 213
+	for k, v in iter(input) do -- luacheck: ignore 213
 		_gen = {}
 		if _prev == nil then
 			_prev = v
@@ -142,7 +159,7 @@ end
 
 local function igroupby(input)
 	local _prev, _gen
-	for k, v in ipairs(input) do -- luacheck: ignore 213
+	for k, v in iter(input, ipairs) do -- luacheck: ignore 213
 		_gen = {}
 		if _prev == nil then
 			_prev = v
@@ -227,7 +244,7 @@ local function quantify(input, fn)
 		return quantify(input, truthy)
 	end
 	local _val = 0
-	for _, n in pairs(fnl.map(fn, table.copy(input))) do
+	for _, n in iter(fnl.map(fn, table.copy(input))) do
 		if n then
 			_val = _val + 1
 		end
