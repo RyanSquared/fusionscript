@@ -344,24 +344,30 @@ handlers['number'] = function(node)
 	end
 end
 
+local des_num = 0
+
 handlers['assignment'] = function(node)
 	local output = {}
 	if node.is_local then
 		output[1] = "local "
 	end
 	if node.variable_list.is_destructuring then
+		local name = "_des_" .. tostring(des_num)
+		des_num = des_num + 1
 		local expression = transform(node.expression_list[1])
 		local last = {} -- capture all last values
+		table.insert(output, 1, ("local %s = %s\n"):format(name, expression))
 		for i, v in ipairs(node.variable_list) do
 			local value = transform(v)
-			last[#last + 1] = expression .. "." .. value
+			last[#last + 1] = name .. "." .. value
 			output[#output + 1] = value
 			if node.variable_list[i + 1] then
-				output[#output + 1] = ','
+				output[#output + 1] = ', '
 			end
 		end
 		output[#output + 1] = " = "
-		output[#output + 1] = table.concat(last, ',')
+		output[#output + 1] = table.concat(last, ', ')
+		des_num = des_num - 1
 		return table.concat(output)
 	end
 	output[#output + 1] = transform_variable_list(node) -- ::TODO::
