@@ -111,6 +111,9 @@ local pattern = re.compile([[
 		if /
 		class
 	)
+	keyword <- 'local' / 'new' / 'extends' / 'break' / 'return' / 'yield' /
+		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
+		'in' / 'async'
 	rstatement <- statement / r
 	r <- ({} {.}) -> err
 	class <- {| {:is_local: 'local' -> true space :}?
@@ -179,7 +182,7 @@ local pattern = re.compile([[
 		) ws '(' ws function_call_body? ws ')'
 	|}
 	function_call_body <- {:generator: {|
-		expression (ws 'for' ws variable_list / r)? ws 'in' ws (expression / r)
+		expression (ws 'for' ws (variable_list / r))? ws 'in' ws (expression / r)
 	|} :} / function_args
 	function_args <- expression_list?
 
@@ -224,7 +227,7 @@ local pattern = re.compile([[
 		((('@' -> 'self' name? / name) / '(' expression ')') ws ('.' ws (name / r
 		) / '[' ws (expression / r) ws ']')*)
 	|}
-	name <- {[A-Za-z_][A-Za-z0-9_]*}
+	name <- (! (keyword [^A-Za-z0-9_])) {[A-Za-z_][A-Za-z0-9_]*}
 
 	literal <-
 		table /
