@@ -173,7 +173,16 @@ describe("lexer", function()
 			{type = "variable", "func"}
 		}})
 	end)
-	it("can parse a generated function loop", function()
+	it("can parse a simple generated function loop", function()
+		assert.same(lexer:match("func(a in b);"), {{type = "function_call",
+			{type = "variable", "func"},
+			generator = {
+				{type = "variable", "a"},
+				{type = "variable", "b"},
+			}
+		}})
+	end)
+	it("can parse a complex generated function loop", function()
 		assert.same(lexer:match("func(a for a in b);"), {{type = "function_call",
 			{type = "variable", "func"},
 			generator = {
