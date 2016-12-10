@@ -476,4 +476,33 @@ describe("lexer", function()
 			extends = {type = "variable", "y"}
 		}})
 	end)
+	it("can parse negative ranges", function()
+		assert.same(lexer:match("a = 10::1::2;"), {{type = "assignment",
+			variable_list = {{type = "variable", "a"}},
+			expression_list = {{type = "range",
+				start = {type = "number", base = "10", 10},
+				stop = {type = "number", base = "10", 1},
+				step = {type = "number", base = "10", 2}
+			}}
+		}})
+	end)
+	it("can parse complex ranges", function()
+		assert.same(lexer:match("a = 1::10::2;"), {{type = "assignment",
+			variable_list = {{type = "variable", "a"}},
+			expression_list = {{type = "range",
+				start = {type = "number", base = "10", 1},
+				stop = {type = "number", base = "10", 10},
+				step = {type = "number", base = "10", 2}
+			}}
+		}})
+	end)
+	it("can parse basic ranges", function()
+		assert.same(lexer:match("a = 1::5;"), {{type = "assignment",
+			variable_list = {{type = "variable", "a"}},
+			expression_list = {{type = "range",
+				start = {type = "number", base = "10", 1},
+				stop = {type = "number", base = "10", 5}
+			}}
+		}})
+	end)
 end)
