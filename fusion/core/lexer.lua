@@ -36,7 +36,7 @@ defs.err = function(pos, char)
 		};
 		context = current_file:sub(math.max(pos - 2, line_start),
 			math.min(pos + 5, current_file:match("()$")));
-		quick = "syntax"
+		quick = "semicolon"
 	}
 	if current_file:match("^[A-Za-z_]", pos) then
 		-- found text, match as context
@@ -229,12 +229,16 @@ local pattern = re.compile([[
 	literal <-
 		table /
 		{| {:type: '' -> 'vararg' :} { '...' } |} /
+		range /
 		number /
 		string /
 		{| {:type: '' -> 'boolean' :}
 			('true' / 'false') -> bool
 		|} /
 		{| {:type: {'nil'} :} |}
+	range <- {| {:type: '' -> 'range' :}
+		{:start: number :} '::' {:stop: number :} ('::' {:step: number :})?
+	|}
 	number <- {| {:type: '' -> 'number' :} {:is_negative: '-' -> true :}? (
 		base16num /
 		base10num
