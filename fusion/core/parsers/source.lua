@@ -47,6 +47,10 @@ handlers['using'] = function(node)
 	local directive = node[1]
 	if directive == "class" then
 		return 'local class = require("fusion.stdlib.class")'
+	elseif directive == "fnl" then
+		return 'local fnl = require("fusion.stdlib.functional")'
+	elseif directive == "itr" then
+		return 'local itr = require("fusion.stdlib.iterable")'
 	end
 end
 
@@ -386,6 +390,21 @@ handlers['number'] = function(node)
 	else
 		return is_negative .. ("0x%x"):format(node[1])
 	end
+end
+
+handlers['range'] = function(node)
+	local output = {
+		"itr.range(";
+		transform(node.start);
+		", ";
+		transform(node.stop);
+	}
+	if node.step then
+		output[5] = ", "
+		output[6] = transform(node.step)
+	end
+	output[#output + 1] = ")"
+	return table.concat(output)
 end
 
 local des_num = 0
