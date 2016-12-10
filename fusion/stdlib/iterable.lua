@@ -102,26 +102,36 @@ end
 local function chain(...)
 	for k, v in pairs({...}) do -- luacheck: ignore 213
 		if type(v) == "function" then
-			for val in v do
-				coroutine.yield(val)
+			while true do
+				local x = {v()}
+				if x[1] then
+					coroutine.yield(unpack(x))
+				else
+					break
+				end
 			end
 		else
 			for _k, _v in pairs(v) do -- luacheck: ignore 213
-				coroutine.yield(_v)
+				coroutine.yield(_k, _v)
 			end
 		end
 	end
 end
 
 local function ichain(...)
-	for i, v in ipairs({...}) do -- luacheck: ignore 213
+	for k, v in ipairs({...}) do -- luacheck: ignore 213
 		if type(v) == "function" then
-			for val in v do
-				coroutine.yield(val)
+			while true do
+				local x = {v()}
+				if x[1] then
+					coroutine.yield(unpack(x))
+				else
+					break
+				end
 			end
 		else
 			for _k, _v in ipairs(v) do -- luacheck: ignore 213
-				coroutine.yield(_v)
+				coroutine.yield(_k, _v)
 			end
 		end
 	end
@@ -264,7 +274,7 @@ local function dotproduct(t0, t1)
 		t1))
 end
 
-return table.join(fnl.map(mk_gen, {
+return table.from_generator(xchain(fnl.map(mk_gen, {
 	count = count;
 	cycle = cycle;
 	icycle = icycle;
@@ -288,4 +298,4 @@ return table.join(fnl.map(mk_gen, {
 	quantify = quantify;
 	padnil = padnil;
 	dotproduct = dotproduct;
-})
+}))
