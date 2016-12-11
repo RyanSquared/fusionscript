@@ -1,4 +1,9 @@
 #!/usr/bin/env lua
+--- Generate a Lua file from FusionScript code.
+-- @script fusionc-source
+-- @author ChickenNuggers
+-- @usage fusionc-source [FILE]/[DIRECTORY]
+
 local parser = require("fusion.core.parsers.source")
 local lfs = require("lfs")
 

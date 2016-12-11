@@ -1,4 +1,13 @@
 #!/usr/bin/env lua
+--- Run FusionScript code with the Lua VM.
+-- @script fusion-source
+-- @author ChickenNuggers
+-- @usage fusion-source [OPTIONS] [FILE]
+-- fusion-source [FILE]
+--
+--   --metadata <package> | Print metadata for package
+--   -m <package>         | Run <package>.main module
+--   -h                   | Print help information
 local parser = require("fusion.core.parsers.source")
 parser.inject_loader()
 
@@ -36,9 +45,15 @@ while arg_index <= #arg do
 		assert(module, "missing argument to -m: module")
 		require(module .. ".main")
 		break
-	elseif arg[arg_index] == "-h" then -- print help
+	elseif arg[arg_index] == "-h" or arg[arg_index] == "--help" then -- print help
+		local program = arg[0]:match(".+/(.-)$") or arg[0]
 		local usage = {
-			("Usage: %s [OPTIONS]"):format(arg[0])
+			("Usage: %s [OPTIONS] [PACKAGE]"):format(program);
+			("   or: %s [FILE]"):format(program);
+			("");
+			("\t--metadata <package> | Print metadata for package");
+			("\t-m <package>         | Run <package>.main module");
+			("\t-h                   | Print help information")
 		}
 		print(table.concat(usage, "\n"))
 		break

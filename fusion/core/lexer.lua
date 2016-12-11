@@ -1,6 +1,16 @@
+--- Lex FusionScript files.
+-- @module fusion.core.lexer
+
 local re = require("re");
 
-local defs = {}
+--- @table defs
+-- @field true Convert input to `true` boolean
+-- @field false Convert input to `false` boolean
+-- @field bool Convert input to `defs[input]` - should be `true`/`false`
+-- @field numberify Convert input to number via `tonumber`
+-- @field err Generate a SyntaxError on current line
+-- @field semicolon Generate a SyntaxError for a missing semicolon
+local defs = {} -- Definitions for LPeg Regex pattern.
 local current_file;
 
 defs['true'] = function() return true end
@@ -285,6 +295,12 @@ local pattern = re.compile([[
 	ws <- %s* ('--' [^]] .. '\r\n' .. [[]* ]] .. '\r\n' .. [[?)? %s*
 	space <- %s+
 ]], defs);
+
+--- Generate an AST from a file
+-- @function lexer:match
+-- @tparam string input
+-- @treturn table
+-- @usage require("pl.pretty").dump(lexer:match("print('hi');"))
 
 return {
 	match = function(self, input) -- luacheck: ignore 212

@@ -1,0 +1,916 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>FusionScript &middot; Documentation</title>
+    <link rel="stylesheet" href="../ldoc_pale.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>FusionScript</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/fusion.core.lexer.html">fusion.core.lexer</a></li>
+  <li><a href="../modules/fusion.core.parsers.source.html">fusion.core.parsers.source</a></li>
+  <li><a href="../modules/fusion.stdlib.class.html">fusion.stdlib.class</a></li>
+  <li><a href="../modules/fusion.stdlib.functional.html">fusion.stdlib.functional</a></li>
+  <li><strong>fusion.stdlib.iterative</strong></li>
+</ul>
+<h2>Scripts</h2>
+<ul class="nowrap">
+  <li><a href="../scripts/fusionc-source.html">fusionc-source</a></li>
+  <li><a href="../scripts/fusion-source.html">fusion-source</a></li>
+  <li><a href="../scripts/fusion-ast.html">fusion-ast</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>fusion.stdlib.iterative</code></h1>
+<p>Module for iterators and functions that use them</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#count">count (start, step)</a></td>
+	<td class="summary">Infinitely count upwards.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cycle">cycle (pattern)</a></td>
+	<td class="summary">Loop through an iterable object infinitely.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#icycle">icycle (pattern)</a></td>
+	<td class="summary">Loop through an iterable object infinitely, using ipairs as the fallback
+ iterator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rep">rep (element, n)</a></td>
+	<td class="summary">Repeatedly yield a value, optionally up to <code>n</code> times.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#range">range (start, stop, step)</a></td>
+	<td class="summary">Return numbers from <code>start</code> to <code>stop</code>, incrementing by <code>step</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#accumulate">accumulate (input, fn)</a></td>
+	<td class="summary">Return accumulated sums or results of binary function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#chain">chain (...)</a></td>
+	<td class="summary">Iterate over every iterable object passed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#ichain">ichain (...)</a></td>
+	<td class="summary">Iterate over every iterable object passed, using ipairs as the fallback
+ iterator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compress">compress (input, selectors)</a></td>
+	<td class="summary">Return values from input stream based on truthy values in selectors stream.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#groupby">groupby (input)</a></td>
+	<td class="summary">Squish repeated values based on equality of repeated values.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#igroupby">igroupby (input)</a></td>
+	<td class="summary">Similar to <code>groupby()</code> but use <code>ipairs()</code> as the default iterator</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#slice">slice (input, start, stop, step)</a></td>
+	<td class="summary">Return a subsection of an iterable object</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#zip">zip (input0, input1, default)</a></td>
+	<td class="summary">Zip two input streams together; table input streams will have their keys
+ discarded.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#head">head (n, input)</a></td>
+	<td class="summary">Return a table based off a slice of the start of a stream.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tabulate">tabulate (fn, start)</a></td>
+	<td class="summary">Repeatedly count upwards and call a function with the value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tail">tail (n, input)</a></td>
+	<td class="summary">Return a table based off a slice of the end of a stream.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#consume">consume (iterator, n)</a></td>
+	<td class="summary">Run an iterator a certain amount of times.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#allequal">allequal (input)</a></td>
+	<td class="summary">Return true if all values in <code>input</code> stream are true, otherwise false.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#quantify">quantify (input, fn)</a></td>
+	<td class="summary">Return a number incremented for every truthy value in an input stream after
+ a function is applied to it.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#padnil">padnil (input, times)</a></td>
+	<td class="summary">Pad an input stream with nil.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dotproduct">dotproduct (t0, t1)</a></td>
+	<td class="summary">Return the dot product of two data streams</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#iter">iter ()</a></td>
+	<td class="summary">Iterate over a value</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "count"></a>
+    <strong>count (start, step)</strong>
+    </dt>
+    <dd>
+    Infinitely count upwards.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">start</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">step</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> (n <span class="keyword">in</span> count()) {
+	<span class="global">print</span>(n)
+	<span class="keyword">if</span> (&gt; n <span class="number">100</span>) <span class="keyword">break</span>;
+}</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "cycle"></a>
+    <strong>cycle (pattern)</strong>
+    </dt>
+    <dd>
+    Loop through an iterable object infinitely.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">pattern</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> (char <span class="keyword">in</span> cycle(<span class="string">"hello"</span>)) <span class="global">print</span>(char);</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "icycle"></a>
+    <strong>icycle (pattern)</strong>
+    </dt>
+    <dd>
+    Loop through an iterable object infinitely, using ipairs as the fallback
+ iterator.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">pattern</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.iterative.html#cycle">cycle</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "rep"></a>
+    <strong>rep (element, n)</strong>
+    </dt>
+    <dd>
+    Repeatedly yield a value, optionally up to <code>n</code> times.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">element</span>
+
+
+
+        </li>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         Amount of times to yield (default: infinite)
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> (fn <span class="keyword">in</span> rep(get_function())) <span class="global">print</span>(fn);</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "range"></a>
+    <strong>range (start, stop, step)</strong>
+    </dt>
+    <dd>
+    Return numbers from <code>start</code> to <code>stop</code>, incrementing by <code>step</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">start</span>
+            <span class="types"><span class="type">number</span></span>
+         Default 1
+        </li>
+        <li><span class="parameter">stop</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">step</span>
+            <span class="types"><span class="type">number</span></span>
+         Default 1
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> (n <span class="keyword">in</span> range(<span class="number">0</span>, <span class="number">100</span>, <span class="number">5</span>)) <span class="global">print</span>(n);</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "accumulate"></a>
+    <strong>accumulate (input, fn)</strong>
+    </dt>
+    <dd>
+    Return accumulated sums or results of binary function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         Binary function for reductive accumulation
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(x <span class="keyword">in</span> accumulate(<span class="number">1</span>::<span class="number">5</span>)); <span class="comment">-- 1 3 6 10 15</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "chain"></a>
+    <strong>chain (...)</strong>
+    </dt>
+    <dd>
+    Iterate over every iterable object passed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+         Variable argument of iterable objects
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> (char <span class="keyword">in</span> chain(<span class="string">"ABCD"</span>, <span class="string">"EFGH"</span>)) <span class="global">print</span>(char); <span class="comment">-- A B C D E F G H</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "ichain"></a>
+    <strong>ichain (...)</strong>
+    </dt>
+    <dd>
+    Iterate over every iterable object passed, using ipairs as the fallback
+ iterator.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+         Variable argument of iterable objects
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.iterative.html#chain">chain</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "compress"></a>
+    <strong>compress (input, selectors)</strong>
+    </dt>
+    <dd>
+    Return values from input stream based on truthy values in selectors stream.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">selectors</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> (val <span class="keyword">in</span> compress({<span class="string">"hello"</span>}, {<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="keyword">false</span>, <span class="number">1</span>})) <span class="global">print</span>(val);
+ <span class="comment">-- 'helo'</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "groupby"></a>
+    <strong>groupby (input)</strong>
+    </dt>
+    <dd>
+    Squish repeated values based on equality of repeated values.
+ Two values are returned; the value, and an iterator over all values matched.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(group <span class="keyword">in</span> groupby(<span class="string">"ABCCAAAD"</span>)); <span class="comment">-- A B C A D</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "igroupby"></a>
+    <strong>igroupby (input)</strong>
+    </dt>
+    <dd>
+    Similar to <code>groupby()</code> but use <code>ipairs()</code> as the default iterator
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.iterative.html#groupby">groupby</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "slice"></a>
+    <strong>slice (input, start, stop, step)</strong>
+    </dt>
+    <dd>
+    Return a subsection of an iterable object
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">start</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">stop</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">step</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(slice(<span class="string">"Hello World!"</span>, <span class="number">6</span>)); <span class="comment">-- "World!"</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "zip"></a>
+    <strong>zip (input0, input1, default)</strong>
+    </dt>
+    <dd>
+    Zip two input streams together; table input streams will have their keys
+ discarded.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input0</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">input1</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">default</span>
+         Any value; may be null
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(key, value <span class="keyword">for</span> key, value <span class="keyword">in</span> zip(<span class="string">"hi"</span>, {<span class="string">"hello"</span>, <span class="string">"world"</span>}));
+ <span class="comment">-- ("h", "hello") ("i", "world")</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "head"></a>
+    <strong>head (n, input)</strong>
+    </dt>
+    <dd>
+    Return a table based off a slice of the start of a stream.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         Maximum values to take
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.iterative.html#tail">tail</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(head(<span class="string">"Hello World!"</span>), <span class="number">5</span>); <span class="comment">-- "Hello"</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "tabulate"></a>
+    <strong>tabulate (fn, start)</strong>
+    </dt>
+    <dd>
+    Repeatedly count upwards and call a function with the value.  This function
+ should never return.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">start</span>
+            <span class="types"><span class="type">number</span></span>
+         Optional value to start at; 0 by default
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tabulate((n)-&gt; <span class="global">print</span>(n)); <span class="comment">-- 0 1 2 3 4 5 6 7...</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "tail"></a>
+    <strong>tail (n, input)</strong>
+    </dt>
+    <dd>
+    Return a table based off a slice of the end of a stream.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         Maximum values to take
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.iterative.html#head">head</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(tail(<span class="string">"Hello World!"</span>), <span class="number">6</span>); <span class="comment">-- "World!"</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "consume"></a>
+    <strong>consume (iterator, n)</strong>
+    </dt>
+    <dd>
+    Run an iterator a certain amount of times.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">iterator</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(n <span class="keyword">in</span> consume(<span class="number">1</span>::<span class="number">10</span>, <span class="number">3</span>)); <span class="comment">-- 4 5 6 7 8 9 10</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "allequal"></a>
+    <strong>allequal (input)</strong>
+    </dt>
+    <dd>
+    Return true if all values in <code>input</code> stream are true, otherwise false.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(allequal(rep(<span class="number">1</span>, <span class="number">10</span>))); <span class="comment">-- true</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "quantify"></a>
+    <strong>quantify (input, fn)</strong>
+    </dt>
+    <dd>
+    Return a number incremented for every truthy value in an input stream after
+ a function is applied to it.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(quantify(map((()-&gt; <span class="global">math</span>.random(<span class="number">0</span>, <span class="number">1</span>)), <span class="number">1</span>::<span class="number">10</span>), (n)-&gt; n == <span class="number">1</span>));</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "padnil"></a>
+    <strong>padnil (input, times)</strong>
+    </dt>
+    <dd>
+    Pad an input stream with nil.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">times</span>
+            <span class="types"><span class="type">number</span></span>
+         Amount of times to pad, default infinite
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(k, v <span class="keyword">for</span> k, v <span class="keyword">in</span> zip(<span class="string">"hello"</span>, padnil(<span class="string">"hi"</span>)));
+ <span class="comment">-- ("h", "h") ("e", "i") ("l", nil) ("l", nil) ("o", nil)</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "dotproduct"></a>
+    <strong>dotproduct (t0, t1)</strong>
+    </dt>
+    <dd>
+    Return the dot product of two data streams
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">t0</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">t1</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.iterative.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "iter"></a>
+    <strong>iter ()</strong>
+    </dt>
+    <dd>
+    Iterate over a value
+
+
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.functional.html#iter">functional.iter</a>
+    </ul>
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2016-12-11 11:31:26 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

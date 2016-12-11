@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>FusionScript &middot; Documentation</title>
+    <link rel="stylesheet" href="../ldoc_pale.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>FusionScript</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/fusion.core.lexer.html">fusion.core.lexer</a></li>
+  <li><strong>fusion.core.parsers.source</strong></li>
+  <li><a href="../modules/fusion.stdlib.class.html">fusion.stdlib.class</a></li>
+  <li><a href="../modules/fusion.stdlib.functional.html">fusion.stdlib.functional</a></li>
+  <li><a href="../modules/fusion.stdlib.iterative.html">fusion.stdlib.iterative</a></li>
+</ul>
+<h2>Scripts</h2>
+<ul class="nowrap">
+  <li><a href="../scripts/fusionc-source.html">fusionc-source</a></li>
+  <li><a href="../scripts/fusion-source.html">fusion-source</a></li>
+  <li><a href="../scripts/fusion-ast.html">fusion-ast</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>fusion.core.parsers.source</code></h1>
+<p>Compile FusionScript AST to Lua code</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#parser.compile">parser.compile (input_stream, output_stream)</a></td>
+	<td class="summary">Convert an iterator returning FusionScript chunks to Lua code.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser.read_file">parser.read_file (file, dump)</a></td>
+	<td class="summary">Read FusionScript code from a file and return or print output.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser.load_file">parser.load_file (file)</a></td>
+	<td class="summary">Load FusionScript code from a file and return a function to run the code.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser.do_file">parser.do_file (file)</a></td>
+	<td class="summary">Load and run FusionScript code from a file</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser.search_for">parser.search_for (module_name)</a></td>
+	<td class="summary">Find a module in the package path and return relevant information.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser.inject_loader">parser.inject_loader ()</a></td>
+	<td class="summary">Inject <a href="../modules/fusion.core.parsers.source.html#parser.search_for">parser.search_for</a> into the <code>require()</code> searchers list.</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#transform">transform (node)</a></td>
+	<td class="summary">Transform a node using the registered handler.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#l">l (line)</a></td>
+	<td class="summary">Add indent to a line of text.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#transform_expression_list">transform_expression_list (node)</a></td>
+	<td class="summary">Convert an expression_list field to a transformed list of expressions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#transform_variable_list">transform_variable_list (node)</a></td>
+	<td class="summary">Convert a variable_list to a transformed list of variable names.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#transform_class_function">transform_class_function (node)</a></td>
+	<td class="summary">Convert a function field in a class to a lambda table assignment.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "parser.compile"></a>
+    <strong>parser.compile (input_stream, output_stream)</strong>
+    </dt>
+    <dd>
+    Convert an iterator returning FusionScript chunks to Lua code.
+ Do not use this function directly to compile code.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input_stream</span>
+            <span class="types"><span class="type">function</span></span>
+         Used as an iterator to retrieve code
+        </li>
+        <li><span class="parameter">output_stream</span>
+            <span class="types"><span class="type">function</span></span>
+         Repeatedly called with generated code
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser.read_file"></a>
+    <strong>parser.read_file (file, dump)</strong>
+    </dt>
+    <dd>
+    Read FusionScript code from a file and return or print output.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">file</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+         File to read input from
+        </li>
+        <li><span class="parameter">dump</span>
+            <span class="types"><span class="type">boolean</span></span>
+         Boolean to print output instead of return (optional)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+        Lua code
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser.load_file"></a>
+    <strong>parser.load_file (file)</strong>
+    </dt>
+    <dd>
+    Load FusionScript code from a file and return a function to run the code.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">file</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        Loaded FusionScript code
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser.do_file"></a>
+    <strong>parser.do_file (file)</strong>
+    </dt>
+    <dd>
+    Load and run FusionScript code from a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">file</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser.search_for"></a>
+    <strong>parser.search_for (module_name)</strong>
+    </dt>
+    <dd>
+    Find a module in the package path and return relevant information.
+ Returns <code>nil</code> and an error message if not found.
+ Do not use this function by itself; use <code>parser.inject_loader()</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">module_name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">function</span></span>
+        Closure to return loaded module</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+        Path to loaded file</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser.inject_loader"></a>
+    <strong>parser.inject_loader ()</strong>
+    </dt>
+    <dd>
+    Inject <a href="../modules/fusion.core.parsers.source.html#parser.search_for">parser.search_for</a> into the <code>require()</code> searchers list.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        False if loader already found
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">parser.inject_loader(); <span class="global">print</span>(<span class="global">require</span>(<span class="string">"test_module"</span>))
+ <span class="comment">-- Attempts to load a FusionScript <code>test_module</code> package</span></pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "transform"></a>
+    <strong>transform (node)</strong>
+    </dt>
+    <dd>
+    Transform a node using the registered handler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "l"></a>
+    <strong>l (line)</strong>
+    </dt>
+    <dd>
+    Add indent to a line of text.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">line</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "transform_expression_list"></a>
+    <strong>transform_expression_list (node)</strong>
+    </dt>
+    <dd>
+    Convert an expression_list field to a transformed list of expressions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "transform_variable_list"></a>
+    <strong>transform_variable_list (node)</strong>
+    </dt>
+    <dd>
+    Convert a variable_list to a transformed list of variable names.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "transform_class_function"></a>
+    <strong>transform_class_function (node)</strong>
+    </dt>
+    <dd>
+    Convert a function field in a class to a lambda table assignment.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2016-12-11 11:31:26 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

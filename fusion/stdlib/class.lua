@@ -1,3 +1,12 @@
+--- Contains a function to create classes
+-- @module fusion.stdlib.class
+
+--- Generate a new class from a given class.
+-- @function class
+-- @tparam table new Base class table
+-- @tparam table extends Class to use as index class
+-- @tparam string name Name of class
+-- @treturn class
 local function class(new, extends, name)
 	local base_mt = {
 		__index = new;

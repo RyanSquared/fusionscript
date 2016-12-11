@@ -1,3 +1,6 @@
+--- Compile FusionScript AST to Lua code
+-- @module fusion.core.parsers.source
+
 local lexer = require("fusion.core.lexer")
 local lfs = require("lfs")
 
@@ -6,6 +9,8 @@ local parser = {}
 local handlers = {}
 local last_node = {} -- luacheck: ignore 231
 
+--- Transform a node using the registered handler.
+-- @tparam table node
 local function transform(node, ...)
 	assert(node.type, ("Bad node: %s"):format(node))
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
@@ -13,10 +18,14 @@ local function transform(node, ...)
 	return handlers[node.type](node, ...)
 end
 
+--- Add indent to a line of text.
+-- @tparam string line
 local function l(line)
 	return ("\t"):rep(indent) .. line
 end
 
+--- Convert an expression_list field to a transformed list of expressions.
+-- @tparam table node
 local function transform_expression_list(node)
 	if not node.expression_list then
 		return ""
@@ -29,6 +38,8 @@ local function transform_expression_list(node)
 	return table.concat(output, ",")
 end
 
+--- Convert a variable_list to a transformed list of variable names.
+-- @tparam table node
 local function transform_variable_list(node)
 	local output = {}
 	local list = node.variable_list
@@ -54,6 +65,8 @@ handlers['using'] = function(node)
 	end
 end
 
+--- Convert a function field in a class to a lambda table assignment.
+-- @tparam table node
 local function transform_class_function(node)
 	return {
 		name = transform(node[1]);
@@ -509,12 +522,20 @@ handlers['blstring'] = function(node)
 	return ("[%s[%s]%s]"):format(eq, node[1], eq)
 end
 
+--- Convert an iterator returning FusionScript chunks to Lua code.
+-- Do not use this function directly to compile code.
+-- @tparam function input_stream Used as an iterator to retrieve code
+-- @tparam function output_stream Repeatedly called with generated code
 function parser.compile(input_stream, output_stream)
 	for input in input_stream do
 		output_stream(transform(input))
 	end
 end
 
+--- Read FusionScript code from a file and return or print output.
+-- @tparam string file File to read input from
+-- @tparam boolean dump Boolean to print output instead of return (optional)
+-- @treturn string Lua code
 function parser.read_file(file, dump)
 	local append, output
 	if dump then
@@ -534,6 +555,9 @@ function parser.read_file(file, dump)
 	return table.concat(output, "\n")
 end
 
+--- Load FusionScript code from a file and return a function to run the code.
+-- @tparam string file
+-- @treturn function Loaded FusionScript code
 function parser.load_file(file)
 	local content = parser.read_file(file)
 	if loadstring then -- luacheck: ignore 113
@@ -543,12 +567,20 @@ function parser.load_file(file)
 	end
 end
 
+--- Load and run FusionScript code from a file
+-- @tparam string file
 function parser.do_file(file)
 	return (parser.load_file(file)())
 end
 
-function parser.search_for(name)
-	local module_path = name:gsub("%.", "/")
+--- Find a module in the package path and return relevant information.
+-- Returns `nil` and an error message if not found.
+-- Do not use this function by itself; use `parser.inject_loader()`.
+-- @tparam string module_name
+-- @treturn function Closure to return loaded module
+-- @treturn string Path to loaded file
+function parser.search_for(module_name)
+	local module_path = module_name:gsub("%.", "/")
 
 	local file_path
 	for _, path in ipairs(package.fusepath_t) do
@@ -564,13 +596,18 @@ function parser.search_for(name)
 	return nil, "\n" .. table.concat(msg, "\n")
 end
 
+--- Inject `parser.search_for` into the `require()` searchers list.
+-- @treturn boolean False if loader already found
+-- @usage parser.inject_loader(); print(require("test_module"))
+-- -- Attempts to load a FusionScript `test_module` package
 function parser.inject_loader()
 	for _, loader in ipairs(package.searchers) do
 		if loader == parser.search_for then
 			return false
 		end
-		package.searchers[2] = parser.search_for
 	end
+	package.searchers[2] = parser.search_for
+	return true
 end
 
 if not package.fusepath then

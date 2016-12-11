@@ -1,4 +1,8 @@
 #!/usr/bin/env lua
+--- Print a Lua table containing a FusionScript AST.
+-- @script fusion-ast
+-- @author ChickenNuggers
+-- @usage fusion-ast [FILE]
 local lexer = require("fusion.core.lexer")
 local pretty = require("pl.pretty")
 

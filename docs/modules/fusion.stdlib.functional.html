@@ -1,0 +1,597 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>FusionScript &middot; Documentation</title>
+    <link rel="stylesheet" href="../ldoc_pale.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>FusionScript</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/fusion.core.lexer.html">fusion.core.lexer</a></li>
+  <li><a href="../modules/fusion.core.parsers.source.html">fusion.core.parsers.source</a></li>
+  <li><a href="../modules/fusion.stdlib.class.html">fusion.stdlib.class</a></li>
+  <li><strong>fusion.stdlib.functional</strong></li>
+  <li><a href="../modules/fusion.stdlib.iterative.html">fusion.stdlib.iterative</a></li>
+</ul>
+<h2>Scripts</h2>
+<ul class="nowrap">
+  <li><a href="../scripts/fusionc-source.html">fusionc-source</a></li>
+  <li><a href="../scripts/fusion-source.html">fusion-source</a></li>
+  <li><a href="../scripts/fusion-ast.html">fusion-ast</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>fusion.stdlib.functional</code></h1>
+<p>Module for "functional" iterators and functions.</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#map">map (fn, input)</a></td>
+	<td class="summary">Apply a function to one or more input streams, and return the values.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#filter">filter (fn, input)</a></td>
+	<td class="summary">Return values in an input stream if an applied function returns true.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reduce">reduce (fn, input, init)</a></td>
+	<td class="summary">Return a value from a function applied to all values of an input stream.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fold">fold (start, stop, step, fn, input, init)</a></td>
+	<td class="summary">Does the same thing as <a href="../modules/fusion.stdlib.functional.html#reduce">reduce</a>, but operates on ordered sequences.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#foldl">foldl (fn, input, init)</a></td>
+	<td class="summary">Fold starting from the first value of input to the last value of input.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#foldr">foldr (fn, input, init)</a></td>
+	<td class="summary">Fold starting from the last value of input to the first value of input.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#any">any (fn, input)</a></td>
+	<td class="summary">Return true if any returned value from an input stream are truthy,
+ otherwise false.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#all">all (fn, input)</a></td>
+	<td class="summary">Return true if all returned values from an input stream are truthy.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sum">sum (input, negative)</a></td>
+	<td class="summary">Return a sum of all values in a stream.</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#iter">iter (input, iterator)</a></td>
+	<td class="summary">Return an iterator over a value if possible or the value passed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mk_gen">mk_gen (fn)</a></td>
+	<td class="summary">Make an iterator (or 'generator') from a function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#truthy">truthy (val)</a></td>
+	<td class="summary">Return the boolean form of a value.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "map"></a>
+    <strong>map (fn, input)</strong>
+    </dt>
+    <dd>
+    Apply a function to one or more input streams, and return the values.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+        Initialized iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(x <span class="keyword">in</span> map(((v)-&gt; v ^ <span class="number">2</span>), <span class="number">1</span>::<span class="number">10</span>)); <span class="comment">-- squares</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "filter"></a>
+    <strong>filter (fn, input)</strong>
+    </dt>
+    <dd>
+    Return values in an input stream if an applied function returns true.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+         Iterable object
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+        Initialized iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(x <span class="keyword">in</span> filter(((v)-&gt; v % <span class="number">2</span> == <span class="number">0</span>), <span class="number">1</span>::<span class="number">10</span>)); <span class="comment">-- odds</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "reduce"></a>
+    <strong>reduce (fn, input, init)</strong>
+    </dt>
+    <dd>
+    Return a value from a function applied to all values of an input stream.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+         Iterable object
+        </li>
+        <li><span class="parameter">init</span>
+         Initial value (will use first value of stream if not supplied)
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(reduce(((x, y)-&gt; x &gt; y), {<span class="number">5</span>, <span class="number">2</span>, <span class="number">7</span>, <span class="number">9</span>, <span class="number">1</span>})); <span class="comment">-- math.max()</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "fold"></a>
+    <strong>fold (start, stop, step, fn, input, init)</strong>
+    </dt>
+    <dd>
+    Does the same thing as <a href="../modules/fusion.stdlib.functional.html#reduce">reduce</a>, but operates on ordered sequences.
+ This function should only be used on numeric tables or indexable streams.
+ Use <code>foldl()</code> or <code>foldr()</code> for convenience instead of this function unless
+ you need control over the exact sequence.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">start</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">stop</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">step</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+         Numerically indexable object
+        </li>
+        <li><span class="parameter">init</span>
+         Initial value (will use first value in input if not supplied)
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/fusion.stdlib.functional.html#reduce">reduce</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "foldl"></a>
+    <strong>foldl (fn, input, init)</strong>
+    </dt>
+    <dd>
+    Fold starting from the first value of input to the last value of input.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+         Numerically indexable object
+        </li>
+        <li><span class="parameter">init</span>
+         Initial value (will use first value in input if not supplied)
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/fusion.stdlib.functional.html#fold">fold</a></li>
+         <li><a href="../modules/fusion.stdlib.functional.html#foldr">foldr</a></li>
+         <li><a href="../modules/fusion.stdlib.functional.html#reduce">reduce</a></li>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "foldr"></a>
+    <strong>foldr (fn, input, init)</strong>
+    </dt>
+    <dd>
+    Fold starting from the last value of input to the first value of input.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+         Numerically indexable object
+        </li>
+        <li><span class="parameter">init</span>
+         Initial value (will use last value in input if not supplied)
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/fusion.stdlib.functional.html#fold">fold</a></li>
+         <li><a href="../modules/fusion.stdlib.functional.html#foldl">foldl</a></li>
+         <li><a href="../modules/fusion.stdlib.functional.html#reduce">reduce</a></li>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "any"></a>
+    <strong>any (fn, input)</strong>
+    </dt>
+    <dd>
+    Return true if any returned value from an input stream are truthy,
+ otherwise false.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(any({<span class="keyword">nil</span>, <span class="keyword">true</span>, <span class="keyword">false</span>})); <span class="comment">-- true</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "all"></a>
+    <strong>all (fn, input)</strong>
+    </dt>
+    <dd>
+    Return true if all returned values from an input stream are truthy.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(all(chain(<span class="number">1</span>::<span class="number">50</span>, {<span class="keyword">false</span>}))); <span class="comment">-- false</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "sum"></a>
+    <strong>sum (input, negative)</strong>
+    </dt>
+    <dd>
+    Return a sum of all values in a stream.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="../modules/fusion.stdlib.functional.html#iter">iter</a></span>
+
+
+
+        </li>
+        <li><span class="parameter">negative</span>
+            <span class="types"><span class="type">boolean</span></span>
+         optional; returns a difference instead if true
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+
+
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">print</span>(sum(<span class="number">1</span>::<span class="number">50</span>));</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "iter"></a>
+    <strong>iter (input, iterator)</strong>
+    </dt>
+    <dd>
+    Return an iterator over a value if possible or the value passed.
+ Possible value types can be strings and any object with __pairs or __ipairs
+ metadata.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">input</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+         Table to iterate over (can also be iterator function)
+        </li>
+        <li><span class="parameter">iterator</span>
+            <span class="types"><span class="type">function</span></span>
+         Table iterator to use (<code>pairs()</code> by default)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mk_gen"></a>
+    <strong>mk_gen (fn)</strong>
+    </dt>
+    <dd>
+    Make an iterator (or 'generator') from a function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        Wrapped coroutine
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "truthy"></a>
+    <strong>truthy (val)</strong>
+    </dt>
+    <dd>
+    Return the boolean form of a value.  False and nil return false, otherwise
+ true is returned.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">val</span>
+         Value to convert to boolean value (optionally nil)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2016-12-11 11:31:26 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
