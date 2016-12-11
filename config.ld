@@ -5,6 +5,10 @@ project = 'FusionScript'
 description = 'The programming language of ultimate dankliness'
 title = 'FusionScript &middot; Documentation'
 style = '!pale'
-readme = 'README.md'
+topics = {
+	'docs/_topics/FusionScript.md';
+	'docs/_topics/Syntax.md';
+}
+kind_names = {topic='Manual', script='Programs'}
 all = true
 format = 'markdown'
