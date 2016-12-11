@@ -1,12 +1,14 @@
 local unpack = unpack or table.unpack -- luacheck: ignore 113
 
 local function iter(input, iterator)
-	if not iterator then
-		return iter(input, pairs)
-	end
 	if type(input) == "function" then
 		return input
+	elseif type(input) == "string" then
+		return input:gmatch(".")
 	else
+		if not iterator then
+			return iter(input, pairs)
+		end
 		return iterator(input)
 	end
 end

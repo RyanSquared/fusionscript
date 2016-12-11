@@ -4,12 +4,14 @@ local table = require("fusion.stdlib.table")
 local unpack = unpack or table.unpack -- luacheck: ignore 113
 
 local function iter(input, iterator)
-	if not iterator then
-		return iter(input, pairs)
-	end
 	if type(input) == "function" then
 		return input
+	elseif type(input) == "string" then
+		return input:gmatch(".")
 	else
+		if not iterator then
+			return iter(input, pairs)
+		end
 		return iterator(input)
 	end
 end
@@ -40,16 +42,28 @@ end
 
 local function cycle(pattern)
 	while true do
-		for k, v in pairs(pattern) do
-			coroutine.yield(k, v)
+		local _iter = iter(pattern)
+		while true do
+			local x = {_iter()}
+			if x[1] then
+				coroutine.yield(unpack(x))
+			else
+				break
+			end
 		end
 	end
 end
 
 local function icycle(pattern)
 	while true do
-		for k, v in pairs(pattern) do
-			coroutine.yield(k, v)
+		local _iter = iter(pattern, ipairs)
+		while true do
+			local x = {_iter()}
+			if x[1] then
+				coroutine.yield(unpack(x))
+			else
+				break
+			end
 		end
 	end
 end
@@ -101,18 +115,13 @@ end
 
 local function chain(...)
 	for k, v in pairs({...}) do -- luacheck: ignore 213
-		if type(v) == "function" then
-			while true do
-				local x = {v()}
-				if x[1] then
-					coroutine.yield(unpack(x))
-				else
-					break
-				end
-			end
-		else
-			for _k, _v in pairs(v) do -- luacheck: ignore 213
-				coroutine.yield(_k, _v)
+		v = iter(v)
+		while true do
+			local x = {v()}
+			if x[1] then
+				coroutine.yield(unpack(x))
+			else
+				break
 			end
 		end
 	end
@@ -120,18 +129,13 @@ end
 
 local function ichain(...)
 	for k, v in ipairs({...}) do -- luacheck: ignore 213
-		if type(v) == "function" then
-			while true do
-				local x = {v()}
-				if x[1] then
-					coroutine.yield(unpack(x))
-				else
-					break
-				end
-			end
-		else
-			for _k, _v in ipairs(v) do -- luacheck: ignore 213
-				coroutine.yield(_k, _v)
+		v = iter(v, ipairs)
+		while true do
+			local x = {v()}
+			if x[1] then
+				coroutine.yield(unpack(x))
+			else
+				break
 			end
 		end
 	end
