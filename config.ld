@@ -6,8 +6,8 @@ description = 'The programming language of ultimate dankliness'
 title = 'FusionScript &middot; Documentation'
 style = '!pale'
 topics = {
-	'docs/_topics/FusionScript.md';
-	'docs/_topics/Syntax.md';
+	'.topics/FusionScript.md';
+	'.topics/Syntax.md';
 }
 kind_names = {topic='Manual', script='Programs'}
 all = true
