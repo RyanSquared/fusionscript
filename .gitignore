@@ -51,3 +51,6 @@ luac.out
 
 # Vim editing files
 *.swp
+
+# Lua local repositories
+luarocks
