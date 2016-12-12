@@ -4,7 +4,7 @@ dir = 'docs'
 project = 'FusionScript'
 description = 'The programming language of ultimate dankliness'
 title = 'FusionScript &middot; Documentation'
-style = '!pale'
+style = 'docs/style'
 topics = {
 	'.topics/FusionScript.md';
 	'.topics/Syntax.md';
