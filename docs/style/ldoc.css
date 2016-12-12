@@ -88,10 +88,6 @@ h2 { font-size: 1.25em; }
 h3 { font-size: 1.15em; }
 h4 { font-size: 1.06em; }
 
-a:link { font-weight: bold; color: #03a9f4; text-decoration: none; }
-a:visited { font-weight: bold; color: #03a9f4; text-decoration: none; }
-a:link:hover { text-decoration: underline; }
-
 hr {
     color:#cccccc;
     background: #00007f;
@@ -289,3 +285,19 @@ pre .number { color: #ff9800; }
 pre .operator { color: #3f51b5; font-weight: bold; }
 pre .global { color: #18ffff; }
 
+a {
+	color: #ddf;
+	text-decoration: none;
+	transition: all 0.75s ease-in;
+	-o-transition: all 0.75s ease-in;
+	-moz-transition: all 0.75s ease-in;
+	-webkit-transition: all 0.75s ease-in;
+}
+a:hover {
+	color: #4096ee;
+	cursor: default;
+	transition: all 0.5s ease-out;
+	-o-transition: all 0.5s ease-out;
+	-moz-transition: all 0.5s ease-out;
+	-webkit-transition: all 0.5s ease-out;
+}
