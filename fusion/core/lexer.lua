@@ -292,7 +292,10 @@ local pattern = re.compile([[
 		{| {:name: name :} ws '=' ws (expression / r) |} /
 		expression
 
-	ws <- %s* ('--' [^]] .. '\r\n' .. [[]* ]] .. '\r\n' .. [[?)? %s*
+	ws <-
+		('#!' [^]] .. '\r\n' .. [[]*)?
+		(%s* '--' [^]] .. '\r\n' .. [[]* ]] .. '\r\n' .. [[?)*
+		%s*
 	space <- %s+
 ]], defs);
 
