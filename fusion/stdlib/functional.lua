@@ -145,10 +145,12 @@ end
 -- @usage print(any({nil, true, false})); -- true
 local function any(fn, input)
 	if not fn or not input then
-		return any(input, truthy)
+		return any(truthy, fn or input)
 	end
 	for k, v in iter(input) do -- luacheck: ignore 213
-		if v and fn(v) or fn(k) then
+		if v ~= nil and fn(v) then
+			return true
+		elseif v == nil and fn(k) then
 			return true
 		end
 	end
@@ -162,11 +164,13 @@ end
 -- @treturn boolean
 -- @usage print(all(chain(1::50, {false}))); -- false
 local function all(fn, input)
-	if not fn then
-		return all(input, truthy)
+	if not fn or not input then
+		return all(truthy, fn or input)
 	end
-	for k, v in pairs(input) do -- luacheck: ignore 213
-		if not fn(v) then
+	for k, v in iter(input) do -- luacheck: ignore 213
+		if v ~= nil and not fn(v) then
+			return false
+		elseif v == nil and not fn(k) then
 			return false
 		end
 	end
@@ -181,9 +185,9 @@ end
 -- @usage print(sum(1::50));
 local function sum(input, negative)
 	if negative then
-		return reduce(function(a, b) return a + b end, input)
-	else
 		return reduce(function(a, b) return a - b end, input)
+	else
+		return reduce(function(a, b) return a + b end, input)
 	end
 end
 
