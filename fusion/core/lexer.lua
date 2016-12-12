@@ -46,7 +46,7 @@ defs.err = function(pos, char)
 		};
 		context = current_file:sub(math.max(pos - 2, line_start),
 			math.min(pos + 5, current_file:match("()$")));
-		quick = "semicolon"
+		quick = "syntax"
 	}
 	if current_file:match("^[A-Za-z_]", pos) then
 		-- found text, match as context
@@ -85,7 +85,7 @@ defs.semicolon = function(pos)
 			x = pos - line_start - 1;
 		};
 		context = current_file:sub(pos - 7, pos);
-		quick = "syntax"
+		quick = "semicolon"
 	}
 	if current_file:match("^[A-Za-z_]", pos) then
 		local start_pos = pos
@@ -288,7 +288,7 @@ local pattern = re.compile([[
 		table_field (ws 'for' ws (variable_list / r))? ws 'in' ws (expression / r)
 	|}
 	table_field <-
-		{| '[' ws {:index: variable :} ws ']' ws '=' ws (expression / r) |} /
+		{| '[' ws {:index: expression :} ws ']' ws '=' ws (expression / r) |} /
 		{| {:name: name :} ws '=' ws (expression / r) |} /
 		expression
 
