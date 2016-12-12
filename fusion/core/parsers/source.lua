@@ -545,6 +545,9 @@ function parser.read_file(file, dump)
 		append = function(line) output[#output + 1] = line end
 	end
 	local source_file = io.open(file)
+	if not source_file:read("*l"):match("^#!") then
+		source_file:seek("set")
+	end
 	local node = lexer:match(source_file:read("*a"))
 	source_file:close()
 	parser.compile(coroutine.wrap(function()
