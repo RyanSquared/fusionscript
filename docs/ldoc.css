@@ -110,6 +110,7 @@ p.name {
 pre {
     background-color: #373b44;
     border: 1px solid #616161;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
     padding: 10px;
     margin: 10px 0 10px 0;
     overflow: auto;
@@ -226,6 +227,7 @@ table.index td { text-align: left; vertical-align: top; }
 }
 
 table.module_list {
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
     border-width: 1px;
     border-style: solid;
     border-color: #373b44;
@@ -241,6 +243,7 @@ table.module_list td.name { background-color: #373b44; ; min-width: 200px; }
 table.module_list td.summary { width: 100%; }
 
 table.function_list {
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
     border-width: 1px;
     border-style: solid;
     border-color: #373b44;
