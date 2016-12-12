@@ -8,9 +8,9 @@ function table.copy(t0)
 	return t1
 end
 
-function table.from_generator(iterable)
+function table.from_generator(iterable, ...)
 	local t0 = {}
-	for k, v in iterable do
+	for k, v in iterable, ... do
 		if v then
 			t0[k] = v
 		else
