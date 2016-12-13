@@ -108,7 +108,9 @@ local pattern = re.compile([[
 	statement <- (
 		function_definition
 	) / (
-		{|{:type: {'using'} :} ws {[A-Za-z]+} |} /
+		{|{:type: {'using'} :} (space using_name / ws '{' ws
+			using_name (ws ',' ws using_name)*
+		ws '}' / r) |} /
 		assignment /
 		function_call /
 		return /
@@ -121,6 +123,7 @@ local pattern = re.compile([[
 		if /
 		class
 	)
+	using_name <- {[A-Za-z]+}
 	keyword <- 'local' / 'new' / 'extends' / 'break' / 'return' / 'yield' /
 		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
 		'in' / 'async'
