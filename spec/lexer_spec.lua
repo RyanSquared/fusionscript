@@ -514,4 +514,11 @@ describe("lexer", function()
 			}}
 		}})
 	end)
+	it("can parse `using` statements", function()
+		assert.same(lexer:match("using fnl;"), {{type = "using", "fnl"}})
+	end)
+	it("can parse multi-directive `using` statements", function()
+		assert.same(lexer:match("using {fnl, itr};"), {{type = "using",
+			"fnl", "itr"}})
+	end)
 end)
