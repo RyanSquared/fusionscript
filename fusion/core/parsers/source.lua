@@ -55,14 +55,17 @@ handlers['nil'] = function() return 'nil' end
 handlers['vararg'] = function(node) return '...' end -- luacheck: ignore 212
 
 handlers['using'] = function(node)
-	local directive = node[1]
-	if directive == "class" then
-		return 'local class = require("fusion.stdlib.class")'
-	elseif directive == "fnl" then
-		return 'local fnl = require("fusion.stdlib.functional")'
-	elseif directive == "itr" then
-		return 'local itr = require("fusion.stdlib.iterable")'
+	local output = {}
+	for _, directive in ipairs(node) do
+		if directive == "class" then
+			output[#output + 1] = 'local class = require("fusion.stdlib.class")'
+		elseif directive == "fnl" then
+			output[#output + 1] = 'local fnl = require("fusion.stdlib.functional")'
+		elseif directive == "itr" then
+			output[#output + 1] = 'local itr = require("fusion.stdlib.iterable")'
+		end
 	end
+	return table.concat(output, l"\n")
 end
 
 --- Convert a function field in a class to a lambda table assignment.
