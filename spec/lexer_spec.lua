@@ -207,11 +207,10 @@ describe("lexer", function()
 		assert.same(lexer:match("table.instance:method<subclass>(argument);"), {
 			{type = "function_call",
 				{type = "variable", "table", "instance"}, -- tables parse -this- way
-				{type = "variable", "method"},
 				expression_list = {
 					{type = "variable", "argument"}
 				},
-				has_self = true,
+				has_self = "method",
 				index_class = "subclass"
 			}
 		})
@@ -520,5 +519,9 @@ describe("lexer", function()
 	it("can parse multi-directive `using` statements", function()
 		assert.same(lexer:match("using {fnl, itr};"), {{type = "using",
 			"fnl", "itr"}})
+	end)
+	it("can parse LPeg regex literals", function()
+		assert.same(lexer:match("return /test/;"), {{type="return",
+			expression_list = {{type="re", "test"}}}})
 	end)
 end)
