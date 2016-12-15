@@ -177,8 +177,8 @@ describe("lexer", function()
 		assert.same(lexer:match("func(a in b);"), {{type = "function_call",
 			{type = "variable", "func"},
 			generator = {
-				{type = "variable", "a"},
 				{type = "variable", "b"},
+				expression_list = {{type = "variable", "a"}}
 			}
 		}})
 	end)
@@ -186,8 +186,8 @@ describe("lexer", function()
 		assert.same(lexer:match("func(a for a in b);"), {{type = "function_call",
 			{type = "variable", "func"},
 			generator = {
-				{type = "variable", "a"},
 				{type = "variable", "b"},
+				expression_list = {{type = "variable", "a"}},
 				variable_list = {{type = "variable", "a"}}
 			}
 		}})
@@ -318,7 +318,7 @@ describe("lexer", function()
 		})
 	end)
 	it("can parse function definitions", function()
-		assert.same(lexer:match("test(a, b='c')-> return a, b;"), {
+		assert.same(lexer:match("test(a, b='c', ...)-> return a, b;"), {
 			{type = "function_definition",
 				{type = "variable", "test"},
 				{
@@ -326,7 +326,8 @@ describe("lexer", function()
 					{
 						name = "b",
 						default = {type = "sqstring", "c"}
-					}
+					},
+					{name = "..."} -- vararg
 				},
 				{type = "return",
 					expression_list = {
