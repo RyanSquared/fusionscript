@@ -19,7 +19,10 @@ local function class(new, extends, name)
 			return name
 		end;
 		__call = function(this_class, ...) -- luacheck: ignore 212
-			local instance = setmetatable({}, base_mt)
+			local instance = setmetatable({
+				__class = new;
+				__super = extends;
+			}, base_mt)
 			instance.__args = {}
 			for i, v in ipairs({...}) do
 				local _type = type(v)
