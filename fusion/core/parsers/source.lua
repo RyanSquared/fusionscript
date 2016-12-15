@@ -12,7 +12,7 @@ local last_node = {} -- luacheck: ignore 231
 --- Transform a node using the registered handler.
 -- @tparam table node
 local function transform(node, ...)
-	assert(node.type, ("Bad node: %s"):format(node))
+	assert(node.type, ("Bad node: %s"):format(tostring(node)))
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	last_node = node
 	return handlers[node.type](node, ...)
