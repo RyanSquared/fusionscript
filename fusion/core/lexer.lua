@@ -190,7 +190,7 @@ local pattern = re.compile([[
 	|}
 
 	function_call <- {| {:type: '' -> 'function_call' :} (
-		variable ({:has_self: ':' -> true :} (variable / r) ws
+		(variable / literal) ({:has_self: ':' {name / r} :} ws
 		{:index_class: ws '<' ws {expression} ws '>' :}? )?
 		) ws '(' ws function_call_body? ws ')'
 	|}
@@ -243,6 +243,7 @@ local pattern = re.compile([[
 	name <- (! (keyword [^A-Za-z0-9_])) {[A-Za-z_][A-Za-z0-9_]*}
 
 	literal <-
+		re /
 		table /
 		{| {:type: '' -> 'vararg' :} { '...' } |} /
 		range /
@@ -252,6 +253,9 @@ local pattern = re.compile([[
 			('true' / 'false') -> bool
 		|} /
 		{| {:type: {'nil'} :} |}
+	re <- {| {:type: '' -> 're' :}
+		'/' {('\' . / [^/]+)*} ('/' / r)
+	|}
 	range <- {| {:type: '' -> 'range' :}
 		{:start: number :} '::' {:stop: number :} ('::' {:step: number :})?
 	|}
