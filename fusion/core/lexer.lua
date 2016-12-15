@@ -161,7 +161,8 @@ local pattern = re.compile([[
 		function_argument ((! ')') ws (',' / r) ws function_argument)*
 	|}
 	function_argument <- {|
-		{:name: ((! ")") (name / r)) :} (ws '=' ws {:default: expression / r:})?
+		{:name: ((! ")") (name / {'...'} / r)) :} (ws '=' ws
+		{:default: expression / r:})?
 	|}
 
 	while_loop <- {| {:type: '' -> 'while_loop' :}
@@ -195,7 +196,8 @@ local pattern = re.compile([[
 		) ws '(' ws function_call_body? ws ')'
 	|}
 	function_call_body <- {:generator: {|
-		expression (ws 'for' ws (variable_list / r))? ws 'in' ws (expression / r)
+		expression_list (ws 'for' ws (variable_list / r))? ws 'in' ws (expression
+		/ r)
 	|} :} / function_args
 	function_args <- expression_list?
 
