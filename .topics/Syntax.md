@@ -11,8 +11,8 @@ and know the basic syntax of Lua, C, and Python.
 
 ## Literals
 
-There are five literals - excluding functions - in FusionScript: Numbers,
-strings, booleans, `nil`, and tables.
+There are seven literals - excluding functions - in FusionScript: Numbers,
+strings, booleans, `nil`, tables, ranges, and patterns.
 
 ### Numbers
 
@@ -69,6 +69,32 @@ expression; or a variable name, `=`, and an expression.
     [true] = 7,
     asdf = "peanut butter"
 }
+```
+
+### Ranges
+
+Ranges are a quick way to make an iterator, like a numeric `for` loop. They
+don't exist in Lua and require the `using itr;` statement somewhere before the
+range is constructed to be used. The syntax for ranges is simple: a _start_, a
+_stop_, and optionally a _step_ separated with two semicolons.
+
+```fuse
+using itr;
+for (i in 1::10::2)
+	print(i); -- odds from 1 to 10
+```
+
+### Patterns
+
+Patterns use the LPeg `re` module to provide a quick way to make LPeg patterns
+without having to manually type out `re.compile()`. They're not like "normal"
+regex (see [here](www.inf.puc-rio.br/~roberto/lpeg/re.html) for more info on
+why) but still provide a powerful interface to matching text. Similar to the
+range syntax, patterns require a `using re;` statement.
+
+```fuse
+using re;
+print(/{[A-Za-z]+}/:match("test"))
 ```
 
 ## Expressions
