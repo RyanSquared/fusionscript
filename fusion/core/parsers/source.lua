@@ -54,16 +54,17 @@ local _tablegen_level = 0
 handlers['nil'] = function() return 'nil' end
 handlers['vararg'] = function(node) return '...' end -- luacheck: ignore 212
 
+local dirs = {
+	class = 'local class = require("fusion.stdlib.class")';
+	fnl = 'local fnl = require("fusion.stdlib.functional")';
+	itr = 'local itr = require("fusion.stdlib.iterable")';
+	re = 'local re = require("re")';
+}
+
 handlers['using'] = function(node)
 	local output = {}
 	for _, directive in ipairs(node) do
-		if directive == "class" then
-			output[#output + 1] = 'local class = require("fusion.stdlib.class")'
-		elseif directive == "fnl" then
-			output[#output + 1] = 'local fnl = require("fusion.stdlib.functional")'
-		elseif directive == "itr" then
-			output[#output + 1] = 'local itr = require("fusion.stdlib.iterable")'
-		end
+		output[#output + 1] = dirs[directive]
 	end
 	return table.concat(output, l"\n")
 end
@@ -81,6 +82,10 @@ local function transform_class_function(node)
 			is_self = node.is_self;
 		}
 	}
+end
+
+handlers['re'] = function(node)
+	return 're.compile(' .. ("%q"):format(node[1]) .. ')'
 end
 
 handlers['class'] = function(node)
@@ -461,7 +466,6 @@ handlers['function_call'] = function(node)
 			node.generator[2];
 			{type = "function_call";
 				node[1];
-				node[2];
 				has_self = node.has_self;
 				index_class = node.index_class;
 				expression_list = {node.generator[1]};
@@ -476,9 +480,9 @@ handlers['function_call'] = function(node)
 				node.expression_list = node.expression_list or {}
 				table.insert(node.expression_list, 1, node[1])
 				node[1] = {type = "variable", node.index_class}
-				name = transform(node[1]) .. "." .. transform(node[2])
+				name = transform(node[1]) .. "." .. node.has_self
 			else
-				name = transform(node[1]) .. ":" .. transform(node[2])
+				name = transform(node[1]) .. ":" .. node.has_self
 			end
 		else
 			name = transform(node[1])
