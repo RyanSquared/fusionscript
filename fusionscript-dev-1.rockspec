@@ -13,7 +13,8 @@ description = {
 
 dependencies = {
 	"lua >= 5.1",
-	"lpeg >= 1.0"
+	"lpeg >= 1.0",
+	"luafilesystem"
 }
 
 local default = "source"
