@@ -20,7 +20,7 @@ install:
   - luarocks make
 
 script:
-  - luacheck . --no-color --codes
+  - luacheck . --no-color --codes --exclude-files spec/out
   - busted -o plainTerminal
 
 cache:
