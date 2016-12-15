@@ -1,0 +1,50 @@
+-- Function calls AND assignment --
+
+-- basic function calls
+
+a();
+a(b());
+a.b();
+a[b]();
+
+-- __index based function calls --
+
+a:b();
+a.b:c();
+a.b:c<d>();
+a:b<c>();
+
+-- generated function loops --
+
+print(line in io.lines("test"));
+
+print(line for line in io.lines("test"));
+
+print(k, v for k, v in pairs(x));
+
+-- basic function definitions --
+
+a_1()->
+	return b;
+
+a_2()-> b
+
+a_3()-> {
+	return b;
+}
+
+-- table based function definitions --
+
+abcd.ef()-> {
+
+}
+
+a[b]()-> {
+
+}
+
+-- arguments for functions --
+
+a(b, c, d = 5, ...)-> {
+
+}

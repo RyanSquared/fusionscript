@@ -1,0 +1,61 @@
+using {itr, range};
+
+-- numbers --
+
+local a = 1;
+local b = 1.0;
+local c = 25e7;
+local d = 55E2;
+local e = 0xDEADBEEF;
+local f = 0x1P50;
+
+-- strings --
+
+local a = 'tes\t';
+local b = "tes\t";
+local c = "tes\\t"; -- TODO: interpolation?
+local d = [[
+this is a long string
+]];
+
+-- booleans --
+
+local a = true;
+local b = false;
+local c = (! true); -- false
+local d = (! false); -- true
+
+-- nil --
+
+local a = nil;
+
+-- tables --
+
+-- any value can be a key
+
+local a = {
+	1,
+	b = 2,
+	[c] = 3,
+	["d"] = 4,
+	[{}] = 5,
+	[true] = 6,
+	[false] = 7,
+	[1::2] = 8
+};
+
+-- generated tables --
+
+local array = {k in 1::5};
+local transformed_array = {(^ 2 k) for k in 1::5};
+local copy_transformed_array = {[k] = v for k, v in pairs(transformed_array)};
+
+-- ranges --
+
+local a = 1::5;
+local b = 5::1::-1;
+local c = 1::10::2;
+
+-- patterns --
+
+local a = /{[A-Za-z]+}/; -- indexing covered in statements.fuse

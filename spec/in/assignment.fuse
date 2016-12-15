@@ -1,0 +1,29 @@
+-- assign literal to variable --
+
+local a = 5;
+
+-- assign literal to global variable --
+
+b = 0;
+
+-- assign variable to variable --
+
+local c = a;
+
+-- assign variable to global variable --
+
+local d = b;
+
+-- assign value to self[name] --
+
+@c = 7;
+
+-- assign variable if not assigned in function definition --
+
+asdf(a = 5)-> {
+
+}
+
+-- destructure values into assignment, local only --
+
+local {a, b} = c;

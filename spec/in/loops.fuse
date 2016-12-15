@@ -1,0 +1,61 @@
+using itr;
+
+for (i in 1::10) {
+
+}
+
+for (i=1, 10) {
+
+}
+
+for (i in 10::1::-1) {
+
+}
+
+for (i=10, 1, -1) {
+
+}
+
+for (i=1, (# x)) {
+
+}
+
+for (x in y) {
+
+}
+
+for (x in y()) {
+
+}
+
+for (x in (y())()) {
+
+}
+
+for (x, y in z()) {
+
+}
+
+while true {
+
+}
+
+while (true) {
+	
+}
+
+while x {
+
+}
+
+while (x) {
+
+}
+
+while x() {
+
+}
+
+while (x()) {
+
+}

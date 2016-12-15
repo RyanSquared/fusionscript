@@ -1,0 +1,60 @@
+-- basic conditions --
+
+if a {
+
+}
+
+if (a) {
+
+}
+
+if (! a) {
+
+}
+
+if x() {
+
+}
+
+if (! x()) {
+
+}
+
+-- else --
+
+if a {
+	
+} else {
+
+}
+
+if a() {
+	
+} else {
+
+}
+
+if (! a) {
+	
+} else {
+
+}
+
+if (! a()) {
+	
+} else {
+
+}
+
+-- elseif conditions --
+
+
+if a {
+
+} elseif b() {
+
+} elseif (! c) {
+
+} else {
+
+}
