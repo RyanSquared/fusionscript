@@ -138,14 +138,8 @@ end
 -- @usage for (char in chain("ABCD", "EFGH")) print(char); -- A B C D E F G H
 local function chain(...)
 	for k, v in pairs({...}) do -- luacheck: ignore 213
-		v = iter(v)
-		while true do
-			local x = {v()}
-			if x[1] then
-				coroutine.yield(unpack(x))
-			else
-				break
-			end
+		for _k, _v in iter(v) do
+			coroutine.yield(_k, _v)
 		end
 	end
 end
