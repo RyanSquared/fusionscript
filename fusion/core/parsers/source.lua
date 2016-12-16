@@ -163,13 +163,8 @@ handlers['table'] = function(node)
 				named[#named + 1] = l("[%s] = %s;"):format(transform(item.index),
 					transform(item[1]))
 			else
-				if item.name:match("^[A-Za-z_][A-Za-z0-9_]*$") then
-					named[#named + 1] = l("%s = %s;"):format(item.name,
-						transform(item[1]))
-				else
-					named[#named + 1] = l("[%q] = %s;"):format(item.name,
-						transform(item[1]))
-				end
+				named[#named + 1] = l("%s = %s;"):format(item.name,
+					transform(item[1]))
 			end
 		end
 	end
@@ -345,7 +340,7 @@ handlers['lambda'] = function(node)
 	if node.is_self then
 		args[1] = "self"
 	end
-	if not node[1].type then -- empty parameter list
+	if node[1] and not node[1].type then -- empty parameter list
 		for _, arg in ipairs(node[1]) do
 			if arg.default then
 				defaults[arg.name] = transform(arg.default)
@@ -487,11 +482,7 @@ handlers['function_call'] = function(node)
 		else
 			name = transform(node[1])
 		end
-		if node.expression_list then
-			return name .. "(" .. transform_expression_list(node) .. ")"
-		else
-			return name .. "()"
-		end
+		return name .. "(" .. transform_expression_list(node) .. ")"
 	end
 end
 
@@ -562,7 +553,9 @@ function parser.read_file(file, dump)
 			coroutine.yield(value)
 		end
 	end), append)
-	return table.concat(output, "\n") .. "\n" -- EOL at EOF
+	if not dump then
+		return table.concat(output, "\n") .. "\n" -- EOL at EOF
+	end
 end
 
 --- Load FusionScript code from a file and return a function to run the code.
