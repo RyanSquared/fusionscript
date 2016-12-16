@@ -106,7 +106,8 @@ local pattern = re.compile([[
 	statement_list <- ws {| ((! '}') rstatement ws)* |}
 	statement_block <- {| {:type: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
-		function_definition
+		function_definition /
+		class
 	) / (
 		{|{:type: {'using'} :} (space using_name / ws '{' ws
 			using_name (ws ',' ws using_name)*
@@ -120,8 +121,7 @@ local pattern = re.compile([[
 		while_loop /
 		numeric_for_loop /
 		iterative_for_loop /
-		if /
-		class
+		if
 	)
 	using_name <- {[A-Za-z]+}
 	keyword <- 'local' / 'new' / 'extends' / 'break' / 'return' / 'yield' /
