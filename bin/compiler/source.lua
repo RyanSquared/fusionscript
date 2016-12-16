@@ -44,7 +44,7 @@ while arg_index <= #args do
 	if _arg == "-p" then
 		arg_index = arg_index + 1
 		for i=arg_index, #args do
-			print(parser.read_file(args[i]))
+			parser.read_file(args[i], true)
 		end
 		break
 	elseif _arg == "--help" or _arg == "-h" then
