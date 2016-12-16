@@ -449,6 +449,11 @@ describe("lexer", function()
 		assert.same(lexer:match("new x {}"), {{type = "class", {},
 			name = {type = "variable", "x"}}})
 	end)
+	it("can parse local classes", function()
+		assert.same(lexer:match("local new x {}"), {{type = "class", {},
+			is_local = true,
+			name = {type = "variable", "x"}}})
+	end)
 	it("can parse classes with methods", function()
 		assert.same(lexer:match("new x { y()-> z }"), {{type = "class",
 			{
