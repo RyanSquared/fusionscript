@@ -24,9 +24,20 @@ end
 function a_3()
 	return b
 end
-function abcd.ef()
+function x()
+	return coroutine.wrap(function()
+		coroutine.yield(a,b,c)
+	end)
+end
+function abcd.ef(self)
 
 end
+x = (function()
+	return y
+end)
+y = (function()
+	return z
+end)
 a[b] = function()
 
 end

@@ -4,6 +4,12 @@ for (i in 1::10) {
 
 }
 
+for (i in 1::10)
+	print(i);
+
+for (i=1, 10)
+	print(i);
+
 for (i=1, 10) {
 
 }
@@ -37,8 +43,11 @@ for (x, y in z()) {
 }
 
 while true {
-
+	break;
 }
+
+while true
+	print("test");
 
 while (true) {
 	

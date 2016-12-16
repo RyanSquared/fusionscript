@@ -1,6 +1,6 @@
 local itr = require("fusion.stdlib.iterable")
 local a = 1
-local b = 1
+local b = 1.500000
 local c = 250000000
 local d = 5500
 local e = 0xdeadbeef

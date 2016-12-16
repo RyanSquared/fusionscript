@@ -33,11 +33,22 @@ a_3()-> {
 	return b;
 }
 
+-- asynchronous function definitions
+
+async x()->
+	yield a, b, c;
+
 -- table based function definitions --
 
-abcd.ef()-> {
+abcd.ef()=> {
 
 }
+
+x = ()-> {
+	return y;
+};
+
+y = ()-> z;
 
 a[b]()-> {
 

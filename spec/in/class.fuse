@@ -3,19 +3,25 @@ using class;
 -- basic class --
 
 new Example {
-	__init(a = 5)->
+	__init(a = 5)=>
 		@a = a;
-	print()->
+	print()=>
 		print(@a);
 }
 
 a = Example();
 b = Example(15);
 
+-- local class --
+
+local new ExampleLocal {
+
+}
+
 -- extension class --
 
 new ExampleToo extends Example {
-	__init(a, b = 10)->
+	__init(a, b = 10)=>
 		@a, @b = a, b;
 	print()->
 		print(@b);
@@ -28,6 +34,6 @@ c:print<Example>(); -- @a
 -- superinitialization --
 
 new ExampleThree extends ExampleToo {
-	__init(a, b)->
+	__init(a, b)=>
 		self:__init<ExampleToo>(a, b);
 }
