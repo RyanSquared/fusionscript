@@ -8,9 +8,10 @@ local unpack = unpack or table.unpack -- luacheck: ignore 113
 -- @tparam table input Table to iterate over (can also be iterator function)
 -- @tparam function iterator Table iterator to use (`pairs()` by default)
 -- @treturn function
-local function iter(input, iterator)
+local function iter(input, ...)
+	local iterator = ...
 	if type(input) == "function" then
-		return input
+		return input, ...
 	elseif type(input) == "string" then
 		return input:gmatch(".")
 	else
@@ -39,18 +40,13 @@ end
 -- @tparam iter input
 -- @treturn iter Initialized iterator
 -- @usage print(x in map(((v)-> v ^ 2), 1::10)); -- squares
-local function map(fn, input, ...)
-	local _args = {...}
-	for i, v in ipairs(_args) do
-		_args[i] = iter(v)
-	end
+local function map(fn, input)
 	for k, v in iter(input) do
-		local t0 = {}
-		for i, _v in ipairs(_args) do -- luacheck: ignore 213
-			table.insert(t0, _v())
+		if v then
+			coroutine.yield(k, fn(v))
+		else
+			coroutine.yield(fn(k))
 		end
-		input[k] = fn(v, unpack(t0))
-		coroutine.yield(k, fn(v, unpack(t0)))
 	end
 end
 
