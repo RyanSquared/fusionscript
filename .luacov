@@ -1,0 +1,6 @@
+return {
+	reportfile = "luacov.report.out";
+	include = {
+		"/fusion/.+$";
+	};
+}
