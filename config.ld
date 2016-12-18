@@ -9,6 +9,6 @@ topics = {
 	'.topics/FusionScript.md';
 	'.topics/Syntax.md';
 }
-kind_names = {topic='Manual', script='Programs'}
+kind_names = {script='Programs'}
 all = true
 format = 'markdown'
