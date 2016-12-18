@@ -131,12 +131,13 @@ describe("lexer", function()
 		})
 	end)
 	it("can parse complex expressions", function()
-		assert.same(lexer:match("a = (+ (^ b c) (/ d e));"), {
+		assert.same(lexer:match("a = (?: false (^ b c) (/ d e));"), {
 			{type = "assignment",
 				variable_list = {
 					{type = "variable", "a"}
 				},
 				expression_list = {{type = "expression",
+					{type = "boolean", false},
 					{type = "expression",
 						{type = "variable", "b"},
 						{type = "variable", "c"},
@@ -147,7 +148,7 @@ describe("lexer", function()
 						{type = "variable", "e"},
 						operator = "/",
 					},
-					operator = "+",
+					operator = "?:",
 				}}
 			}
 		})

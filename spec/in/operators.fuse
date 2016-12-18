@@ -35,3 +35,16 @@ b = (|| d e);
 -- misc --
 
 a = (.. "hello" 'world');
+
+-- ternary operator --
+
+using ternary;
+
+async test()-> {
+	yield true;
+	error(); -- will error if using an `a() and b or not a() and c` method
+}
+
+a = test();
+
+print((?: a() "is-working" "is-not-working"));
