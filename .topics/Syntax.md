@@ -163,6 +163,12 @@ index of a table
   - **Note:** Numbers will be converted to a string if either operator is
   a string.
 
+### Ternary Expression
+
+The `?:` operator is the only operator that can currently be used in with a
+ternary expression; it works like it would in C but requires a `using ternary;`
+statement before the line.
+
 ## Names
 
 Names are how you access a variable. You can use any name that starts with an
