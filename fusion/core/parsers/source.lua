@@ -3,6 +3,7 @@
 
 local lexer = require("fusion.core.lexer")
 local lfs = require("lfs")
+local unpack = unpack or table.unpack -- luacheck: ignore 113
 
 local indent = 0
 local parser = {}
@@ -59,6 +60,7 @@ local dirs = {
 	fnl = 'local fnl = require("fusion.stdlib.functional")';
 	itr = 'local itr = require("fusion.stdlib.iterable")';
 	re = 'local re = require("re")';
+	ternary = 'local ternary = require("fusion.stdlib.ternary")';
 }
 
 handlers['using'] = function(node)
@@ -124,8 +126,7 @@ handlers['table'] = function(node)
 						generator[1].index;
 						type = "variable";
 					}};
-					expression_list = {generator[1][1]};
-				};
+					expression_list = {generator[1][1]}};
 				type = "iterative_for_loop";
 				variable_list = generator.variable_list;
 			}))
@@ -139,8 +140,7 @@ handlers['table'] = function(node)
 						("#_generator_%s + 1"):format(_tablegen_level);
 						type = "variable";
 					}};
-					expression_list = {generator[1]};
-				};
+					expression_list = {generator[1]}};
 				type = "iterative_for_loop";
 				variable_list = generator.variable_list or {generator[1]};
 			}))
@@ -376,6 +376,12 @@ local operator_transformations = {
 	["!"] = "not "; -- rare case; usually symbols instead of kw,
 }
 
+local ternary_operator_transformations = {
+	['?:'] = function(condition, is_if, is_else)
+		return ("(ternary(%s, %s, %s))"):format(condition, is_if, is_else)
+	end
+}
+
 handlers['expression'] = function(node)
 	if operator_transformations[node.operator] then
 		node.operator = operator_transformations[node.operator]
@@ -385,8 +391,7 @@ handlers['expression'] = function(node)
 		for i = 1, #node do
 			expr[#expr + 1] = transform(node[i])
 		end
-		error("too many values in expression", '(' .. node.operator .. ' ' ..
-			table.concat(node, ' ') ')')
+		return ternary_operator_transformations[node.operator](unpack(expr))
 	elseif #node == 2 then
 		return ("(%s %s %s)"):format(transform(node[1]), node.operator,
 			transform(node[2]))
