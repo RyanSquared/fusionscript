@@ -1,14 +1,12 @@
 # FusionScript [![Build Status](https://travis-ci.org/ChickenNuggers/FusionScript.svg?branch=master)](https://travis-ci.org/ChickenNuggers/FusionScript)
 The programming language of ultimate dankliness
 
-**Warning:** This project is not yet released and possibly has many bugs. If
-your code does not compile, it is *very* likely a problem in the compiler
+**Warning:** This project is very recently released and possibly has many bugs.
+If your code does not compile, it is *very* likely a problem in the compiler
 instead of your code. Please feel free to add an issue if any errors arise that
 you believe were caused by the compiler.
 
 ## Commands
-
-As of 01-12-2016, no commands have any command line flags.
 
 ### `fusion-ast`: Compile a file into an abstract syntax tree (AST).
 
@@ -55,6 +53,9 @@ The `fusionc-source` compiler can take FusionScript files and compile them to
 formatted Lua source. Because the compilation is from source to source, some
 things may look awkwardly formatted when compiled. As of 01-12-2016, there is
 no way to automatically compile FusionScript code to Lua bytecode.
+
+There's a single command line flag that allows the output of the parser to be
+printed to the standard output, which is `-p`.
 
 ## Examples
 
@@ -118,11 +119,10 @@ assert(bob:withdraw(math.max)); -- errors
 local {Async} = require("core.async");
 local {TCPSocket, TCPServer} = require("core.async.net");
 
---
- The server MUST be started before the asynchronization
- due to the fact the client can attempt connecting before
- the server is initialized.
- ;
+
+-- The server MUST be started before the asynchronization
+-- due to the fact the client can attempt connecting before
+-- the server is initialized.
 
 server = TCPServer("localhost", 9999);
 
