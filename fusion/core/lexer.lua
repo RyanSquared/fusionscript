@@ -107,7 +107,8 @@ local pattern = re.compile([[
 	statement_block <- {| {:type: '' -> 'block' :} '{' ws statement_list ws '}' |}
 	statement <- (
 		function_definition /
-		class
+		class /
+		interface
 	) / (
 		{|{:type: {'using'} :} (space using_name / ws '{' ws
 			using_name (ws ',' ws using_name)*
@@ -123,7 +124,7 @@ local pattern = re.compile([[
 		iterative_for_loop /
 		if
 	)
-	using_name <- {[A-Za-z]+}
+	using_name <- {[A-Za-z]+} / {'*'}
 	keyword <- 'local' / 'class' / 'extends' / 'break' / 'return' / 'yield' /
 		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
 		'in' / 'async'
@@ -131,8 +132,9 @@ local pattern = re.compile([[
 	r <- ({} {.}) -> err
 	class <- {| {:is_local: 'local' -> true space :}?
 		{:type: {'class'} :} space {:name: variable / r :}
-		(ws 'extends' ws {:extends: variable / r :})? ws
-		'{' ws {| ((! '}') (class_field / r) ws)* |} ws '}'
+		(ws 'extends' ws {:extends: variable / r :})?
+		(ws 'implements' ws {:implements: variable / r :})?
+		ws '{' ws {| ((! '}') (class_field / r) ws)* |} ws '}'
 	|}
 	class_field <-
 		function_definition /
@@ -143,6 +145,11 @@ local pattern = re.compile([[
 				/ {:name: name / r :} ws ('=' / r) ws (expression / r) ws (';' / r)
 			)
 		|}
+	interface <- {| {:is_local: 'local' -> true space :}?
+		{:type: {'interface'} :} space {:name: variable / r :}
+		ws '{' ws {| ((! '}') (interface_field / r) ws)* |} ws '}'
+	|}
+	interface_field <- name ws ';'
 
 	return <- {| {:type: {'return' / 'yield'} :} ws expression_list? |}
 
@@ -209,8 +216,11 @@ local pattern = re.compile([[
 	name_list <- {:variable_list: {|
 		local_name (ws ',' ws (local_name / r))*
 	|} :} / {:variable_list: {|
-		{:is_destructuring: '{' -> true :} ws local_name
+		{:is_destructuring: '{' -> 'table' :} ws local_name -- local {x} = a;
 		(ws ',' ws (local_name / r))* ws '}'
+	|} :} / {:variable_list: {|
+		{:is_destructuring: '[' -> 'array' :} ws local_name -- local [x] = a;
+		(ws ',' ws (local_name / r))* ws ']'
 	|} :}
 	local_name <- {| {:type: '' -> 'variable' :} name |}
 	expression_list <- {:expression_list: {|
