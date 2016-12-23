@@ -88,12 +88,26 @@ describe("lexer", function()
 			}
 		})
 	end)
-	it("can parse destructuring local assignment", function()
+	it("can parse destructuring tables to local assignment", function()
 		assert.same(lexer:match("local {a} = b;"), {
 			{type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
-					is_destructuring = true
+					is_destructuring = "table"
+				},
+				expression_list = {
+					{type = "variable", "b"}
+				},
+				is_local = true
+			}
+		})
+	end)
+	it("can parse destructuring arrays to local assignment", function()
+		assert.same(lexer:match("local [a] = b;"), {
+			{type = "assignment",
+				variable_list = {
+					{type = "variable", "a"},
+					is_destructuring = "array"
 				},
 				expression_list = {
 					{type = "variable", "b"}
