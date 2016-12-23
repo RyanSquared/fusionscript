@@ -609,16 +609,14 @@ function parser.read_file(file, dump)
 	end
 end
 
+local loadstring = loadstring or load -- luacheck: ignore 113
+
 --- Load FusionScript code from a file and return a function to run the code.
 -- @tparam string file
 -- @treturn function Loaded FusionScript code
 function parser.load_file(file)
 	local content = parser.read_file(file)
-	if loadstring then -- luacheck: ignore 113
-		return assert(loadstring(content)) -- luacheck: ignore 113
-	else
-		return assert(load(content))
-	end
+	return assert(loadstring(content))
 end
 
 --- Load and run FusionScript code from a file
