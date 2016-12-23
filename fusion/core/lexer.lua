@@ -87,13 +87,6 @@ defs.semicolon = function(pos)
 		context = current_file:sub(pos - 7, pos);
 		quick = "semicolon"
 	}
-	if current_file:match("^[A-Za-z_]", pos) then
-		local start_pos = pos
-		while current_file:match("^[A-Za-z_]", start_pos) do
-			start_pos = start_pos - 1
-		end
-		errormsg.context = current_file:sub(start_pos, pos)
-	end
 	setmetatable(errormsg, {
 		__tostring = function()
 			return table.concat(errormsg_table, "\n")
