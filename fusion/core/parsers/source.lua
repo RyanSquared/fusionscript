@@ -65,8 +65,14 @@ local dirs = {
 
 handlers['using'] = function(node)
 	local output = {}
-	for _, directive in ipairs(node) do
-		output[#output + 1] = dirs[directive]
+	if node[1] == "*" then
+		for _, directive in pairs(dirs) do
+			output[#output + 1] = directive
+		end
+	else
+		for _, directive in ipairs(node) do
+			output[#output + 1] = dirs[directive]
+		end
 	end
 	return table.concat(output, l"\n")
 end
@@ -92,8 +98,12 @@ end
 
 handlers['class'] = function(node)
 	node[1].type = 'table'
-	if not node.extends then
-		node.extends = {type = "nil"}
+	local data = {}
+	if node.extends then
+		data[1] = "extends = " .. transform(node.extends)
+	end
+	if node.implements then
+		data[#data + 1] = "implements = " .. transform(node.implements)
 	end
 	for i, v in ipairs(node[1]) do
 		if v.type == "function_definition" then
@@ -102,10 +112,34 @@ handlers['class'] = function(node)
 	end
 	if node.is_local then
 		return ("local %s = class(%s, %s, %q)"):format(transform(node.name),
-			transform(node[1]), transform(node.extends), transform(node.name))
+			transform(node[1]), "{" .. table.concat(data, ",") .. "}",
+			transform(node.name))
 	else
 		return ("%s = class(%s, %s, %q)"):format(transform(node.name),
-			transform(node[1]), transform(node.extends), transform(node.name))
+			transform(node[1]), "{" .. table.concat(data, ",") .. "}",
+			transform(node.name))
+	end
+end
+
+handlers['interface'] = function(node)
+	local names = node[1]
+	if #names == 0 then
+		if node.is_local then
+			return ('local %s = {}'):format(transform(node.name))
+		else
+			return ('%s = {}'):format(transform(node.name))
+		end
+	else
+		for i, v in ipairs(names) do
+			names[i] = {name = v, {type = "boolean", true}}
+		end
+		return transform({type="assignment";
+			variable_list = {node.name};
+			expression_list = {{
+				type = "table";
+				unpack(names);
+			}};
+		})
 	end
 end
 
@@ -436,17 +470,36 @@ handlers['assignment'] = function(node)
 		output[1] = "local "
 	end
 	if node.variable_list.is_destructuring then
-		local name = "_des_" .. tostring(des_num)
-		des_num = des_num + 1
 		local expression = transform(node.expression_list[1])
+		local name
+		if node.expression_list[1].type == "variable" and
+			not node.expression_list[1][2] then -- no indexing
+			name = ("_des_%s_%i"):format(expression, des_num)
+		else
+			name = "_des_" .. tostring(des_num)
+		end
+		des_num = des_num + 1
 		local last = {} -- capture all last values
 		table.insert(output, 1, ("local %s = %s\n"):format(name, expression))
-		for i, v in ipairs(node.variable_list) do
-			local value = transform(v)
-			last[#last + 1] = name .. "." .. value
-			output[#output + 1] = value
-			if node.variable_list[i + 1] then
-				output[#output + 1] = ', '
+		if node.variable_list.is_destructuring == "table" then
+			for i, v in ipairs(node.variable_list) do
+				local value = transform(v)
+				last[#last + 1] = name .. "." .. value
+				output[#output + 1] = value
+				if node.variable_list[i + 1] then
+					output[#output + 1] = ', '
+				end
+			end
+		elseif node.variable_list.is_destructuring == "array" then
+			local counter = 0
+			for i, v in ipairs(node.variable_list) do
+				local value = transform(v)
+				counter = counter + 1
+				last[#last + 1] = ("%s[%i]"):format(name, counter)
+				output[#output + 1] = value
+				if node.variable_list[i + 1] then
+					output[#output + 1] = ', '
+				end
 			end
 		end
 		output[#output + 1] = " = "
