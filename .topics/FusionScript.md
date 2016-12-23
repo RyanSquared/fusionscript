@@ -14,6 +14,21 @@ This program will load a file and print out a syntax tree for the file. The
 program will generate a syntax error and exit with error code `1` if a file has
 a syntax error.
 
+### `fusion-pkg`: Install and manage FusionScript packages
+
+The `fusion-pkg` program offers a very simple wrapper around Git that offers
+the ability to use Git URLs as well as GitHub repositories to clone a repo and
+a simple way to upgrade all locally installed repos. The repos will be placed
+in the `vendor` folder, which is automatically searched when `require()` is
+invoked. There's two subcommands for `fusion-pkg`:
+
+**`get`** - Clone a GitHub url (pattern `user/repository`) or a Git url,
+pattern (`git+<url>`).
+
+**`upgrade`** - Upgrade a locally installed package.
+
+**`remove`** - Remove a locally installed package; url is the repository name.
+
 ### `fusion`: Run FusionScript files
 
 The `fusion` program (which at the current time is an alias to `fusion-source`)
