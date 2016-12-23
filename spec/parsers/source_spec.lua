@@ -26,6 +26,7 @@ print("test")
 	end)
 	it("can load a searcher into the module loading system", function()
 		assert.same(true, parser.inject_loader())
+		assert.same(parser.search_for, (package.loaders or package.searchers)[2])
 		assert.same(false, parser.inject_loader()) -- false if already run
 	end)
 	it("can run FusionScript files", function()
