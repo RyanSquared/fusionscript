@@ -4,6 +4,7 @@
 -- @author ChickenNuggers
 -- @usage fusion-pkg get ([USER]/[REPO]|git+[https|ssh]://<URL>)
 -- or: fusion-pkg upgrade
+-- or: fusion-pkg remove [REPO]
 
 local function clone(url)
 	os.execute((
@@ -29,6 +30,8 @@ elseif args[1] == "upgrade" then
 		end
 	end
 	lfs.chdir("..")
+elseif args[1] == "remove" then
+	os.execute("rm -rf vendor/" .. assert(args[2], "Missing repository name"))
 elseif not args[1] then
 	error("No command given")
 else
