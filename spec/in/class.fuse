@@ -37,3 +37,28 @@ class ExampleThree extends ExampleToo {
 	__init(a, b)=>
 		self:__init<ExampleToo>(a, b);
 }
+
+-- interface
+
+interface IScope {
+	close;
+}
+
+-- implementation of interface
+
+class IO implements IScope {
+	close()=> {
+		if (! @closed)
+			@closed = true;
+		else
+			return;
+		@file:close();
+	}
+}
+
+-- extension of implemented interface, inherits close()
+
+class File extends IO implements IScope {
+	__new(...)=>
+		@file = io.open(...);
+}

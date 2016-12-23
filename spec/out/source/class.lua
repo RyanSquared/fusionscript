@@ -9,10 +9,10 @@ Example = class({
 	print = (function(self)
 		print(self.a)
 	end);
-}, nil, "Example")
+}, {}, "Example")
 a = Example()
 b = Example(15)
-local ExampleLocal = class({}, nil, "ExampleLocal")
+local ExampleLocal = class({}, {}, "ExampleLocal")
 ExampleToo = class({
 	__init = (function(self, a, b)
 		if not b then
@@ -23,7 +23,7 @@ ExampleToo = class({
 	print = (function()
 		print(self.b)
 	end);
-}, Example, "ExampleToo")
+}, {extends = Example}, "ExampleToo")
 c = ExampleToo()
 c:print()
 Example.print(c)
@@ -31,4 +31,22 @@ ExampleThree = class({
 	__init = (function(self, a, b)
 		ExampleToo.__init(self,a,b)
 	end);
-}, ExampleToo, "ExampleThree")
+}, {extends = ExampleToo}, "ExampleThree")
+IScope = {
+	close = true;
+}
+IO = class({
+	close = (function(self)
+		if (not self.closed) then
+			self.closed = true
+		else
+			return 
+		end
+		self.file:close()
+	end);
+}, {implements = IScope}, "IO")
+File = class({
+	__new = (function(self, ...)
+		self.file = io.open(...)
+	end);
+}, {extends = IO,implements = IScope}, "File")
