@@ -52,25 +52,6 @@ local function cycle(pattern)
 	end
 end
 
---- Loop through an iterable object infinitely, using ipairs as the fallback
--- iterator.
--- @function icycle
--- @tparam iter pattern
--- @see cycle
-local function icycle(pattern)
-	while true do
-		local _iter = iter(pattern, ipairs)
-		while true do
-			local x = {_iter()}
-			if x[1] then
-				coroutine.yield(unpack(x))
-			else
-				break
-			end
-		end
-	end
-end
-
 --- Repeatedly yield a value, optionally up to `n` times.
 -- @function rep
 -- @param element
@@ -109,7 +90,7 @@ local function range(start, stop, step)
 end
 
 local function add(x, y)
-	return x + y
+	return x and y and x + y
 end
 
 local xrange = mk_gen(range)
@@ -123,13 +104,15 @@ local function accumulate(input, fn)
 	if not fn then
 		return accumulate(input, add)
 	end
-	for i in xrange(#input) do
-		local t0 = {}
-		for j in xrange(1, i) do
-			t0[j] = input[j]
-		end
-		coroutine.yield(fnl.reduce(fn, t0))
+	local _iter = iter(input)
+	local total = _iter()
+	if not total then
+		return
 	end
+	repeat
+		coroutine.yield(total)
+		total = fn(total, _iter())
+	until not total
 end
 
 --- Iterate over every iterable object passed.
@@ -144,25 +127,6 @@ local function chain(...)
 	end
 end
 
---- Iterate over every iterable object passed, using ipairs as the fallback
--- iterator.
--- @function ichain
--- @tparam iter ... Variable argument of iterable objects
--- @see chain
-local function ichain(...)
-	for k, v in ipairs({...}) do -- luacheck: ignore 213
-		v = iter(v, ipairs)
-		while true do
-			local x = {v()}
-			if x[1] then
-				coroutine.yield(unpack(x))
-			else
-				break
-			end
-		end
-	end
-end
-
 --- Return values from input stream based on truthy values in selectors stream.
 -- @function compress
 -- @tparam iter input
@@ -170,12 +134,15 @@ end
 -- @usage for (val in compress({"hello"}, {1, 1, 1, false, 1})) print(val);
 -- -- 'helo'
 local function compress(input, selectors)
+	local _selectors = iter(selectors)
+	local _input = iter(input)
 	while true do
-		local val = input()
+		local val = _input()
 		if not val then
 			return
 		else
-			if selectors() then
+			local a, b = _selectors()
+			if b == nil and a or b then
 				coroutine.yield(val)
 			end
 		end
@@ -188,49 +155,27 @@ end
 -- @tparam iter input
 -- @usage print(group in groupby("ABCCAAAD")); -- A B C A D
 local function groupby(input)
-	local _prev, _gen
+	local _prev
+	local _gen = {}
 	for k, _v in iter(input) do -- luacheck: ignore 213
 		local v
-		if not k then
+		if not _v then
 			v = k
 		else
 			v = _v
 		end
-		_gen = {}
 		if _prev == nil then
 			_prev = v
 		end
 		if _prev == v then
 			table.insert(_gen, v)
 		else
-			coroutine.yield(_prev, pairs(_gen))
+			coroutine.yield(_prev, iter(_gen))
 			_prev = v
 			_gen = {v}
 		end
 	end
-	coroutine.yield(_prev, pairs(_gen))
-end
-
---- Similar to `groupby()` but use `ipairs()` as the default iterator
--- @function igroupby
--- @tparam iter input
--- @see groupby
-local function igroupby(input)
-	local _prev, _gen
-	for k, v in iter(input, ipairs) do -- luacheck: ignore 213
-		_gen = {}
-		if _prev == nil then
-			_prev = v
-		end
-		if _prev == v then
-			table.insert(_gen, v)
-		else
-			coroutine.yield(_prev, pairs(_gen))
-			_prev = v
-			_gen = {v}
-		end
-	end
-	coroutine.yield(_prev, pairs(_gen))
+	coroutine.yield(_prev, iter(_gen))
 end
 
 --- Return a subsection of an iterable object
@@ -244,14 +189,18 @@ local function slice(input, start, stop, step)
 	if not step then
 		return slice(input, start, stop, 1)
 	elseif not stop then
-		return slice(input, start, #input, 1)
+		return slice(input, start, math.huge, 1)
 	end
 	input = iter(input) -- use 2 to skip first; don't want to chew first value
 	for i in xrange(2, start) do -- luacheck: ignore 213
 		input()
 	end
 	for i in xrange(start, stop, step) do -- luacheck: ignore 213
-		coroutine.yield(input())
+		local x = {input()}
+		if not x[1] then
+			break
+		end
+		coroutine.yield(unpack(x))
 	end
 end
 
@@ -264,13 +213,23 @@ end
 -- @usage print(key, value for key, value in zip("hi", {"hello", "world"}));
 -- -- ("h", "hello") ("i", "world")
 local function zip(input0, input1, default)
-	input0, input1 = iter(input0, input1)
+	input0, input1 = iter(input0), iter(input1)
 	repeat
-		local x, y = input0()
-		if y then
+		local ok, x, y = pcall(input0) -- luacheck: ignore 211
+		if ok and y then
 			x = y
+		elseif not ok then
+			break
 		end
-		coroutine.yield(x, input1() or default)
+		local ok, val, val2 = pcall(input1) -- luacheck: ignore 411
+		if val2 then
+			val = val2
+		end
+		if not ok or not val then
+			coroutine.yield(x, default)
+		else
+			coroutine.yield(x, val)
+		end
 	until not x
 end
 
@@ -279,27 +238,16 @@ end
 local xslice = mk_gen(slice)
 
 --- Return a table based off a slice of the start of a stream.
+-- Does not return n values, but instead will return values after n items are
+-- consumed from the stream.
 -- @function head
--- @tparam number n Maximum values to take
+-- @tparam number n Position to start getting results at
 -- @tparam iter input
 -- @usage print(head("Hello World!"), 5); -- "Hello"
 -- @see tail
 local function head(n, input)
+	-- ::TODO:: queue with size limit to store last values, Pythonic tail()
 	return table.from_generator(xslice(input, 1, n))
-end
-
-local xcount = mk_gen(count)
-
---- Repeatedly count upwards and call a function with the value. This function
--- should never return.
--- @function tabulate
--- @tparam function fn
--- @tparam number start Optional value to start at; 0 by default
--- @usage tabulate((n)-> print(n)); -- 0 1 2 3 4 5 6 7...
-local function tabulate(fn, start)
-	for n in xcount(start or 0) do
-		fn(n)
-	end
 end
 
 --- Return a table based off a slice of the end of a stream.
@@ -366,51 +314,23 @@ local function quantify(input, fn)
 	return _val
 end
 
-local xrep = mk_gen(rep)
 local xchain = mk_gen(chain)
-
---- Pad an input stream with nil.
--- @function padnil
--- @tparam iter input
--- @tparam number times Amount of times to pad, default infinite
--- @treturn iter
--- @usage print(k, v for k, v in zip("hello", padnil("hi")));
--- -- ("h", "h") ("e", "i") ("l", nil) ("l", nil) ("o", nil)
-local function padnil(input, times)
-	return xchain(input, xrep(nil, times))
-end
-
---- Return the dot product of two data streams
--- @function dotproduct
--- @tparam iter t0
--- @tparam iter t1
--- @treturn number
-local function dotproduct(t0, t1)
-	return fnl.sum(fnl.map((function(a, b) return a * b end), t0,
-		t1))
-end
 
 return table.from_generator(xchain(fnl.map(mk_gen, {
 	count = count;
 	cycle = cycle;
-	icycle = icycle;
 	rep = rep;
 	range = range;
 	accumulate = accumulate;
 	chain = chain;
-	ichain = ichain;
 	compress = compress;
 	groupby = groupby;
-	igroupby = igroupby;
 	slice = slice;
 	zip = zip;
 }), {
 	head = head;
-	tabulate = tabulate;
 	tail = tail;
 	consume = consume;
 	allequal = allequal;
 	quantify = quantify;
-	padnil = padnil;
-	dotproduct = dotproduct;
 }))
