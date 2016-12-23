@@ -647,7 +647,7 @@ function parser.search_for(module_name)
 	for _, path in ipairs(package.fusepath_t) do
 		msg[#msg + 1] = ("\tno file %q"):format(path:gsub("?", module_path))
 	end
-	return nil, "\n" .. table.concat(msg, "\n")
+	return "\n" .. table.concat(msg, "\n")
 end
 
 --- Inject `parser.search_for` into the `require()` searchers list.
@@ -660,11 +660,12 @@ function parser.inject_loader()
 			package.loaders[k] = v
 		end})
 	end
-	for _, loader in ipairs(package.searchers) do
+	for _, loader in ipairs(package.loaders or package.searchers) do
 		if loader == parser.search_for then
 			return false
 		end
 	end
+	table.insert(package.searchers, 2, parser.search_for)
 	package.searchers[2] = parser.search_for
 	return true
 end
