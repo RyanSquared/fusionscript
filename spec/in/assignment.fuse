@@ -27,3 +27,11 @@ asdf(a = 5)-> {
 -- destructure values into assignment, local only --
 
 local {a, b} = c;
+
+-- destructure values into assignment from array, also local only --
+
+local [a, b] = c;
+
+-- destructure values from complex name --
+
+local {a, b} = c.d[e];
