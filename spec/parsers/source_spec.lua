@@ -24,7 +24,7 @@ print("test")
 		assert(parser.load_file("spec/in/basic.fuse"), "unable to load file")()
 		_G['print'] = old_print
 	end)
-	pending("can load a searcher into the module loading system", function()
+	it("can load a searcher into the module loading system", function()
 		assert.same(true, parser.inject_loader())
 		assert.same(parser.search_for, (package.loaders or package.searchers)[2])
 		assert.same(false, parser.inject_loader()) -- false if already run

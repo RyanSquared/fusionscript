@@ -655,18 +655,12 @@ end
 -- @usage parser.inject_loader(); print(require("test_module"))
 -- -- Attempts to load a FusionScript `test_module` package
 function parser.inject_loader()
-	if not package.searchers then
-		package.searchers = setmetatable({}, {__newindex = function(t, k, v) -- luacheck: ignore 212
-			package.loaders[k] = v
-		end})
-	end
 	for _, loader in ipairs(package.loaders or package.searchers) do
 		if loader == parser.search_for then
 			return false
 		end
 	end
-	table.insert(package.searchers, 2, parser.search_for)
-	package.searchers[2] = parser.search_for
+	table.insert(package.loaders or package.searchers, 2, parser.search_for)
 	return true
 end
 
