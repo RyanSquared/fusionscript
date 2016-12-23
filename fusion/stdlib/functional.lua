@@ -2,6 +2,17 @@
 -- @module fusion.stdlib.functional
 local unpack = unpack or table.unpack -- luacheck: ignore 113
 
+--- Iterate over a table's keys and values
+-- @tparam table input
+-- @treturn iter Initialized iterator
+local function _pairs(input)
+	return coroutine.wrap(function()
+		for k, v in pairs(input) do
+			coroutine.yield(k, v)
+		end
+	end)
+end
+
 --- Return an iterator over a value if possible or the value passed.
 -- Possible value types can be strings and any object with __pairs or __ipairs
 -- metadata.
@@ -16,7 +27,7 @@ local function iter(input, ...)
 		return input:gmatch(".")
 	else
 		if not iterator then
-			return iter(input, pairs)
+			return iter(input, _pairs)
 		end
 		return iterator(input)
 	end
@@ -188,6 +199,7 @@ local function sum(input, negative)
 end
 
 return {
+	_pairs = _pairs;
 	_iter = iter;
 	_mk_gen = mk_gen;
 	all = all;
