@@ -2,7 +2,7 @@ using class;
 
 -- basic class --
 
-new Example {
+class Example {
 	__init(a = 5)=>
 		@a = a;
 	print()=>
@@ -14,13 +14,13 @@ b = Example(15);
 
 -- local class --
 
-local new ExampleLocal {
+local class ExampleLocal {
 
 }
 
 -- extension class --
 
-new ExampleToo extends Example {
+class ExampleToo extends Example {
 	__init(a, b = 10)=>
 		@a, @b = a, b;
 	print()->
@@ -33,7 +33,7 @@ c:print<Example>(); -- @a
 
 -- superinitialization --
 
-new ExampleThree extends ExampleToo {
+class ExampleThree extends ExampleToo {
 	__init(a, b)=>
 		self:__init<ExampleToo>(a, b);
 }
