@@ -69,6 +69,7 @@ handlers['using'] = function(node)
 		for _, directive in pairs(dirs) do
 			output[#output + 1] = directive
 		end
+		table.sort(output) -- consistency, helps w/ tests
 	else
 		for _, directive in ipairs(node) do
 			output[#output + 1] = dirs[directive]
@@ -123,24 +124,16 @@ end
 
 handlers['interface'] = function(node)
 	local names = node[1]
-	if #names == 0 then
-		if node.is_local then
-			return ('local %s = {}'):format(transform(node.name))
-		else
-			return ('%s = {}'):format(transform(node.name))
-		end
-	else
-		for i, v in ipairs(names) do
-			names[i] = {name = v, {type = "boolean", true}}
-		end
-		return transform({type="assignment";
-			variable_list = {node.name};
-			expression_list = {{
-				type = "table";
-				unpack(names);
-			}};
-		})
+	for i, v in ipairs(names) do
+		names[i] = {name = v, {type = "boolean", true}}
 	end
+	return transform({type="assignment";
+		variable_list = {node.name};
+		expression_list = {{
+			type = "table";
+			unpack(names);
+		}};
+	})
 end
 
 handlers['table'] = function(node)
@@ -662,6 +655,11 @@ end
 -- @usage parser.inject_loader(); print(require("test_module"))
 -- -- Attempts to load a FusionScript `test_module` package
 function parser.inject_loader()
+	if not package.searchers then
+		package.searchers = setmetatable({}, {__newindex = function(t, k, v) -- luacheck: ignore 212
+			package.loaders[k] = v
+		end})
+	end
 	for _, loader in ipairs(package.searchers) do
 		if loader == parser.search_for then
 			return false
