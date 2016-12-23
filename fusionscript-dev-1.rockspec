@@ -33,6 +33,7 @@ build = {
 	install = {
 		bin = {
 			["fusion-ast"] = "bin/util/ast.lua";
+			["fusion-pkg"] = "bin/util/pkg.lua";
 			["fusion"] = ("bin/interpreter/%s.lua"):format(default);
 			["fusionc"] = ("bin/compiler/%s.lua"):format(default);
 			["fusion-source"] = "bin/interpreter//source.lua";
