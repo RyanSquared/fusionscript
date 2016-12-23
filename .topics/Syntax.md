@@ -81,7 +81,7 @@ _stop_, and optionally a _step_ separated with two semicolons.
 ```fuse
 using itr;
 for (i in 1::10::2)
-	print(i); -- odds from 1 to 10
+    print(i); -- odds from 1 to 10
 ```
 
 ### Patterns
@@ -213,6 +213,7 @@ can be used with the [`class`](#class-definitions) keyword.
 the iterators `map` and `filter` as well as functions such as `reduce`.
 - `using itr;`: Does the same thing as `using fnl;` but with the `iterable`
 library (localized as `itr`).
+- `using *;`: Load all available syntax extensions.
 
 ### Function Calls
 
@@ -513,4 +514,38 @@ class ExampleClassToo extends ExampleClass {
     example_method()=> print("hello!");
 }
 (ExampleClassToo()):example_method<ExampleClass>(); -- hi!
+```
+
+### Interfaces
+
+Interfaces are a basic extension onto classes that essentially ensure that a
+class has a certain method or value. If the class is not generated with any
+value at all of the names in the interface, the class will fail to generate and
+an error will be thrown.
+
+```fuse
+lfs = require("lfs");
+
+interface IScope { descope; }
+
+class UseDir implements IScope {
+    __init(dir)=> {
+        @old_dir = assert(os.getenv("PWD"), "missing directory");
+        lfs.chdir(dir)
+    }
+    close()=> lfs.chdir(@old_dir);
+}
+```
+
+Classes extended upon another class will still be able to use the method of the
+previous class when using an interface. The methods do not have to be added
+again to avoid errors.
+
+```fuse
+class UseDirAndPrint extends UseDir implements IScope {
+    __init(dir)=> {
+        self:__init<UseDir>(self); -- initialize in extended class
+        print(dir);
+    }
+}
 ```
