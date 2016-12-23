@@ -124,13 +124,13 @@ local pattern = re.compile([[
 		if
 	)
 	using_name <- {[A-Za-z]+}
-	keyword <- 'local' / 'new' / 'extends' / 'break' / 'return' / 'yield' /
+	keyword <- 'local' / 'class' / 'extends' / 'break' / 'return' / 'yield' /
 		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
 		'in' / 'async'
 	rstatement <- statement / r
 	r <- ({} {.}) -> err
 	class <- {| {:is_local: 'local' -> true space :}?
-		{:type: 'new' -> 'class' :} space {:name: variable / r :}
+		{:type: {'class'} :} space {:name: variable / r :}
 		(ws 'extends' ws {:extends: variable / r :})? ws
 		'{' ws {| ((! '}') (class_field / r) ws)* |} ws '}'
 	|}
