@@ -19,7 +19,6 @@ before_install:
 
 install:
   - luarocks make
-  - find . -type d
 
 script:
   - luacheck . --no-color --codes --exclude-files spec/out
