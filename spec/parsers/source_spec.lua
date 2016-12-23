@@ -29,7 +29,7 @@ print("test")
 		assert.same(parser.search_for, (package.loaders or package.searchers)[2])
 		assert.same(false, parser.inject_loader()) -- false if already run
 	end)
-	pending("can run FusionScript files", function()
+	it("can run FusionScript files", function()
 		assert.same(0xDEADBEEF, require("spec.misc"))
 	end)
 end)

@@ -13,11 +13,13 @@ before_install:
   - hererocks ~/hererocks -r^ --$LUA
   - export PATH=$PATH:~/hererocks/bin
   - eval `luarocks path --bin`
+  - export LUA_PATH="$LUA_PATH"';./?.lua;./?/init.lua'
   - luarocks install luacheck
   - luarocks install busted
 
 install:
   - luarocks make
+  - find . -type d
 
 script:
   - luacheck . --no-color --codes --exclude-files spec/out
