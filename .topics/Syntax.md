@@ -466,7 +466,7 @@ for (i in madeIntoACoroutine())
 Class definitions are a specific kind of statement that is like a table but
 uses a different form of assignment. Assignment using names can be done like
 traditional tables but function declaration can also be done. Classes start
-with the word "new", optionally a name for the class, optionally "extends"
+with the word "class", optionally a name for the class, optionally "extends"
 followed by a class to extend, and an opening curly bracket.
 
 While inside of a class, methods can make use of the fat arrow operator to
@@ -476,7 +476,7 @@ accessed in the `print()` statement.
 
 ```fuse
 {Object} = require("core");
-new ExampleClass extends Object {
+class ExampleClass extends Object {
     x = "hello";
     y = "world";
     print()=> print("%s %s" % {@x, @y})
@@ -493,7 +493,7 @@ line in the file the class was defined on. There's also `@__tostring` for
 most class instances (where `__tostring()` is not defined).
 
 ```fuse
-new ExampleClass extends Object {
+class ExampleClass extends Object {
     print()=>
         print("<%s>() => %s" % {ExampleClass, @})
 }
@@ -506,10 +506,10 @@ for which to call the method. If there is only one instance of the method, it
 is not required to use this format to call the method.
 
 ```fuse
-new ExampleClass extends Object {
+class ExampleClass extends Object {
     example_method()=> print("hi!")
 }
-new ExampleClassToo extends ExampleClass {
+class ExampleClassToo extends ExampleClass {
     example_method()=> print("hello!");
 }
 (ExampleClassToo()):example_method<ExampleClass>(); -- hi!

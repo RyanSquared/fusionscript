@@ -80,7 +80,7 @@ print(tostring(factorial(5)));
 ### Account (from Lua Demo)
 
 ```
-new Account {
+class Account {
     __new(balance = 0)=> {
         @balance = balance;
     }
@@ -126,7 +126,7 @@ local {TCPSocket, TCPServer} = require("core.async.net");
 
 server = TCPServer("localhost", 9999);
 
-new ExampleAsyncApp extends Async {
+class ExampleAsyncApp extends Async {
     client()-> {
         socket = TCPSocket("localhost", 9999);
         socket:send("echo");
