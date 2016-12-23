@@ -593,8 +593,9 @@ function parser.read_file(file, dump)
 		output = {}
 		append = function(line) output[#output + 1] = line end
 	end
-	local source_file = io.open(file)
-	if not source_file:read("*l"):match("^#!") then
+	local source_file = assert(io.open(file))
+	local line = source_file:read("*l")
+	if line and not line:match("^#!") then
 		source_file:seek("set")
 	end
 	local node = lexer:match(source_file:read("*a"))
@@ -667,6 +668,9 @@ if not package.fusepath then
 	for path in package.path:gmatch("[^;]+") do
 		local match = path:match("^(.+)%.lua$")
 		if match then
+			if match:sub(1, 2) == "./" then
+				paths[#paths + 1] = "./vendor/" .. match:sub(3) .. ".fuse"
+			end
 			paths[#paths + 1] = match .. ".fuse"
 		end
 	end
