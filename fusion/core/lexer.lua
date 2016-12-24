@@ -20,7 +20,7 @@ defs['numberify'] = tonumber
 
 defs.print = print
 
-defs.err = function(pos, char)
+defs.err = function(pos, char, ctx)
 	local line = 1
 	local start = 1
 	local line_start = 0
@@ -37,6 +37,7 @@ defs.err = function(pos, char)
 		("Unexpected character on line %d"):format(line);
 		("Token: %s"):format(char);
 		("Input: >> %q <<"):format(input);
+		ctx
 	}
 	local errormsg = {
 		msg = errormsg_table;
@@ -105,7 +106,7 @@ local pattern = re.compile([[
 	) / (
 		{|{:type: {'using'} :} (space using_name / ws '{' ws
 			using_name (ws ',' ws using_name)*
-		ws '}' / r) |} /
+		ws '}' / ((pos '' -> 'Unclosed using statement') -> err)) |} /
 		assignment /
 		function_call /
 		return /
@@ -121,8 +122,9 @@ local pattern = re.compile([[
 	keyword <- 'local' / 'class' / 'extends' / 'break' / 'return' / 'yield' /
 		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
 		'in' / 'async'
-	rstatement <- statement / r
-	r <- ({} {.}) -> err
+	rstatement <- statement / (pos '' -> 'Missing statement') -> err
+	r <- pos -> err
+	pos <- {} {.}
 	class <- {| {:is_local: 'local' -> true space :}?
 		{:type: {'class'} :} space {:name: variable / r :}
 		(ws 'extends' ws {:extends: variable / r :})?
