@@ -525,6 +525,15 @@ describe("lexer", function()
 			extends = {type = "variable", "y"}
 		}})
 	end)
+	it("can parse very complex classes", function()
+		assert.same(lexer:match("class x extends y implements z {}"), {{
+			{},
+			implements = {type = "variable", "z"},
+			extends = {type = "variable", "y"},
+			name = {type = "variable", "x"},
+			type = "class"
+		}})
+	end)
 	it("can parse negative ranges", function()
 		assert.same(lexer:match("a = 10::1::2;"), {{type = "assignment",
 			variable_list = {{type = "variable", "a"}},
