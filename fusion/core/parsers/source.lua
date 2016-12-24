@@ -581,18 +581,13 @@ function parser.compile(input_stream, output_stream)
 	end
 end
 
---- Read FusionScript code from a file and return or print output.
+--- Read FusionScript code from a file and return output.
 -- @tparam string file File to read input from
--- @tparam boolean dump Boolean to print output instead of return (optional)
 -- @treturn string Lua code
-function parser.read_file(file, dump)
+function parser.read_file(file)
 	local append, output
-	if dump then
-		append = print
-	else
-		output = {}
-		append = function(line) output[#output + 1] = line end
-	end
+	output = {}
+	append = function(line) output[#output + 1] = line end
 	local source_file = assert(io.open(file))
 	local line = source_file:read("*l")
 	if line and not line:match("^#!") then
@@ -605,9 +600,7 @@ function parser.read_file(file, dump)
 			coroutine.yield(value)
 		end
 	end), append)
-	if not dump then
-		return table.concat(output, "\n") .. "\n" -- EOL at EOF
-	end
+	return table.concat(output, "\n") .. "\n" -- EOL at EOF
 end
 
 local loadstring = loadstring or load -- luacheck: ignore 113
