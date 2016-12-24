@@ -10,7 +10,7 @@
 local function class(new, data, name)
 	local extends, implements = data.extends, data.implements
 	new.__index = new;
-	new.__tostring = function(self)
+	new.__tostring = new.__tostring or function(self)
 		local args = {}
 		for _=1, self.__argc do
 			local arg = self.__args[_]
