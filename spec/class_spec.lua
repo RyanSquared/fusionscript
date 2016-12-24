@@ -9,6 +9,12 @@ describe("class", function()
 		assert.same(x, instance.__class)
 		assert.is_nil(instance.__super)
 	end)
+	it("can use a basic interface", function()
+		class({a = 'b'}, {implements = {a = true}}, "Test_Two")
+		assert.errors(function()
+			class({}, {implements = {a = true}}, "Test_Three")
+		end)
+	end)
 	it("can make a complex class", function()
 		local ext = {3, 4}
 		local impl = {d = true}
