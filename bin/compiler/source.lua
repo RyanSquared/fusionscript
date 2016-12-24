@@ -44,7 +44,7 @@ while arg_index <= #args do
 	if _arg == "-p" then
 		arg_index = arg_index + 1
 		for i=arg_index, #args do
-			parser.read_file(args[i], true)
+			io.write(parser.read_file(args[i]))
 		end
 		break
 	elseif _arg == "--help" or _arg == "-h" then
