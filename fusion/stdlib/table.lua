@@ -38,4 +38,6 @@ function table.sort(t, ...)
 	return t
 end
 
+table.unpack = unpack or table.unpack -- luacheck: ignore 113
+
 return table
