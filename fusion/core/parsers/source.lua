@@ -5,47 +5,55 @@ local lexer = require("fusion.core.lexer")
 local lfs = require("lfs")
 local unpack = unpack or table.unpack -- luacheck: ignore 113
 
-local indent = 0
 local parser = {}
 local handlers = {}
-local last_node = {} -- luacheck: ignore 231
+
+--- Initialize a parser state
+function parser:new()
+	if not self then
+		self = {}
+	end
+	self.indent = 0
+	self.last_node = {}
+	return self
+end
 
 --- Transform a node using the registered handler.
 -- @tparam table node
-local function transform(node, ...)
+function parser:transform(node, ...)
 	assert(node.type, ("Bad node: %s"):format(tostring(node)))
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
-	last_node = node
-	return handlers[node.type](node, ...)
+	self.last_node = node
+	return handlers[node.type](self, node, ...)
 end
 
 --- Add indent to a line of text.
 -- @tparam string line
-local function l(line)
-	return ("\t"):rep(indent) .. line
+function parser:l(line)
+	return ("\t"):rep(self.indent) .. line
 end
 
 --- Convert an expression_list field to a transformed list of expressions.
 -- @tparam table node
-local function transform_expression_list(node)
+function parser:transform_expression_list(node)
 	if not node.expression_list then
 		return ""
 	end
 	local output = {}
 	local list = node.expression_list
 	for i=1, #list do
-		output[#output + 1] = transform(list[i])
+		output[#output + 1] = self:transform(list[i])
 	end
 	return table.concat(output, ",")
 end
 
 --- Convert a variable_list to a transformed list of variable names.
 -- @tparam table node
-local function transform_variable_list(node)
+function parser:transform_variable_list(node)
 	local output = {}
 	local list = node.variable_list
 	for i=1, #list do
-		output[#output + 1] = transform(list[i])
+		output[#output + 1] = self:transform(list[i])
 	end
 	return table.concat(output, ",")
 end
@@ -53,7 +61,7 @@ end
 local _tablegen_level = 0
 
 handlers['nil'] = function() return 'nil' end
-handlers['vararg'] = function(node) return '...' end -- luacheck: ignore 212
+handlers['vararg'] = function() return '...' end
 
 local dirs = {
 	class = 'local class = require("fusion.stdlib.class")';
@@ -63,7 +71,7 @@ local dirs = {
 	ternary = 'local ternary = require("fusion.stdlib.ternary")';
 }
 
-handlers['using'] = function(node)
+handlers['using'] = function(self, node) -- TODO: no repeat?
 	local output = {}
 	if node[1] == "*" then
 		for _, directive in pairs(dirs) do
@@ -75,14 +83,14 @@ handlers['using'] = function(node)
 			output[#output + 1] = dirs[directive]
 		end
 	end
-	return table.concat(output, l"\n")
+	return table.concat(output, self:l"\n")
 end
 
 --- Convert a function field in a class to a lambda table assignment.
 -- @tparam table node
-local function transform_class_function(node)
+function parser:transform_class_function(node)
 	return {
-		name = transform(node[1]);
+		name = self:transform(node[1]);
 		{
 			node[2] or {};
 			node[3];
@@ -93,41 +101,41 @@ local function transform_class_function(node)
 	}
 end
 
-handlers['re'] = function(node)
+handlers['re'] = function(self, node)
 	return 're.compile(' .. ("%q"):format(node[1]) .. ')'
 end
 
-handlers['class'] = function(node)
+handlers['class'] = function(self, node)
 	node[1].type = 'table'
 	local data = {}
 	if node.extends then
-		data[1] = "extends = " .. transform(node.extends)
+		data[1] = "extends = " .. self:transform(node.extends)
 	end
 	if node.implements then
-		data[#data + 1] = "implements = " .. transform(node.implements)
+		data[#data + 1] = "implements = " .. self:transform(node.implements)
 	end
 	for i, v in ipairs(node[1]) do
 		if v.type == "function_definition" then
-			node[1][i] = transform_class_function(v)
+			node[1][i] = self:transform_class_function(v)
 		end
 	end
 	if node.is_local then
-		return ("local %s = class(%s, %s, %q)"):format(transform(node.name),
-			transform(node[1]), "{" .. table.concat(data, ",") .. "}",
-			transform(node.name))
+		return ("local %s = class(%s, %s, %q)"):format(self:transform(node.name),
+			self:transform(node[1]), "{" .. table.concat(data, ",") .. "}",
+			self:transform(node.name))
 	else
-		return ("%s = class(%s, %s, %q)"):format(transform(node.name),
-			transform(node[1]), "{" .. table.concat(data, ",") .. "}",
-			transform(node.name))
+		return ("%s = class(%s, %s, %q)"):format(self:transform(node.name),
+			self:transform(node[1]), "{" .. table.concat(data, ",") .. "}",
+			self:transform(node.name))
 	end
 end
 
-handlers['interface'] = function(node)
+handlers['interface'] = function(self, node)
 	local names = node[1]
 	for i, v in ipairs(names) do
 		names[i] = {name = v, {type = "boolean", true}}
 	end
-	return transform({type="assignment";
+	return self:transform({type="assignment";
 		variable_list = {node.name};
 		expression_list = {{
 			type = "table";
@@ -136,17 +144,17 @@ handlers['interface'] = function(node)
 	})
 end
 
-handlers['table'] = function(node)
+handlers['table'] = function(self, node)
 	if #node == 0 then
 		return '{}'
 	elseif node[1].type == "generator" then
 		_tablegen_level = _tablegen_level + 1
-		local output = {"(function()", l("\tlocal _generator_%s = {}"):format(
-			_tablegen_level)}
+		local output = {"(function()", self:l("\tlocal _generator_%s = {}"
+			):format(_tablegen_level)}
 		local generator = node[1]
 		if generator[1].index then -- complex
-			indent = indent + 1
-			output[#output + 1] = l(transform({
+			self.indent = self.indent + 1
+			output[#output + 1] = self:l(self:transform({
 				generator[2]; -- loop iterator
 				{type = "assignment";
 					variable_list = {{("_generator_%s"):format(_tablegen_level);
@@ -157,10 +165,10 @@ handlers['table'] = function(node)
 				type = "iterative_for_loop";
 				variable_list = generator.variable_list;
 			}))
-			indent = indent - 1
+			self.indent = self.indent - 1
 		else -- simpler
-			indent = indent + 1
-			output[#output + 1] = l(transform({
+			self.indent = self.indent + 1
+			output[#output + 1] = self:l(self:transform({
 				generator[2]; -- loop iterator
 				{type = "assignment";
 					variable_list = {{("_generator_%s"):format(_tablegen_level);
@@ -171,136 +179,137 @@ handlers['table'] = function(node)
 				type = "iterative_for_loop";
 				variable_list = generator.variable_list or {generator[1]};
 			}))
-			indent = indent - 1
+			self.indent = self.indent - 1
 		end
-		output[#output + 1] = (l"\treturn _generator_%s"):format(_tablegen_level)
-		output[#output + 1] = l"end)()"
+		output[#output + 1] = (self:l"\treturn _generator_%s"):format(
+			_tablegen_level)
+		output[#output + 1] = self:l"end)()"
 		_tablegen_level = _tablegen_level - 1
 		return table.concat(output, "\n")
 	end
 	local output = {'{'}
 	local named = {}
-	indent = indent + 1
+	self.indent = self.indent + 1
 	for _, item in ipairs(node) do
 		if not item.index and not item.name then
 			-- not named, add to normal output
-			output[#output + 1] = l(transform(item)) .. ";"
+			output[#output + 1] = self:l(self:transform(item)) .. ";"
 		else
 			if item.index then
-				named[#named + 1] = l("[%s] = %s;"):format(transform(item.index),
-					transform(item[1]))
+				named[#named + 1] = self:l("[%s] = %s;"):format(self:transform(
+					item.index), self:transform(item[1]))
 			else
-				named[#named + 1] = l("%s = %s;"):format(item.name,
-					transform(item[1]))
+				named[#named + 1] = self:l("%s = %s;"):format(item.name,
+					self:transform(item[1]))
 			end
 		end
 	end
 	for _, item in ipairs(named) do
 		output[#output + 1] = item
 	end
-	indent = indent - 1
+	self.indent = self.indent - 1
 	output[#output + 1] = "}"
 	return table.concat(output, "\n")
 end
 
-handlers['boolean'] = function(node)
+handlers['boolean'] = function(self, node)
 	return tostring(node[1])
 end
 
-handlers['break'] = function(node)
+handlers['break'] = function(self, node)
 	return node.type
 end
 
-handlers['yield'] = function(node)
-	return ("coroutine.yield(%s)"):format(transform_expression_list(node))
+handlers['yield'] = function(self, node)
+	return ("coroutine.yield(%s)"):format(self:transform_expression_list(node))
 end
 
-handlers['return'] = function(node)
-	return ("return %s"):format(transform_expression_list(node))
+handlers['return'] = function(self, node)
+	return ("return %s"):format(self:transform_expression_list(node))
 end
 
-handlers['block'] = function(root_node, is_logical) -- ::TODO:: check for block
+handlers['block'] = function(self, root_node, is_logical)
 	local lines = {}
 	if not is_logical then
 		lines[1] = 'do'
 	end
-	indent = indent + 1
+	self.indent = self.indent + 1
 	for i, node in ipairs(root_node[1]) do -- luacheck: ignore 213
-		lines[#lines + 1] = l(transform(node))
+		lines[#lines + 1] = self:l(self:transform(node))
 	end
-	indent = indent - 1
+	self.indent = self.indent - 1
 	if not is_logical then
-		lines[#lines + 1] = l'end'
+		lines[#lines + 1] = self:l'end'
 	end
 	return table.concat(lines, '\n')
 end
 
-handlers['while_loop'] = function(node)
+handlers['while_loop'] = function(self, node)
 	local output = {"while"}
-	output[#output + 1] = transform(node.condition)
+	output[#output + 1] = self:transform(node.condition)
 	if node[1].type ~= "block" then
-		output[#output + 1] = transform({type = "block", {node[1]}})
+		output[#output + 1] = self:transform({type = "block", {node[1]}})
 	else
-		output[#output + 1] = transform(node[1])
+		output[#output + 1] = self:transform(node[1])
 	end
 	return table.concat(output, " ")
 end
 
-handlers['numeric_for_loop'] = function(node)
+handlers['numeric_for_loop'] = function(self, node)
 	local args = {node.incremented_variable .. "=" ..
-	transform(node.start), transform(node.stop)}
+	self:transform(node.start), self:transform(node.stop)}
 	if node.step then
-		args[#args + 1] = transform(node.step)
+		args[#args + 1] = self:transform(node.step)
 	end
 	local output = {"for", table.concat(args, ", ")}
 	if node[1].type ~= "block" then
-		output[#output + 1] = transform({type = "block", {node[1]}})
+		output[#output + 1] = self:transform({type = "block", {node[1]}})
 	else
-		output[#output + 1] = transform(node[1])
+		output[#output + 1] = self:transform(node[1])
 	end
 	return table.concat(output, " ")
 end
 
-handlers['iterative_for_loop'] = function(node)
-	local output = {"for", transform_variable_list(node), "in",
-		transform(node[1])}
+handlers['iterative_for_loop'] = function(self, node)
+	local output = {"for", self:transform_variable_list(node), "in",
+		self:transform(node[1])}
 	if node[2].type ~= "block" then
-		output[#output + 1] = transform({type = "block", {node[2]}})
+		output[#output + 1] = self:transform({type = "block", {node[2]}})
 	else
-		output[#output + 1] = transform(node[2])
+		output[#output + 1] = self:transform(node[2])
 	end
 	return table.concat(output, " ")
 end
 
-handlers['if'] = function(node)
-	local output = {("if %s then"):format(transform(node.condition))}
+handlers['if'] = function(self, node)
+	local output = {("if %s then"):format(self:transform(node.condition))}
 	if node[1].type == "block" then
-		output[#output + 1] = handlers['block'](node[1], true)
+		output[#output + 1] = handlers['block'](self, node[1], true)
 	else
-		output[#output + 1] = l("\t" .. transform(node[1]))
+		output[#output + 1] = self:l("\t" .. self:transform(node[1]))
 	end
 	for _, blk in ipairs(node['elseif']) do
-		output[#output + 1] = l("elseif %s then"):format(transform(
+		output[#output + 1] = self:l("elseif %s then"):format(self:transform(
 			blk.condition))
 		if blk[1].type == "block" then
-			output[#output + 1] = handlers['block'](blk[1], true)
+			output[#output + 1] = handlers['block'](self, blk[1], true)
 		else
-			output[#output + 1] = l("\t" .. transform(blk[1]))
+			output[#output + 1] = self:l("\t" .. self:transform(blk[1]))
 		end
 	end
 	if node["else"] then
-		output[#output + 1] = l("else")
+		output[#output + 1] = self:l("else")
 		if node["else"].type == "block" then
-			output[#output + 1] = handlers['block'](node["else"], true)
+			output[#output + 1] = handlers['block'](self, node["else"], true)
 		else
-			output[#output + 1] = l("\t" .. transform(node["else"]))
+			output[#output + 1] = self:l("\t" .. self:transform(node["else"]))
 		end
 	end
-	output[#output + 1] = l"end"
+	output[#output + 1] = self:l"end"
 	return table.concat(output, "\n")
 end
 
-handlers['function_definition'] = function(node)
+handlers['function_definition'] = function(self, node)
 	local is_interpretable_raw = true
 	for _, name in ipairs(node[1]) do
 		-- if type is not string, issue with `function x.y.z()` syntax
@@ -309,7 +318,7 @@ handlers['function_definition'] = function(node)
 			is_interpretable_raw = false
 		end
 	end
-	local name = transform(node[1])
+	local name = self:transform(node[1])
 	local output = {}
 	local header = {}
 	if is_interpretable_raw then
@@ -324,44 +333,45 @@ handlers['function_definition'] = function(node)
 	if node[2] and not node[2].type then -- empty parameter list
 		for _, arg in ipairs(node[2]) do
 			if arg.default then
-				defaults[arg.name] = transform(arg.default)
+				defaults[arg.name] = self:transform(arg.default)
 			end
 			args[#args + 1] = arg.name
 		end
 	end
 	header[2] = table.concat(args, ", ") .. ")"
 	output[1] = table.concat(header)
-	indent = indent + 1
+	self.indent = self.indent + 1
 	for arg_name, default in pairs(defaults) do
-		output[#output + 1] = l(("if not %s then"):format(arg_name))
-		output[#output + 1] = l(("\t%s = %s"):format(arg_name, default))
-		output[#output + 1] = l"end"
+		output[#output + 1] = self:l(("if not %s then"):format(arg_name))
+		output[#output + 1] = self:l(("\t%s = %s"):format(arg_name, default))
+		output[#output + 1] = self:l"end"
 	end
-	indent = indent - 1
+	self.indent = self.indent - 1
 	if node.expression_list then
-		output[#output + 1] = l"\treturn " .. transform_expression_list(node)
+		output[#output + 1] = self:l"\treturn " ..
+			self:transform_expression_list(node)
 	else
 		if node.is_async then
 			-- wrap block in `return coroutine.wrap(function()`
-			indent = indent + 1
-			output[#output + 1] = l"return coroutine.wrap(function()"
+			self.indent = self.indent + 1
+			output[#output + 1] = self:l"return coroutine.wrap(function()"
 		end
 		if node[#node].type == "block" then
-			output[#output + 1] = handlers['block'](node[#node], true)
+			output[#output + 1] = handlers['block'](self, node[#node], true)
 		else
-			output[#output + 1] = l"\t" .. transform(node[#node])
+			output[#output + 1] = self:l"\t" .. self:transform(node[#node])
 		end
 		if node.is_async then
 			-- wrap block in `return coroutine.wrap(function()`
-			output[#output + 1] = l"end)"
-			indent = indent - 1
+			output[#output + 1] = self:l"end)"
+			self.indent = self.indent - 1
 		end
 	end
-	output[#output + 1] = l"end"
+	output[#output + 1] = self:l"end"
 	return table.concat(output, "\n")
 end
 
-handlers['lambda'] = function(node)
+handlers['lambda'] = function(self, node)
 	local output = {}
 	local defaults, args = {}, {}
 	if node.is_self then
@@ -370,29 +380,30 @@ handlers['lambda'] = function(node)
 	if node[1] and not node[1].type then -- empty parameter list
 		for _, arg in ipairs(node[1]) do
 			if arg.default then
-				defaults[arg.name] = transform(arg.default)
+				defaults[arg.name] = self:transform(arg.default)
 			end
 			args[#args + 1] = arg.name
 		end
 	end
 	output[1] = "(function(" .. table.concat(args, ", ") .. ")"
-	indent = indent + 1
+	self.indent = self.indent + 1
 	for name, default in pairs(defaults) do
-		output[#output + 1] = l(("if not %s then"):format(name))
-		output[#output + 1] = l(("\t%s = %s"):format(name, default))
-		output[#output + 1] = l"end"
+		output[#output + 1] = self:l(("if not %s then"):format(name))
+		output[#output + 1] = self:l(("\t%s = %s"):format(name, default))
+		output[#output + 1] = self:l"end"
 	end
-	indent = indent - 1
+	self.indent = self.indent - 1
 	if node.expression_list then
-		output[#output + 1] = l"\treturn " .. transform_expression_list(node)
+		output[#output + 1] = self:l"\treturn " ..
+			self:transform_expression_list(node)
 	else
 		if node[#node].type == "block" then
-			output[#output + 1] = handlers['block'](node[#node], true)
+			output[#output + 1] = handlers['block'](self, node[#node], true)
 		else
-			output[#output + 1] = l("\t" .. transform(node[#node]))
+			output[#output + 1] = self:l("\t" .. self:transform(node[#node]))
 		end
 	end
-	output[#output + 1] = l"end)"
+	output[#output + 1] = self:l"end)"
 	return table.concat(output, "\n")
 end
 
@@ -400,7 +411,7 @@ local operator_transformations = {
 	["!="] = "~=";
 	["&&"] = "and";
 	["||"] = "or";
-	["!"] = "not "; -- rare case; usually symbols instead of kw,
+	["!"] = "not "; -- use space to avoid collisions such as `notx` from `!x`
 }
 
 local ternary_operator_transformations = {
@@ -409,25 +420,25 @@ local ternary_operator_transformations = {
 	end
 }
 
-handlers['expression'] = function(node)
+handlers['expression'] = function(self, node)
 	if operator_transformations[node.operator] then
 		node.operator = operator_transformations[node.operator]
 	end
 	if #node > 2 then -- TODO chain operators
 		local expr = {}
 		for i = 1, #node do
-			expr[#expr + 1] = transform(node[i])
+			expr[#expr + 1] = self:transform(node[i])
 		end
 		return ternary_operator_transformations[node.operator](unpack(expr))
 	elseif #node == 2 then
-		return ("(%s %s %s)"):format(transform(node[1]), node.operator,
-			transform(node[2]))
+		return ("(%s %s %s)"):format(self:transform(node[1]), node.operator,
+			self:transform(node[2]))
 	elseif #node == 1 then
-		return ("(%s%s)"):format(node.operator, transform(node[1]))
+		return ("(%s%s)"):format(node.operator, self:transform(node[1]))
 	end
 end
 
-handlers['number'] = function(node)
+handlers['number'] = function(self, node)
 	local is_negative = node.is_negative and "-" or ""
 	if node.base == "10" then
 		if math.floor(node[1]) == node[1] then
@@ -440,16 +451,16 @@ handlers['number'] = function(node)
 	end
 end
 
-handlers['range'] = function(node)
+handlers['range'] = function(self, node)
 	local output = {
 		"itr.range(";
-		transform(node.start);
+		self:transform(node.start);
 		", ";
-		transform(node.stop);
+		self:transform(node.stop);
 	}
 	if node.step then
 		output[5] = ", "
-		output[6] = transform(node.step)
+		output[6] = self:transform(node.step)
 	end
 	output[#output + 1] = ")"
 	return table.concat(output)
@@ -457,13 +468,13 @@ end
 
 local des_num = 0
 
-handlers['assignment'] = function(node)
+handlers['assignment'] = function(self, node)
 	local output = {}
 	if node.is_local then
 		output[1] = "local "
 	end
 	if node.variable_list.is_destructuring then
-		local expression = transform(node.expression_list[1])
+		local expression = self:transform(node.expression_list[1])
 		local name
 		if node.expression_list[1].type == "variable" and
 			not node.expression_list[1][2] then -- no indexing
@@ -476,7 +487,7 @@ handlers['assignment'] = function(node)
 		table.insert(output, 1, ("local %s = %s\n"):format(name, expression))
 		if node.variable_list.is_destructuring == "table" then
 			for i, v in ipairs(node.variable_list) do
-				local value = transform(v)
+				local value = self:transform(v)
 				last[#last + 1] = name .. "." .. value
 				output[#output + 1] = value
 				if node.variable_list[i + 1] then
@@ -486,7 +497,7 @@ handlers['assignment'] = function(node)
 		elseif node.variable_list.is_destructuring == "array" then
 			local counter = 0
 			for i, v in ipairs(node.variable_list) do
-				local value = transform(v)
+				local value = self:transform(v)
 				counter = counter + 1
 				last[#last + 1] = ("%s[%i]"):format(name, counter)
 				output[#output + 1] = value
@@ -500,15 +511,15 @@ handlers['assignment'] = function(node)
 		des_num = des_num - 1
 		return table.concat(output)
 	end
-	output[#output + 1] = transform_variable_list(node) -- ::TODO::
+	output[#output + 1] = self:transform_variable_list(node)
 	output[#output + 1] = " = "
-	output[#output + 1] = transform_expression_list(node) -- ::TODO::
+	output[#output + 1] = self:transform_expression_list(node)
 	return table.concat(output)
 end
 
-handlers['function_call'] = function(node)
+handlers['function_call'] = function(self, node)
 	if node.generator then
-		return transform {
+		return self:transform {
 			node.generator[1];
 			{type = "function_call";
 				node[1];
@@ -526,21 +537,21 @@ handlers['function_call'] = function(node)
 				node.expression_list = node.expression_list or {}
 				table.insert(node.expression_list, 1, node[1])
 				node[1] = {type = "variable", node.index_class}
-				name = transform(node[1]) .. "." .. node.has_self
+				name = self:transform(node[1]) .. "." .. node.has_self
 			else
-				name = transform(node[1]) .. ":" .. node.has_self
+				name = self:transform(node[1]) .. ":" .. node.has_self
 			end
 		else
-			name = transform(node[1])
+			name = self:transform(node[1])
 		end
-		return name .. "(" .. transform_expression_list(node) .. ")"
+		return name .. "(" .. self:transform_expression_list(node) .. ")"
 	end
 end
 
-handlers['variable'] = function(node)
+handlers['variable'] = function(self, node)
 	local name = {}
 	if type(node[1]) == "table" then
-		name[1] = "(" .. transform(node[1]) .. ")"
+		name[1] = "(" .. self:transform(node[1]) .. ")"
 	else
 		name[1] = node[1]
 	end
@@ -552,21 +563,21 @@ handlers['variable'] = function(node)
 				name[#name + 1] = "[" .. node[i] .. "]"
 			end
 		else
-			name[#name + 1] = "[" .. transform(node[i]) .. "]"
+			name[#name + 1] = "[" .. self:transform(node[i]) .. "]"
 		end
 	end
 	return table.concat(name)
 end
 
-handlers['sqstring'] = function(node)
+handlers['sqstring'] = function(self, node)
 	return ("%q"):format(node[1]:gsub("\\", "\\\\"))  -- \ is ignored in '' strings
 end
 
-handlers['dqstring'] = function(node)
+handlers['dqstring'] = function(self, node)
 	return ('"%s"'):format(node[1])
 end
 
-handlers['blstring'] = function(node)
+handlers['blstring'] = function(self, node)
 	local eq = ("="):rep(#node.eq)
 	return ("[%s[%s]%s]"):format(eq, node[1], eq)
 end
@@ -576,8 +587,9 @@ end
 -- @tparam function input_stream Used as an iterator to retrieve code
 -- @tparam function output_stream Repeatedly called with generated code
 function parser.compile(input_stream, output_stream)
+	local parser_state = parser:new()
 	for input in input_stream do
-		output_stream(transform(input))
+		output_stream(parser_state:transform(input))
 	end
 end
 
