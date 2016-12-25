@@ -33,7 +33,6 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Local_Functions">Local Functions</a></li>
 </ul>
 
 
@@ -73,6 +72,30 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#parser:new">parser:new ()</a></td>
+	<td class="summary">Initialize a parser state</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser:transform">parser:transform (node)</a></td>
+	<td class="summary">Transform a node using the registered handler.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser:l">parser:l (line)</a></td>
+	<td class="summary">Add indent to a line of text.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser:transform_expression_list">parser:transform_expression_list (node)</a></td>
+	<td class="summary">Convert an expression_list field to a transformed list of expressions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser:transform_variable_list">parser:transform_variable_list (node)</a></td>
+	<td class="summary">Convert a variable_list to a transformed list of variable names.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#parser:transform_class_function">parser:transform_class_function (node)</a></td>
+	<td class="summary">Convert a function field in a class to a lambda table assignment.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#parser.compile">parser.compile (input_stream, output_stream)</a></td>
 	<td class="summary">Convert an iterator returning FusionScript chunks to Lua code.</td>
 	</tr>
@@ -97,29 +120,6 @@
 	<td class="summary">Inject <a href="../modules/fusion.core.parsers.source.html#parser.search_for">parser.search_for</a> into the <code>require()</code> searchers list.</td>
 	</tr>
 </table>
-<h2><a href="#Local_Functions">Local Functions</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#transform">transform (node)</a></td>
-	<td class="summary">Transform a node using the registered handler.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#l">l (line)</a></td>
-	<td class="summary">Add indent to a line of text.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#transform_expression_list">transform_expression_list (node)</a></td>
-	<td class="summary">Convert an expression_list field to a transformed list of expressions.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#transform_variable_list">transform_variable_list (node)</a></td>
-	<td class="summary">Convert a variable_list to a transformed list of variable names.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#transform_class_function">transform_class_function (node)</a></td>
-	<td class="summary">Convert a function field in a class to a lambda table assignment.</td>
-	</tr>
-</table>
 
 <br/>
 <br/>
@@ -128,6 +128,135 @@
     <h2 class="section-header "><a name="Functions"></a>Functions</h2>
 
     <dl class="function">
+    <dt>
+    <a name = "parser:new"></a>
+    <strong>parser:new ()</strong>
+    </dt>
+    <dd>
+    Initialize a parser state
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser:transform"></a>
+    <strong>parser:transform (node)</strong>
+    </dt>
+    <dd>
+    Transform a node using the registered handler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser:l"></a>
+    <strong>parser:l (line)</strong>
+    </dt>
+    <dd>
+    Add indent to a line of text.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">line</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser:transform_expression_list"></a>
+    <strong>parser:transform_expression_list (node)</strong>
+    </dt>
+    <dd>
+    Convert an expression_list field to a transformed list of expressions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser:transform_variable_list"></a>
+    <strong>parser:transform_variable_list (node)</strong>
+    </dt>
+    <dd>
+    Convert a variable_list to a transformed list of variable names.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "parser:transform_class_function"></a>
+    <strong>parser:transform_class_function (node)</strong>
+    </dt>
+    <dd>
+    Convert a function field in a class to a lambda table assignment.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
     <dt>
     <a name = "parser.compile"></a>
     <strong>parser.compile (input_stream, output_stream)</strong>
@@ -293,132 +422,13 @@
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
-
-    <dl class="function">
-    <dt>
-    <a name = "transform"></a>
-    <strong>transform (node)</strong>
-    </dt>
-    <dd>
-    Transform a node using the registered handler.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">node</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
-
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "l"></a>
-    <strong>l (line)</strong>
-    </dt>
-    <dd>
-    Add indent to a line of text.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">line</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
-
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "transform_expression_list"></a>
-    <strong>transform_expression_list (node)</strong>
-    </dt>
-    <dd>
-    Convert an expression_list field to a transformed list of expressions.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">node</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
-
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "transform_variable_list"></a>
-    <strong>transform_variable_list (node)</strong>
-    </dt>
-    <dd>
-    Convert a variable_list to a transformed list of variable names.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">node</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
-
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "transform_class_function"></a>
-    <strong>transform_class_function (node)</strong>
-    </dt>
-    <dd>
-    Convert a function field in a class to a lambda table assignment.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">node</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
-
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2016-12-23 21:56:53 </i>
+<i style="float:right;">Last updated 2016-12-25 00:12:26 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
