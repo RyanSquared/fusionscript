@@ -10,9 +10,7 @@ local handlers = {}
 
 --- Initialize a parser state
 function parser:new()
-	if not self then
-		self = {}
-	end
+	self = setmetatable({}, {__index = parser})
 	self.indent = 0
 	self.last_node = {}
 	return self
@@ -584,11 +582,11 @@ end
 
 --- Convert an iterator returning FusionScript chunks to Lua code.
 -- Do not use this function directly to compile code.
--- @tparam function input_stream Used as an iterator to retrieve code
+-- @tparam table in_values Table of values to compile
 -- @tparam function output_stream Repeatedly called with generated code
-function parser.compile(input_stream, output_stream)
+function parser.compile(in_values, output_stream)
 	local parser_state = parser:new()
-	for input in input_stream do
+	for _, input in ipairs(in_values) do
 		output_stream(parser_state:transform(input))
 	end
 end
@@ -607,11 +605,7 @@ function parser.read_file(file)
 	end
 	local node = lexer:match(source_file:read("*a"))
 	source_file:close()
-	parser.compile(coroutine.wrap(function()
-		for key, value in pairs(node) do -- luacheck: ignore 213
-			coroutine.yield(value)
-		end
-	end), append)
+	parser.compile(node, append)
 	return table.concat(output, "\n") .. "\n" -- EOL at EOF
 end
 

@@ -96,7 +96,7 @@
 	<td class="summary">Convert a function field in a class to a lambda table assignment.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.compile">parser.compile (input_stream, output_stream)</a></td>
+	<td class="name" nowrap><a href="#parser.compile">parser.compile (in_values, output_stream)</a></td>
 	<td class="summary">Convert an iterator returning FusionScript chunks to Lua code.</td>
 	</tr>
 	<tr>
@@ -259,7 +259,7 @@
 </dd>
     <dt>
     <a name = "parser.compile"></a>
-    <strong>parser.compile (input_stream, output_stream)</strong>
+    <strong>parser.compile (in_values, output_stream)</strong>
     </dt>
     <dd>
     Convert an iterator returning FusionScript chunks to Lua code.
@@ -268,9 +268,9 @@
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">input_stream</span>
-            <span class="types"><span class="type">function</span></span>
-         Used as an iterator to retrieve code
+        <li><span class="parameter">in_values</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+         Table of values to compile
         </li>
         <li><span class="parameter">output_stream</span>
             <span class="types"><span class="type">function</span></span>
