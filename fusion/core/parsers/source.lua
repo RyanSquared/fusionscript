@@ -206,7 +206,7 @@ handlers['table'] = function(self, node)
 		output[#output + 1] = item
 	end
 	self.indent = self.indent - 1
-	output[#output + 1] = "}"
+	output[#output + 1] = self:l"}"
 	return table.concat(output, "\n")
 end
 
