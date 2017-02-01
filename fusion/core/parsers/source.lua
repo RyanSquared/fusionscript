@@ -95,6 +95,7 @@ function parser:transform_class_function(node)
 			type = "lambda",
 			expression_list = node[1].expression_list;
 			is_self = node.is_self;
+			is_async = node.is_async;
 		}
 	}
 end
@@ -395,10 +396,20 @@ handlers['lambda'] = function(self, node)
 		output[#output + 1] = self:l"\treturn " ..
 			self:transform_expression_list(node)
 	else
+		if node.is_async then
+			-- wrap block in `return coroutine.wrap(function()`
+			self.indent = self.indent + 1
+			output[#output + 1] = self:l"return coroutine.wrap(function()"
+		end
 		if node[#node].type == "block" then
 			output[#output + 1] = handlers['block'](self, node[#node], true)
 		else
-			output[#output + 1] = self:l("\t" .. self:transform(node[#node]))
+			output[#output + 1] = self:l"\t" .. self:transform(node[#node])
+		end
+		if node.is_async then
+			-- wrap block in `return coroutine.wrap(function()`
+			output[#output + 1] = self:l"end)"
+			self.indent = self.indent - 1
 		end
 	end
 	output[#output + 1] = self:l"end)"
