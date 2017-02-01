@@ -377,7 +377,7 @@ handlers['lambda'] = function(self, node)
 	end
 	if node[1] and not node[1].type then -- empty parameter list
 		for _, arg in ipairs(node[1]) do
-			if arg.default then
+			if arg.default then -- keep for compat with class methods!
 				defaults[arg.name] = self:transform(arg.default)
 			end
 			args[#args + 1] = arg.name
@@ -523,10 +523,11 @@ handlers['function_call'] = function(self, node)
 				node[1];
 				has_self = node.has_self;
 				index_class = node.index_class;
-				expression_list = node.generator.expression_list;
+				expression_list = node.generator.expression_list or
+					node.generator.variable_list;
 			};
 			type = "iterative_for_loop"; -- `in` without `for` only 1 var   V
-			variable_list = node.generator.variable_list or {node.generator[1]}
+			variable_list = node.generator.variable_list
 		}
 	else
 		local name
