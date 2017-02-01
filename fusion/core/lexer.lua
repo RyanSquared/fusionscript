@@ -149,8 +149,10 @@ local pattern = re.compile([[
 	return <- {| {:type: {'return' / 'yield'} :} ws expression_list? |}
 
 	lambda <- {| {:type: '' -> 'lambda' :}
-		'\' ws name_list? ws is_self '>' ws (statement / expression_list / r)
+		'\' ws lambda_args? ws is_self '>' ws (statement / expression_list / r)
 	|}
+	lambda_args <- {| lambda_arg (ws ',' ws lambda_arg)? |}
+	lambda_arg <- {| {:name: name :} |}
 	function_definition <- {| {:type: '' -> 'function_definition' :}
 		{:is_async: 'async' -> true space :}? ws
 		variable ws function_body -- Do NOT write functions with :
