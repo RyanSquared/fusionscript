@@ -403,7 +403,8 @@ else
 
 Function declarations are done by giving a parenthesis-bound list of arguments
 which may or may not be pre-evaluated to a value (using `argument = value`)
-followed by either `->` or `=>` and either a statement or a statement list.
+followed by either `->` or `=>` and either a statement, a statement list, or an
+expression list.
 
 ```fuse
 asdf(gh = "Hello World!")->
@@ -418,6 +419,17 @@ function.
 ```fuse
 asdf()=>
     print(@text); -- whatever self.text is
+```
+
+### Lambdas
+
+Lambdas are nameless/anonymous functions. The way it works is very similar to
+normal functions. To use one, use the opening character `\`, give a list of
+names to act as function arguments, use an arrow (`->` or `=>`), and give an
+expression list, statement, or statement list.
+
+```fuse
+print(\x -> (^ x 2)); -- squares every input!
 ```
 
 ### Asynchronous Functions
