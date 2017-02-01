@@ -300,7 +300,7 @@ end
 -- @tparam iter input
 -- @tparam function fn
 -- @treturn number
--- @usage print(quantify(map((()-> math.random(0, 1)), 1::10), (n)-> n == 1));
+-- @usage print(quantify(map((\-> math.random(0, 1)), 1::10), (n)-> n == 1));
 local function quantify(input, fn)
 	if not fn then
 		return quantify(input, truthy)

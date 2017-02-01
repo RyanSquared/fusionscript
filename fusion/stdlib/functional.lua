@@ -50,7 +50,7 @@ end
 -- @tparam function fn
 -- @tparam iter input
 -- @treturn iter Initialized iterator
--- @usage print(x in map(((v)-> v ^ 2), 1::10)); -- squares
+-- @usage print(x in map((\v -> (^ v 2)), 1::10)); -- squares
 local function map(fn, input)
 	for k, v in iter(input) do
 		if v then
@@ -66,7 +66,7 @@ end
 -- @tparam function fn
 -- @tparam iter input Iterable object
 -- @treturn iter Initialized iterator
--- @usage print(x in filter(((v)-> v % 2 == 0), 1::10)); -- odds
+-- @usage print(x in filter((\v -> (== (% v 2) 1)), 1::10)); -- odds
 local function filter(fn, input)
 	for k, v in iter(input) do -- luacheck: ignore 213
 		if fn(k, v) then
@@ -80,7 +80,7 @@ end
 -- @tparam function fn
 -- @tparam iter input Iterable object
 -- @param init Initial value (will use first value of stream if not supplied)
--- @usage print(reduce(((x, y)-> x > y), {5, 2, 7, 9, 1})); -- math.max()
+-- @usage print(reduce((\x, y -> (?: (> x y) x y)), {5, 2, 7, 9, 1})); -- math.max()
 local function reduce(fn, input, init)
 	for k, v in iter(input) do -- luacheck: ignore 213
 		if init == nil then
