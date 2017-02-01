@@ -6,7 +6,7 @@ a:b()
 a.b:c()
 d.c(a.b)
 c.b(a)
-for io.lines("test") in io.lines("test") do
+for line in io.lines("test") do
 	print(line)
 end
 for line in io.lines("test") do
