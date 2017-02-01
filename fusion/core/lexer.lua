@@ -149,7 +149,7 @@ local pattern = re.compile([[
 	return <- {| {:type: {'return' / 'yield'} :} ws expression_list? |}
 
 	lambda <- {| {:type: '' -> 'lambda' :}
-		function_body
+		'\' ws name_list? ws is_self '>' ws (statement / expression_list / r)
 	|}
 	function_definition <- {| {:type: '' -> 'function_definition' :}
 		{:is_async: 'async' -> true space :}? ws
@@ -157,8 +157,9 @@ local pattern = re.compile([[
 	|}
 	function_body <-
 		'(' ws function_defined_arguments? ws ')' ws
-			({:is_self: '=' -> true :} / '-') '>' ws
+			is_self '>' ws
 			(statement / expression_list / r)
+	is_self <- {:is_self: '=' -> true :} / '-'
 	function_defined_arguments <- {|
 		function_argument ((! ')') ws (',' / r) ws function_argument)*
 	|}
@@ -198,8 +199,8 @@ local pattern = re.compile([[
 		) ws '(' ws function_call_body? ws ')'
 	|}
 	function_call_body <- {:generator: {|
-		expression_list (ws 'for' ws (variable_list / r))? ws 'in' ws (expression
-		/ r)
+		expression_list ws 'for' ws (variable_list / r) ws 'in' ws expression /
+		variable_list ws 'in' ws expression
 	|} :} / function_args
 	function_args <- expression_list?
 
