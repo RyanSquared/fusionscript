@@ -1,4 +1,4 @@
-# FusionScript [![Build Status](https://travis-ci.org/ChickenNuggers/FusionScript.svg?branch=master)](https://travis-ci.org/ChickenNuggers/FusionScript)
+# FusionScript [![Build Status](https://travis-ci.org/RyanSquared/FusionScript.svg?branch=master)](https://travis-ci.org/RyanSquared/FusionScript)
 The programming language of ultimate dankliness
 
 **Warning:** This project is very recently released and possibly has many bugs.
