@@ -213,7 +213,7 @@ describe("lexer", function()
 			{type = "variable", "func"},
 			generator = {
 				{type = "variable", "b"},
-				expression_list = {{type = "variable", "a"}}
+				variable_list = {{type = "variable", "a"}}
 			}
 		}})
 	end)
@@ -374,7 +374,7 @@ describe("lexer", function()
 		})
 	end)
 	it("can parse lambda definitions", function()
-		assert.same(lexer:match("a = ()-> 'hi';"), {{type = "assignment",
+		assert.same(lexer:match("a = \\-> 'hi';"), {{type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "lambda",
 				expression_list = {{type = "sqstring", "hi"}}
@@ -403,7 +403,7 @@ describe("lexer", function()
 		})
 	end)
 	it("can parse lambda method definitions", function()
-		assert.same(lexer:match("a = ()=> 'hi';"), {{type = "assignment",
+		assert.same(lexer:match("a = \\=> 'hi';"), {{type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "lambda",
 				expression_list = {{type = "sqstring", "hi"}},
