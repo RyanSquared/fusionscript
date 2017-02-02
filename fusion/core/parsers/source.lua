@@ -404,7 +404,9 @@ handlers['lambda'] = function(self, node)
 		if node[#node].type == "block" then
 			output[#output + 1] = handlers['block'](self, node[#node], true)
 		else
-			output[#output + 1] = self:l"\t" .. self:transform(node[#node])
+			self.indent = self.indent + 1
+			output[#output + 1] = self:l(self:transform(node[#node]))
+			self.indent = self.indent - 1
 		end
 		if node.is_async then
 			-- wrap block in `return coroutine.wrap(function()`
