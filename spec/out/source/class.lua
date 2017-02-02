@@ -12,8 +12,8 @@ Example = class({
 	test = (function(self)
 		return coroutine.wrap(function()
 			for i in itr.range(1, 10) do
-			coroutine.yield(i)
-		end
+				coroutine.yield(i)
+			end
 		end)
 	end);
 }, {}, "Example")
