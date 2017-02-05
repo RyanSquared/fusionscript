@@ -135,7 +135,7 @@ local pattern = re.compile([[
 		function_definition /
 		{| {:type: '' -> 'class_field' :}
 			(
-				'[' ws {:name: expression / r :} ws ']' ws ('=' / r) ws (expression
+				'[' ws {:index: expression / r :} ws ']' ws ('=' / r) ws (expression
 				/ r) ws (';' / r)
 				/ {:name: name / r :} ws ('=' / r) ws (expression / r) ws (';' / r)
 			)
