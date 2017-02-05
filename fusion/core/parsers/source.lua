@@ -321,7 +321,11 @@ handlers['function_definition'] = function(self, node)
 	local output = {}
 	local header = {}
 	if is_interpretable_raw then
-		header[1] = ("function %s("):format(name)
+		if node.is_local then
+			header[1] = ("local function %s("):format(name)
+		else
+			header[1] = ("function %s("):format(name)
+		end
 	else
 		header[1] = ("%s = function("):format(name)
 	end

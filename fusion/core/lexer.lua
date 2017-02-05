@@ -154,7 +154,8 @@ local pattern = re.compile([[
 	lambda_args <- {| lambda_arg (ws ',' ws lambda_arg)* |}
 	lambda_arg <- {| {:name: name / '...' :} |}
 	function_definition <- {| {:type: '' -> 'function_definition' :}
-		{:is_async: 'async' -> true space :}? ws
+		{:is_async: 'async' -> true space :}?
+		{:is_local: 'local' -> true space :}? ws
 		variable ws function_body -- Do NOT write functions with :
 	|}
 	function_body <-
