@@ -500,7 +500,7 @@ describe("lexer", function()
 			name = {type = "variable", "x"},
 		}})
 	end)
-	it("can parse classes with dynamically named values", function()
+	it("can parse classes with statically named values", function()
 		assert.same(lexer:match("class x { y = z; }"), {{type = "class",
 			{
 				{type = "class_field", {type = "variable", "z"}, name = "y"}
@@ -513,7 +513,7 @@ describe("lexer", function()
 			{
 				{type = "class_field",
 				{type = "variable", "z"},
-				name = {type = "variable", "y"}}
+				index = {type = "variable", "y"}}
 			},
 			name = {type = "variable", "x"},
 		}})
