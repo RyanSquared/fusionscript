@@ -35,7 +35,7 @@ defs.err = function(pos, char, ctx)
 	local errormsg_table = {
 		"SyntaxError";
 		("Unexpected character on line %d"):format(line);
-		("Token: %s"):format(char);
+		("Token: %s"):format(current_file:match("%w+", pos) or char);
 		("Input: >> %q <<"):format(input);
 		ctx
 	}
