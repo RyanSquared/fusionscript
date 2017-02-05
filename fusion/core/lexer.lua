@@ -196,7 +196,8 @@ local pattern = re.compile([[
 		(ws 'else' ws {:else: rstatement :})?
 	|}
 
-	function_call <- {| {:type: '' -> 'function_call' :} (
+	function_call <- {| {:type: '' -> 'function_call' :}
+		((& '@') {:is_method: '' -> true :})? (
 		(variable / literal) ({:has_self: ':' {name / r} :} ws
 		{:index_class: ws '<' ws {expression} ws '>' :}? )?
 		) ws '(' ws function_call_body? ws ')'
