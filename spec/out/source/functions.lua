@@ -24,6 +24,9 @@ end
 function a_3()
 	return b
 end
+local function a_4()
+	return b
+end
 function x()
 	return coroutine.wrap(function()
 		coroutine.yield(a,b,c)
