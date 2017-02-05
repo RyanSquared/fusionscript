@@ -557,6 +557,8 @@ handlers['function_call'] = function(self, node)
 			else
 				name = self:transform(node[1]) .. ":" .. node.has_self
 			end
+		elseif #node[1] == 2 and node.is_method then
+			name = node[1][1] .. ":" .. node[1][2]
 		else
 			name = self:transform(node[1])
 		end
