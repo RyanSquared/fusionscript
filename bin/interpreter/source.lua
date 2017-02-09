@@ -11,6 +11,8 @@
 local parser = require("fusion.core.parsers.source")
 parser.inject_loader()
 
+_G.parser = parser
+
 local arg_index = 1
 while arg_index <= #arg do
 	if arg[arg_index] == "--metadata" then -- return metadata from module
