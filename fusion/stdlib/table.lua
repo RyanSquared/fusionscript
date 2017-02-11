@@ -38,6 +38,16 @@ function table.sort(t, ...)
 	return t
 end
 
+function table.slice(t, start, stop)
+	return coroutine.wrap(function()
+		start = start or 1
+		stop = stop or #t
+		for i=start, stop do
+			coroutine.yield(t[i])
+		end
+	end)
+end
+
 table.unpack = unpack or table.unpack -- luacheck: ignore 113
 
 return table

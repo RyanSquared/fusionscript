@@ -20,4 +20,12 @@ describe("table", function()
 		local t0 = {}
 		assert.same(t0, table.sort(t0))
 	end)
+	it("can grab a slice of a table", function()
+		local base = {'a', 'b', 'c', 'd', 'e'}
+		local first = {'a', 'b', 'c'}
+		local last = {'c', 'd', 'e'}
+		assert.same(base, table.from_generator(table.slice(base)))
+		assert.same(first, table.from_generator(table.slice(base, 1, 3)))
+		assert.same(last, table.from_generator(table.slice(base, 3)))
+	end)
 end)
