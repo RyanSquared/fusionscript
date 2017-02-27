@@ -21,7 +21,7 @@ while arg_index <= #arg do
 			".metadata")
 		if not ok then
 			error("Could not find module metadata for package: " ..
-				arg[arg_index + 1])
+				arg[arg_index + 1] .. "\n" .. module)
 		else
 			local function check(name)
 				assert(module[name], "Missing field: " .. name)
