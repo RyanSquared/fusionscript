@@ -1,5 +1,5 @@
 package = "fusionscript"
-version = "0.2-1"
+version = "0.2.1-1"
 
 source = {
 	url = "git://github.com/ChickenNuggers/FusionScript.git"
