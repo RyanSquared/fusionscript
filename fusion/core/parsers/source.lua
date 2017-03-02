@@ -135,6 +135,7 @@ handlers['interface'] = function(self, node)
 		names[i] = {name = v, {type = "boolean", true}}
 	end
 	return self:transform({type="assignment";
+		is_local = node.is_local;
 		variable_list = {node.name};
 		expression_list = {{
 			type = "table";

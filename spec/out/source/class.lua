@@ -40,7 +40,8 @@ ExampleThree = class({
 		ExampleToo.__init(self,a,b)
 	end);
 }, {extends = ExampleToo}, "ExampleThree")
-IScope = {
+X = {}
+local IScope = {
 	close = true;
 }
 IO = class({
@@ -53,7 +54,7 @@ IO = class({
 		self.file:close()
 	end);
 }, {implements = IScope}, "IO")
-File = class({
+local File = class({
 	__new = (function(self, ...)
 		self.file = io.open(...)
 	end);

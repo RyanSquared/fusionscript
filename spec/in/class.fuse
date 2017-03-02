@@ -45,7 +45,9 @@ class ExampleThree extends ExampleToo {
 
 -- interface
 
-interface IScope {
+interface X {}
+
+local interface IScope {
 	close;
 }
 
@@ -63,7 +65,7 @@ class IO implements IScope {
 
 -- extension of implemented interface, inherits close()
 
-class File extends IO implements IScope {
+local class File extends IO implements IScope {
 	__new(...)=>
 		@file = io.open(...);
 }
