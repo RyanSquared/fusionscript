@@ -1,4 +1,4 @@
--- luacheck: ignore 122
+-- luacheck: ignore 122 142
 
 function table.copy(t0)
 	local t1 = {}
@@ -48,6 +48,6 @@ function table.slice(t, start, stop)
 	end)
 end
 
-table.unpack = unpack or table.unpack -- luacheck: ignore 113
+table.unpack = unpack or table.unpack -- luacheck: ignore 113 143
 
 return table

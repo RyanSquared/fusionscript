@@ -3,7 +3,7 @@
 
 local lexer = require("fusion.core.lexer")
 local lfs = require("lfs")
-local unpack = unpack or table.unpack -- luacheck: ignore 113
+local unpack = unpack or table.unpack -- luacheck: ignore 113 143
 
 local parser = {}
 local handlers = {}
@@ -663,14 +663,14 @@ function parser.search_for(module_name)
 	local module_path = module_name:gsub("%.", "/")
 
 	local file_path
-	for _, path in ipairs(package.fusepath_t) do
+	for _, path in ipairs(package.fusepath_t) do -- luacheck: ignore 143
 		file_path = path:gsub("?", module_path)
 		if lfs.attributes(file_path) then
 			return function() return parser.do_file(file_path) end, file_path
 		end
 	end
 	local msg = {}
-	for _, path in ipairs(package.fusepath_t) do
+	for _, path in ipairs(package.fusepath_t) do -- luacheck: ignore 143
 		msg[#msg + 1] = ("\tno file %q"):format(path:gsub("?", module_path))
 	end
 	return "\n" .. table.concat(msg, "\n")
@@ -681,16 +681,16 @@ end
 -- @usage parser.inject_loader(); print(require("test_module"))
 -- -- Attempts to load a FusionScript `test_module` package
 function parser.inject_loader()
-	for _, loader in ipairs(package.loaders or package.searchers) do
+	for _, loader in ipairs(package.loaders or package.searchers) do -- luacheck: ignore 143
 		if loader == parser.search_for then
 			return false
 		end
 	end
-	table.insert(package.loaders or package.searchers, 2, parser.search_for)
+	table.insert(package.loaders or package.searchers, 2, parser.search_for) -- luacheck: ignore 143
 	return true
 end
 
-if not package.fusepath then
+if not package.fusepath then -- luacheck: ignore 143
 	local paths = {}
 	for path in package.path:gmatch("[^;]+") do
 		local match = path:match("^(.+)%.lua$")
@@ -701,8 +701,8 @@ if not package.fusepath then
 			paths[#paths + 1] = match .. ".fuse"
 		end
 	end
-	package.fusepath = table.concat(paths, ";")
-	package.fusepath_t = paths
+	package.fusepath = table.concat(paths, ";") -- luacheck: ignore 142
+	package.fusepath_t = paths -- luacheck: ignore 142
 end
 
 return parser
