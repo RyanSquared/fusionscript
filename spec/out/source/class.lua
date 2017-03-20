@@ -26,7 +26,7 @@ ExampleToo = class({
 		if not b then
 			b = 10
 		end
-		self.a,self.b = a,b
+		self.a, self.b = a, b
 	end);
 	print = (function()
 		print(self.b)
@@ -37,7 +37,7 @@ c:print()
 Example.print(c)
 ExampleThree = class({
 	__init = (function(self, a, b)
-		ExampleToo.__init(self,a,b)
+		ExampleToo.__init(self, a, b)
 	end);
 }, {extends = ExampleToo}, "ExampleThree")
 X = {}

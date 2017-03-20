@@ -45,6 +45,14 @@ describe("lexer", function()
 			}
 		}})
 	end)
+	it("can parse local nil assignment", function()
+		assert.same(lexer:match("local (a, b);"), {{type = "assignment",
+			{type = "variable", "a"},
+			{type = "variable", "b"},
+			is_local = true,
+			is_nil = true
+		}})
+	end)
 	it("can parse basic assignment", function()
 		assert.same(lexer:match("a = b;"), {
 			{type = "assignment",

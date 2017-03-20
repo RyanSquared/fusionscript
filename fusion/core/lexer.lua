@@ -210,6 +210,8 @@ local pattern = re.compile([[
 
 	assignment <- {| {:type: '' -> 'assignment' :}
 		(variable_list ws '=' ws (expression_list / r) /
+		{:is_local: 'local' -> true :} ws {:is_nil: '(' -> true :} ws local_name
+			(ws ',' ws (local_name / r))* ws ')' /
 		{:is_local: 'local' -> true :} space (name_list / r) ws ('=' / r) ws
 			(expression_list / r))
 	|}

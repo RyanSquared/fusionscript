@@ -1,4 +1,5 @@
 local a = 5
+local a, b
 b = 0
 local c = a
 local d = b

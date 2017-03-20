@@ -12,8 +12,8 @@ end
 for line in io.lines("test") do
 	print(line)
 end
-for k,v in pairs(x) do
-	print(k,v)
+for k, v in pairs(x) do
+	print(k, v)
 end
 function a_1()
 	return b
@@ -29,7 +29,7 @@ local function a_4()
 end
 function x()
 	return coroutine.wrap(function()
-		coroutine.yield(a,b,c)
+		coroutine.yield(a, b, c)
 	end)
 end
 function abcd.ef(self)

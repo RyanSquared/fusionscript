@@ -41,7 +41,7 @@ local transformed_array = (function()
 end)()
 local copy_transformed_array = (function()
 	local _generator_1 = {}
-	for k,v in pairs(transformed_array) do
+	for k, v in pairs(transformed_array) do
 		_generator_1[k] = v
 	end
 	return _generator_1

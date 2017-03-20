@@ -42,7 +42,7 @@ function parser:transform_expression_list(node)
 	for i=1, #list do
 		output[#output + 1] = self:transform(list[i])
 	end
-	return table.concat(output, ",")
+	return table.concat(output, ", ")
 end
 
 --- Convert a variable_list to a transformed list of variable names.
@@ -53,7 +53,7 @@ function parser:transform_variable_list(node)
 	for i=1, #list do
 		output[#output + 1] = self:transform(list[i])
 	end
-	return table.concat(output, ",")
+	return table.concat(output, ", ")
 end
 
 local _tablegen_level = 0
@@ -489,7 +489,14 @@ handlers['assignment'] = function(self, node)
 	if node.is_local then
 		output[1] = "local "
 	end
-	if node.variable_list.is_destructuring then
+	if node.is_nil then
+		local names = {}
+		for i, v in ipairs(node) do -- luacheck: ignore 213
+			table.insert(names, self:transform(v))
+		end
+		table.insert(output, table.concat(names, ", "))
+		return table.concat(output)
+	elseif node.variable_list.is_destructuring then
 		local expression = self:transform(node.expression_list[1])
 		local name
 		if node.expression_list[1].type == "variable" and

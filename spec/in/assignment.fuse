@@ -2,6 +2,10 @@
 
 local a = 5;
 
+-- assign local nil values --
+
+local (a, b);
+
 -- assign literal to global variable --
 
 b = 0;

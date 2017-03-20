@@ -21,7 +21,7 @@ for x in y() do
 end
 for x in (y())() do
 end
-for x,y in z() do
+for x, y in z() do
 end
 while true do
 	break
