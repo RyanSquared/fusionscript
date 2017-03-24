@@ -686,7 +686,7 @@ function parser.inject_loader()
 			return false
 		end
 	end
-	table.insert(package.loaders or package.searchers, 2, parser.search_for) -- luacheck: ignore 143
+	table.insert(package.loaders or package.searchers, parser.search_for) -- luacheck: ignore 143
 	return true
 end
 
