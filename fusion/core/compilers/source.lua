@@ -1,16 +1,16 @@
 --- Compile FusionScript AST to Lua code
--- @module fusion.core.parsers.source
+-- @module fusion.core.compilers.source
 
-local lexer = require("fusion.core.lexer")
+local parser = require("fusion.core.parser")
 local lfs = require("lfs")
 local unpack = unpack or table.unpack -- luacheck: ignore 113 143
 
-local parser = {}
+local compiler = {}
 local handlers = {}
 
---- Initialize a parser state
-function parser:new()
-	self = setmetatable({}, {__index = parser})
+--- Initialize a compiler state
+function compiler:new()
+	self = setmetatable({}, {__index = compiler})
 	self.indent = 0
 	self.last_node = {}
 	return self
@@ -18,7 +18,7 @@ end
 
 --- Transform a node using the registered handler.
 -- @tparam table node
-function parser:transform(node, ...)
+function compiler:transform(node, ...)
 	assert(node.type, ("Bad node: %s"):format(tostring(node)))
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	self.last_node = node
@@ -27,13 +27,13 @@ end
 
 --- Add indent to a line of text.
 -- @tparam string line
-function parser:l(line)
+function compiler:l(line)
 	return ("\t"):rep(self.indent) .. line
 end
 
 --- Convert an expression_list field to a transformed list of expressions.
 -- @tparam table node
-function parser:transform_expression_list(node)
+function compiler:transform_expression_list(node)
 	if not node.expression_list then
 		return ""
 	end
@@ -47,7 +47,7 @@ end
 
 --- Convert a variable_list to a transformed list of variable names.
 -- @tparam table node
-function parser:transform_variable_list(node)
+function compiler:transform_variable_list(node)
 	local output = {}
 	local list = node.variable_list
 	for i=1, #list do
@@ -86,7 +86,7 @@ end
 
 --- Convert a function field in a class to a lambda table assignment.
 -- @tparam table node
-function parser:transform_class_function(node)
+function compiler:transform_class_function(node)
 	return {
 		name = self:transform(node[1]);
 		{
@@ -612,17 +612,17 @@ end
 -- Do not use this function directly to compile code.
 -- @tparam table in_values Table of values to compile
 -- @tparam function output_stream Repeatedly called with generated code
-function parser.compile(in_values, output_stream)
-	local parser_state = parser:new()
+function compiler.compile(in_values, output_stream)
+	local compiler_state = compiler:new()
 	for _, input in ipairs(in_values) do
-		output_stream(parser_state:transform(input))
+		output_stream(compiler_state:transform(input))
 	end
 end
 
 --- Read FusionScript code from a file and return output.
 -- @tparam string file File to read input from
 -- @treturn string Lua code
-function parser.read_file(file)
+function compiler.read_file(file)
 	local append, output
 	output = {}
 	append = function(line) output[#output + 1] = line end
@@ -631,9 +631,9 @@ function parser.read_file(file)
 	if line and not line:match("^#!") then
 		source_file:seek("set")
 	end
-	local node = lexer:match(source_file:read("*a"))
+	local node = parser:match(source_file:read("*a"))
 	source_file:close()
-	parser.compile(node, append)
+	compiler.compile(node, append)
 	return table.concat(output, "\n") .. "\n" -- EOL at EOF
 end
 
@@ -642,31 +642,31 @@ local loadstring = loadstring or load -- luacheck: ignore 113
 --- Load FusionScript code from a file and return a function to run the code.
 -- @tparam string file
 -- @treturn function Loaded FusionScript code
-function parser.load_file(file)
-	local content = parser.read_file(file)
+function compiler.load_file(file)
+	local content = compiler.read_file(file)
 	return assert(loadstring(content))
 end
 
 --- Load and run FusionScript code from a file
 -- @tparam string file
-function parser.do_file(file)
-	return (parser.load_file(file)())
+function compiler.do_file(file)
+	return (compiler.load_file(file)())
 end
 
 --- Find a module in the package path and return relevant information.
 -- Returns `nil` and an error message if not found.
--- Do not use this function by itself; use `parser.inject_loader()`.
+-- Do not use this function by itself; use `compiler.inject_loader()`.
 -- @tparam string module_name
 -- @treturn function Closure to return loaded module
 -- @treturn string Path to loaded file
-function parser.search_for(module_name)
+function compiler.search_for(module_name)
 	local module_path = module_name:gsub("%.", "/")
 
 	local file_path
 	for _, path in ipairs(package.fusepath_t) do -- luacheck: ignore 143
 		file_path = path:gsub("?", module_path)
 		if lfs.attributes(file_path) then
-			return function() return parser.do_file(file_path) end, file_path
+			return function() return compiler.do_file(file_path) end, file_path
 		end
 	end
 	local msg = {}
@@ -676,17 +676,17 @@ function parser.search_for(module_name)
 	return "\n" .. table.concat(msg, "\n")
 end
 
---- Inject `parser.search_for` into the `require()` searchers list.
+--- Inject `compiler.search_for` into the `require()` searchers list.
 -- @treturn boolean False if loader already found
--- @usage parser.inject_loader(); print(require("test_module"))
+-- @usage compiler.inject_loader(); print(require("test_module"))
 -- -- Attempts to load a FusionScript `test_module` package
-function parser.inject_loader()
+function compiler.inject_loader()
 	for _, loader in ipairs(package.loaders or package.searchers) do -- luacheck: ignore 143
-		if loader == parser.search_for then
+		if loader == compiler.search_for then
 			return false
 		end
 	end
-	table.insert(package.loaders or package.searchers, parser.search_for) -- luacheck: ignore 143
+	table.insert(package.loaders or package.searchers, compiler.search_for) -- luacheck: ignore 143
 	return true
 end
 
@@ -705,4 +705,4 @@ if not package.fusepath then -- luacheck: ignore 143
 	package.fusepath_t = paths -- luacheck: ignore 142
 end
 
-return parser
+return compiler

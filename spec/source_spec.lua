@@ -1,7 +1,7 @@
-local parser = require("fusion.core.parsers.source")
+local parser = require("fusion.core.compilers.source")
 local lfs = require("lfs")
 
-describe("parsers/source", function()
+describe("compilers/source", function()
 	local out_file
 	after_each(function()
 		if out_file then

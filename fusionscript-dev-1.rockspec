@@ -27,8 +27,8 @@ build = {
 		["fusion.stdlib.iterable"] = "fusion/stdlib/iterable.lua";
 		["fusion.stdlib.ternary"] = "fusion/stdlib/ternary.lua";
 		["fusion.stdlib.class"] = "fusion/stdlib/class.lua";
-		["fusion.core.parsers.source"] = "fusion/core/parsers/source.lua";
-		["fusion.core.lexer"] = "fusion/core/lexer.lua";
+		["fusion.core.compilers.source"] = "fusion/core/compilers/source.lua";
+		["fusion.core.parser"] = "fusion/core/parser.lua";
 	},
 	install = {
 		bin = {

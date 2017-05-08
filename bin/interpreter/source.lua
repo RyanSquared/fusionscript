@@ -8,10 +8,10 @@
 --   --metadata <package> | Print metadata for package
 --   -m <package>         | Run <package>.main module
 --   -h                   | Print help information
-local parser = require("fusion.core.parsers.source")
-parser.inject_loader()
+local compiler = require("fusion.core.compilers.source")
+compiler.inject_loader()
 
-_G.parser = parser
+_G.compiler = compiler
 
 local arg_index = 1
 while arg_index <= #arg do
@@ -62,7 +62,7 @@ while arg_index <= #arg do
 	else -- run a file
 		local file = assert(arg[arg_index]:match("^.+%.fuse"),
 			("Incorrect filetype: %s"):format(arg[arg_index]))
-		parser.do_file(file)
+		compiler.do_file(file)
 		break
 	end
 	arg_index = arg_index + 1

@@ -1,5 +1,5 @@
 describe("lexer", function()
-	local lexer = require("fusion.core.lexer")
+	local lexer = require("fusion.core.parser")
 	it("can send appropriate errors", function()
 		local err_syntax = assert.errors(function() lexer:match("fail") end)
 		assert.same(err_syntax.quick, "syntax")

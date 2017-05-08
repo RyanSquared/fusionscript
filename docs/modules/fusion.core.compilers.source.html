@@ -38,8 +38,8 @@
 
 <h2>Modules</h2>
 <ul class="nowrap">
+  <li><strong>fusion.core.compilers.source</strong></li>
   <li><a href="../modules/fusion.core.lexer.html">fusion.core.lexer</a></li>
-  <li><strong>fusion.core.parsers.source</strong></li>
   <li><a href="../modules/fusion.stdlib.class.html">fusion.stdlib.class</a></li>
   <li><a href="../modules/fusion.stdlib.functional.html">fusion.stdlib.functional</a></li>
   <li><a href="../modules/fusion.stdlib.iterative.html">fusion.stdlib.iterative</a></li>
@@ -62,7 +62,7 @@
 
 <div id="content">
 
-<h1>Module <code>fusion.core.parsers.source</code></h1>
+<h1>Module <code>fusion.core.compilers.source</code></h1>
 <p>Compile FusionScript AST to Lua code</p>
 <p>
 
@@ -72,52 +72,52 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#parser:new">parser:new ()</a></td>
-	<td class="summary">Initialize a parser state</td>
+	<td class="name" nowrap><a href="#compiler:new">compiler:new ()</a></td>
+	<td class="summary">Initialize a compiler state</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser:transform">parser:transform (node)</a></td>
+	<td class="name" nowrap><a href="#compiler:transform">compiler:transform (node)</a></td>
 	<td class="summary">Transform a node using the registered handler.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser:l">parser:l (line)</a></td>
+	<td class="name" nowrap><a href="#compiler:l">compiler:l (line)</a></td>
 	<td class="summary">Add indent to a line of text.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser:transform_expression_list">parser:transform_expression_list (node)</a></td>
+	<td class="name" nowrap><a href="#compiler:transform_expression_list">compiler:transform_expression_list (node)</a></td>
 	<td class="summary">Convert an expression_list field to a transformed list of expressions.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser:transform_variable_list">parser:transform_variable_list (node)</a></td>
+	<td class="name" nowrap><a href="#compiler:transform_variable_list">compiler:transform_variable_list (node)</a></td>
 	<td class="summary">Convert a variable_list to a transformed list of variable names.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser:transform_class_function">parser:transform_class_function (node)</a></td>
+	<td class="name" nowrap><a href="#compiler:transform_class_function">compiler:transform_class_function (node)</a></td>
 	<td class="summary">Convert a function field in a class to a lambda table assignment.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.compile">parser.compile (in_values, output_stream)</a></td>
+	<td class="name" nowrap><a href="#compiler.compile">compiler.compile (in_values, output_stream)</a></td>
 	<td class="summary">Convert an iterator returning FusionScript chunks to Lua code.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.read_file">parser.read_file (file)</a></td>
+	<td class="name" nowrap><a href="#compiler.read_file">compiler.read_file (file)</a></td>
 	<td class="summary">Read FusionScript code from a file and return output.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.load_file">parser.load_file (file)</a></td>
+	<td class="name" nowrap><a href="#compiler.load_file">compiler.load_file (file)</a></td>
 	<td class="summary">Load FusionScript code from a file and return a function to run the code.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.do_file">parser.do_file (file)</a></td>
+	<td class="name" nowrap><a href="#compiler.do_file">compiler.do_file (file)</a></td>
 	<td class="summary">Load and run FusionScript code from a file</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.search_for">parser.search_for (module_name)</a></td>
+	<td class="name" nowrap><a href="#compiler.search_for">compiler.search_for (module_name)</a></td>
 	<td class="summary">Find a module in the package path and return relevant information.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#parser.inject_loader">parser.inject_loader ()</a></td>
-	<td class="summary">Inject <a href="../modules/fusion.core.parsers.source.html#parser.search_for">parser.search_for</a> into the <code>require()</code> searchers list.</td>
+	<td class="name" nowrap><a href="#compiler.inject_loader">compiler.inject_loader ()</a></td>
+	<td class="summary">Inject <a href="../modules/fusion.core.compilers.source.html#compiler.search_for">compiler.search_for</a> into the <code>require()</code> searchers list.</td>
 	</tr>
 </table>
 
@@ -129,11 +129,11 @@
 
     <dl class="function">
     <dt>
-    <a name = "parser:new"></a>
-    <strong>parser:new ()</strong>
+    <a name = "compiler:new"></a>
+    <strong>compiler:new ()</strong>
     </dt>
     <dd>
-    Initialize a parser state
+    Initialize a compiler state
 
 
 
@@ -143,8 +143,8 @@
 
 </dd>
     <dt>
-    <a name = "parser:transform"></a>
-    <strong>parser:transform (node)</strong>
+    <a name = "compiler:transform"></a>
+    <strong>compiler:transform (node)</strong>
     </dt>
     <dd>
     Transform a node using the registered handler.
@@ -166,8 +166,8 @@
 
 </dd>
     <dt>
-    <a name = "parser:l"></a>
-    <strong>parser:l (line)</strong>
+    <a name = "compiler:l"></a>
+    <strong>compiler:l (line)</strong>
     </dt>
     <dd>
     Add indent to a line of text.
@@ -189,8 +189,8 @@
 
 </dd>
     <dt>
-    <a name = "parser:transform_expression_list"></a>
-    <strong>parser:transform_expression_list (node)</strong>
+    <a name = "compiler:transform_expression_list"></a>
+    <strong>compiler:transform_expression_list (node)</strong>
     </dt>
     <dd>
     Convert an expression_list field to a transformed list of expressions.
@@ -212,8 +212,8 @@
 
 </dd>
     <dt>
-    <a name = "parser:transform_variable_list"></a>
-    <strong>parser:transform_variable_list (node)</strong>
+    <a name = "compiler:transform_variable_list"></a>
+    <strong>compiler:transform_variable_list (node)</strong>
     </dt>
     <dd>
     Convert a variable_list to a transformed list of variable names.
@@ -235,8 +235,8 @@
 
 </dd>
     <dt>
-    <a name = "parser:transform_class_function"></a>
-    <strong>parser:transform_class_function (node)</strong>
+    <a name = "compiler:transform_class_function"></a>
+    <strong>compiler:transform_class_function (node)</strong>
     </dt>
     <dd>
     Convert a function field in a class to a lambda table assignment.
@@ -258,8 +258,8 @@
 
 </dd>
     <dt>
-    <a name = "parser.compile"></a>
-    <strong>parser.compile (in_values, output_stream)</strong>
+    <a name = "compiler.compile"></a>
+    <strong>compiler.compile (in_values, output_stream)</strong>
     </dt>
     <dd>
     Convert an iterator returning FusionScript chunks to Lua code.
@@ -284,8 +284,8 @@
 
 </dd>
     <dt>
-    <a name = "parser.read_file"></a>
-    <strong>parser.read_file (file)</strong>
+    <a name = "compiler.read_file"></a>
+    <strong>compiler.read_file (file)</strong>
     </dt>
     <dd>
     Read FusionScript code from a file and return output.
@@ -311,8 +311,8 @@
 
 </dd>
     <dt>
-    <a name = "parser.load_file"></a>
-    <strong>parser.load_file (file)</strong>
+    <a name = "compiler.load_file"></a>
+    <strong>compiler.load_file (file)</strong>
     </dt>
     <dd>
     Load FusionScript code from a file and return a function to run the code.
@@ -340,8 +340,8 @@
 
 </dd>
     <dt>
-    <a name = "parser.do_file"></a>
-    <strong>parser.do_file (file)</strong>
+    <a name = "compiler.do_file"></a>
+    <strong>compiler.do_file (file)</strong>
     </dt>
     <dd>
     Load and run FusionScript code from a file
@@ -363,13 +363,13 @@
 
 </dd>
     <dt>
-    <a name = "parser.search_for"></a>
-    <strong>parser.search_for (module_name)</strong>
+    <a name = "compiler.search_for"></a>
+    <strong>compiler.search_for (module_name)</strong>
     </dt>
     <dd>
     Find a module in the package path and return relevant information.
  Returns <code>nil</code> and an error message if not found.
- Do not use this function by itself; use <code>parser.inject_loader()</code>.
+ Do not use this function by itself; use <code>compiler.inject_loader()</code>.
 
 
     <h3>Parameters:</h3>
@@ -397,11 +397,11 @@
 
 </dd>
     <dt>
-    <a name = "parser.inject_loader"></a>
-    <strong>parser.inject_loader ()</strong>
+    <a name = "compiler.inject_loader"></a>
+    <strong>compiler.inject_loader ()</strong>
     </dt>
     <dd>
-    Inject <a href="../modules/fusion.core.parsers.source.html#parser.search_for">parser.search_for</a> into the <code>require()</code> searchers list.
+    Inject <a href="../modules/fusion.core.compilers.source.html#compiler.search_for">compiler.search_for</a> into the <code>require()</code> searchers list.
 
 
 
@@ -416,7 +416,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">parser.inject_loader(); <span class="global">print</span>(<span class="global">require</span>(<span class="string">"test_module"</span>))
+        <pre class="example">compiler.inject_loader(); <span class="global">print</span>(<span class="global">require</span>(<span class="string">"test_module"</span>))
  <span class="comment">-- Attempts to load a FusionScript <code>test_module</code> package</span></pre>
     </ul>
 
@@ -428,7 +428,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2016-12-25 00:12:26 </i>
+<i style="float:right;">Last updated 2017-05-07 19:28:08 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

@@ -8,7 +8,7 @@
 --  -p | Write output to stdout
 --  -h | Print help information
 
-local parser = require("fusion.core.parsers.source")
+local compiler = require("fusion.core.compilers.source")
 local lfs = require("lfs")
 
 local function walk(file_func, dir)
@@ -28,7 +28,7 @@ local function process(file, does_output)
 		return walk(process, file)
 	end
 	local base = file:match("^(.+)%.fuse$")
-	local output = parser.read_file(file)
+	local output = compiler.read_file(file)
 	local output_file = io.open(base .. ".lua", "w")
 	output_file:write(output .. "\n")
 	output_file:close()
@@ -44,7 +44,7 @@ while arg_index <= #args do
 	if _arg == "-p" then
 		arg_index = arg_index + 1
 		for i=arg_index, #args do
-			io.write(parser.read_file(args[i]))
+			io.write(compiler.read_file(args[i]))
 		end
 		break
 	elseif _arg == "--help" or _arg == "-h" then
