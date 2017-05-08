@@ -56,6 +56,11 @@ This is somewhat similar to the Python `-m` flag.
 argument and print out the compatible information. Acceptable fields are
 documented [here](https://github.com/ChickenNuggers/FusionScript/wiki/Modules).
 
+The `fusion-source` interpreter also makes it so the `using` keyword isn't
+required for loading syntax extensions. If the target audience for a script is
+intended to not use `fusionc-source` to compile to Lua, it is suggested to not
+use the `using` keyword.
+
 ### `fusionc`: Compile FusionScript
 
 The `fusionc` will use whatever alias is currently in place as the compiler.
