@@ -61,24 +61,26 @@ local _tablegen_level = 0
 handlers['nil'] = function() return 'nil' end
 handlers['vararg'] = function() return '...' end
 
-local dirs = {
-	class = 'local class = require("fusion.stdlib.class")';
-	fnl = 'local fnl = require("fusion.stdlib.functional")';
-	itr = 'local itr = require("fusion.stdlib.iterable")';
-	re = 'local re = require("re")';
-	ternary = 'local ternary = require("fusion.stdlib.ternary")';
+compiler.extensions = {
+	class = "fusion.stdlib.class";
+	fnl = "fusion.stdlib.functional";
+	itr = "fusion.stdlib.iterable";
+	re = "re";
+	ternary = "fusion.stdlib.ternary";
 }
+local ext_pat = "local %s = require(%q)"
 
 handlers['using'] = function(self, node) -- TODO: no repeat?
 	local output = {}
 	if node[1] == "*" then
-		for _, directive in pairs(dirs) do
-			output[#output + 1] = directive
+		for name, module in pairs(self.extensions) do
+			output[#output + 1] = ext_pat:format(name, module)
 		end
 		table.sort(output) -- consistency, helps w/ tests
 	else
-		for _, directive in ipairs(node) do
-			output[#output + 1] = dirs[directive]
+		for _, extension in ipairs(node) do
+			output[#output + 1] = ext_pat:format(extension,
+				self.extensions[extension])
 		end
 	end
 	return table.concat(output, self:l"\n")
@@ -703,6 +705,14 @@ if not package.fusepath then -- luacheck: ignore 143
 	end
 	package.fusepath = table.concat(paths, ";") -- luacheck: ignore 142
 	package.fusepath_t = paths -- luacheck: ignore 142
+end
+
+--- Inject some global variables into the runtime. The `fusion-source` program
+-- does this already.
+function compiler.inject_extensions()
+	for name, module in pairs(compiler.extensions) do
+		_G[name] = require(module)
+	end
 end
 
 return compiler
