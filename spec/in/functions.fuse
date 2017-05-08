@@ -46,15 +46,19 @@ abcd.ef()=> {
 
 }
 
+a[b]()-> {
+
+}
+
+-- lambdas
+
 x = \-> {
 	return y;
 };
 
+a = \-> x();
+
 y = \-> z;
-
-a[b]()-> {
-
-}
 
 -- arguments for functions --
 

@@ -149,7 +149,8 @@ local pattern = re.compile([[
 	return <- {| {:type: {'return' / 'yield'} :} ws expression_list? |}
 
 	lambda <- {| {:type: '' -> 'lambda' :}
-		'\' ws lambda_args? ws is_self '>' ws (statement / expression_list / r)
+		'\' ws lambda_args? ws is_self '>' ws (expression_list / statement_block /
+			r)
 	|}
 	lambda_args <- {| lambda_arg (ws ',' ws lambda_arg)* |}
 	lambda_arg <- {| {:name: name / '...' :} |}

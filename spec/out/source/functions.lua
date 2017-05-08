@@ -35,15 +35,18 @@ end
 function abcd.ef(self)
 
 end
+a[b] = function()
+
+end
 x = (function()
 	return y
+end)
+a = (function()
+	return x()
 end)
 y = (function()
 	return z
 end)
-a[b] = function()
-
-end
 function a(b, c, d, ...)
 	if not d then
 		d = 5
