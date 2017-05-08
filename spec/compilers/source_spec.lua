@@ -21,6 +21,10 @@ print("test")
 		assert(compiler.load_file("spec/in/basic.fuse"), "unable to load file")()
 		_G['print'] = old_print
 	end)
+	it("can inject FusionScript extensions to the global environment", function()
+		-- empty test just to run without errors
+		compiler.inject_extensions()
+	end)
 	it("can load a searcher into the module loading system", function()
 		assert.same(true, compiler.inject_loader())
 		local len = #(package.loaders or package.searchers) -- luacheck: ignore 143
