@@ -10,6 +10,7 @@
 --   -h                   | Print help information
 local compiler = require("fusion.core.compilers.source")
 compiler.inject_loader()
+compiler.inject_extensions()
 
 _G.compiler = compiler
 
