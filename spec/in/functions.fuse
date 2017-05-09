@@ -11,16 +11,17 @@ a[b]();
 
 a:b();
 a.b:c();
-a.b:c<d>();
-a:b<c>();
+a.b:c();
+a:b();
 
--- generated function loops --
+-- chained function calls
 
-print(line in io.lines("test"));
+a().b();
+a():b();
+@a().b:c();
 
-print(line for line in io.lines("test"));
-
-print(k, v for k, v in pairs(x));
+a:b(as, df, gh):qwerty(potato);
+@a:b(c.d.e:f(h, i):j(k, l).m:n(o));
 
 -- basic function definitions --
 

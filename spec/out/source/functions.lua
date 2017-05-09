@@ -4,17 +4,13 @@ a.b()
 a[b]()
 a:b()
 a.b:c()
-d.c(a.b)
-c.b(a)
-for line in io.lines("test") do
-	print(line)
-end
-for line in io.lines("test") do
-	print(line)
-end
-for k, v in pairs(x) do
-	print(k, v)
-end
+a.b:c()
+a:b()
+a().b()
+a():b()
+self:a().b:c()
+a:b(as, df, gh):qwerty(potato)
+self.a:b(c.d.e:f(h, i):j(k, l).m:n(o))
 function a_1()
 	return b
 end

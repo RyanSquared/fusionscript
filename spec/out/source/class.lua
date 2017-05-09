@@ -37,7 +37,7 @@ c:print()
 Example.print(c)
 ExampleThree = class({
 	__init = (function(self, a, b)
-		ExampleToo.__init(self, a, b)
+		self.__super.__init(self, a, b)
 	end);
 }, {extends = ExampleToo}, "ExampleThree")
 X = {}

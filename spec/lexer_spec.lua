@@ -212,50 +212,44 @@ describe("lexer", function()
 		})
 	end)
 	it("can parse a simple function", function()
-		assert.same(lexer:match("func();"), {{type = "function_call",
+		assert.same(lexer:match("func();"), {{type = "function_call", {
 			{type = "variable", "func"}
-		}})
+		}}})
 	end)
-	it("can parse a simple generated function loop", function()
-		assert.same(lexer:match("func(a in b);"), {{type = "function_call",
-			{type = "variable", "func"},
-			generator = {
-				{type = "variable", "b"},
-				variable_list = {{type = "variable", "a"}}
-			}
-		}})
-	end)
-	it("can parse a complex generated function loop", function()
-		assert.same(lexer:match("func(a for a in b);"), {{type = "function_call",
-			{type = "variable", "func"},
-			generator = {
-				{type = "variable", "b"},
-				expression_list = {{type = "variable", "a"}},
-				variable_list = {{type = "variable", "a"}}
+	it("can parse chained functions", function()
+		assert.same(lexer:match("func().two():three().four:five();"), {{
+			type = "function_call", {
+				{type = "variable", "func"}
+			}, {
+				{type = "variable", "two"}
+			}, {
+				has_self = "three"
+			}, {
+				{type = "variable", "four"},
+				has_self = "five"
 			}
 		}})
 	end)
 	it("can parse arguments passed to a function", function()
 		assert.same(lexer:match("func(test, test_two);"), {
-			{type = "function_call",
+			{type = "function_call", {
 				{type = "variable", "func"},
 				expression_list = {
 					{type = "variable", "test"},
 					{type = "variable", "test_two"}
-				}
+				}}
 			}
 		})
 	end)
 	it("can parse a complex function call", function()
-		assert.same(lexer:match("table.instance:method<subclass>(argument);"), {
-			{type = "function_call",
+		assert.same(lexer:match("table.instance:method(argument);"), {
+			{type = "function_call", {
 				{type = "variable", "table", "instance"}, -- tables parse -this- way
 				expression_list = {
 					{type = "variable", "argument"}
 				},
-				has_self = "method",
-				index_class = "subclass"
-			}
+				has_self = "method"
+			}}
 		})
 	end)
 	it("can parse a non-generated table", function()
@@ -300,13 +294,13 @@ describe("lexer", function()
 							{type = "variable", "z"},
 							operator = ".."
 						},
-						{type = "function_call",
+						{type = "function_call", {
 							{type = "variable", "y"},
 							expression_list = {
 								{type = "variable", "a"},
 								{type = "variable", "b"}
 							}
-						}
+						}}
 					}
 				}}
 			}
@@ -326,10 +320,10 @@ describe("lexer", function()
 	it("can parse while loops", function()
 		assert.same(lexer:match("while true print('hi!');"), {
 			{type = "while_loop",
-				{type = "function_call",
+				{type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "sqstring", "hi!"}}
-				},
+				}},
 				condition = {type = "boolean", true}
 			}
 		})
@@ -337,10 +331,10 @@ describe("lexer", function()
 	it("can parse numeric for loops", function()
 		assert.same(lexer:match("for (i=1, 100, 5) print(i);"), {
 			{type = "numeric_for_loop",
-				{type = "function_call",
+				{type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "i"}}
-				},
+				}},
 				start = {type = "number", 1, base = "10"},
 				stop = {type = "number", 100, base = "10"},
 				step = {type = "number", 5, base = "10"},
@@ -352,10 +346,10 @@ describe("lexer", function()
 		assert.same(lexer:match("for (i in x) print(i);"), {
 			{type = "iterative_for_loop",
 				{type = "variable", "x"},
-				{type = "function_call",
+				{type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "i"}}
-				},
+				}},
 				variable_list = {{type = "variable", "i"}}
 			}
 		})
@@ -465,10 +459,10 @@ describe("lexer", function()
 	it("can parse simple if statements", function()
 		assert.same(lexer:match("if x print('test');"), {{type = "if",
 			condition = {type = "variable", "x"},
-			{type = "function_call",
+			{type = "function_call", {
 				{type = "variable", "print"},
 				expression_list = {{type = "sqstring", "test"}}
-			},
+			}},
 			["elseif"] = {}
 		}})
 	end)
@@ -476,14 +470,14 @@ describe("lexer", function()
 		assert.same(lexer:match("if x print('test'); else print(x);"), {
 			{type = "if",
 				condition = {type = "variable", "x"},
-				{type = "function_call",
+				{type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "sqstring", "test"}}
-				},
-				['else'] = {type = "function_call",
+				}},
+				['else'] = {type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "x"}}
-				},
+				}},
 				["elseif"] = {}
 			}
 		})

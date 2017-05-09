@@ -34,13 +34,13 @@ class ExampleToo extends Example {
 
 c = ExampleToo();
 c:print(); -- @b
-c:print<Example>(); -- @a
+Example.print(c);
 
 -- superinitialization --
 
 class ExampleThree extends ExampleToo {
 	__init(a, b)=>
-		self:__init<ExampleToo>(a, b);
+		self.__super.__init(self, a, b);
 }
 
 -- interface

@@ -1,17 +1,39 @@
 local compiler = require("fusion.core.compilers.source")
 local parser = require("fusion.core.parser")
+local lfs = require("lfs")
 
 describe("compilers/source", function()
+	local out_file
+	after_each(function()
+		if out_file then
+			out_file:close()
+			out_file = nil
+		end
+	end)
+	for file in lfs.dir("spec/in") do
+		if not file:match("^%.") then
+			it("can compile file " .. file .. " to Lua source", function()
+				local compiled = assert(compiler.read_file("spec/in/" .. file))
+				out_file = assert(io.open("spec/out/source/" .. file:gsub("fuse",
+					"lua")))
+				assert.same(out_file:read("*a"), compiled)
+			end)
+		end
+	end
 	it("can compile FusionScript code", function()
 		compiler.compile(parser:match("print('test');"), function(output)
 			assert.same("print(\"test\")", output)
 		end)
 	end)
-	it("can compile FusionScript files", function()
-		local input = [[
-print("test")
-]]
-		assert.same(input, compiler.read_file("spec/in/basic.fuse"))
+	it("can error out with bad AST", function()
+		assert.errors(function()
+			local c = compiler:new()
+			c:transform('errors') -- gives type error
+		end)
+		assert.errors(function()
+			local c = compiler:new()
+			c:transform({'errors'}) -- gives error about being bad node
+		end)
 	end)
 	it("can load FusionScript files", function()
 		local old_print = print
