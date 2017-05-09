@@ -227,6 +227,16 @@ print("Hello World!");
 io["write"]("Hello World!\n");
 ```
 
+Function calls can also be chained on one another.
+
+```fuse
+Object():method();
+Try(x):catch(IOError, handle_io_error);
+File("output.log"):with(\file-> {
+	file:write("Message!");
+});
+```
+
 ### Assignment and Destructuring
 
 #### Valid Names
@@ -513,21 +523,6 @@ class ExampleClass extends Object {
 (ExampleClass()):print() -- <ExampleClass(){example.fuse#1}> => ExampleClass()
 ```
 
-If a certain method is needed somewhere in the inheritance chain, it can be
-accessed before the method call by using angle brackets surrounding the class
-for which to call the method. If there is only one instance of the method, it
-is not required to use this format to call the method.
-
-```fuse
-class ExampleClass extends Object {
-    example_method()=> print("hi!")
-}
-class ExampleClassToo extends ExampleClass {
-    example_method()=> print("hello!");
-}
-(ExampleClassToo()):example_method<ExampleClass>(); -- hi!
-```
-
 ### Interfaces
 
 Interfaces are a basic extension onto classes that essentially ensure that a
@@ -556,7 +551,7 @@ again to avoid errors.
 ```fuse
 class UseDirAndPrint extends UseDir implements IScope {
     __init(dir)=> {
-        self:__init<UseDir>(self); -- initialize in extended class
+    	self.__super.__init(self);
         print(dir);
     }
 }
