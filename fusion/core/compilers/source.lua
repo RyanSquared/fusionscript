@@ -19,7 +19,15 @@ end
 --- Transform a node using the registered handler.
 -- @tparam table node
 function compiler:transform(node, ...)
-	assert(node.type, ("Bad node: %s"):format(tostring(node)))
+	if type(node) ~= "table" then
+		error(("Bad node type for (%s): %s"):format(node, type(node)))
+	elseif not node.type then
+		local out = {}
+		for k, v in pairs(node) do
+			out[#out + 1] = ("%s %s: %s"):format(type(v), k, v)
+		end
+		error("Bad node:\n" .. table.concat(out, "\n"))
+	end
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	self.last_node = node
 	return handlers[node.type](self, node, ...)
@@ -543,37 +551,25 @@ handlers['assignment'] = function(self, node)
 end
 
 handlers['function_call'] = function(self, node)
-	if node.generator then
-		return self:transform {
-			node.generator[1];
-			{type = "function_call";
-				node[1];
-				has_self = node.has_self;
-				index_class = node.index_class;
-				expression_list = node.generator.expression_list or
-					node.generator.variable_list;
-			};
-			type = "iterative_for_loop"; -- `in` without `for` only 1 var   V
-			variable_list = node.generator.variable_list
-		}
-	else
+	local calls = {}
+	for _, call in ipairs(node) do
 		local name
-		if node.has_self then
-			if node.index_class then
-				node.expression_list = node.expression_list or {}
-				table.insert(node.expression_list, 1, node[1])
-				node[1] = {type = "variable", node.index_class}
-				name = self:transform(node[1]) .. "." .. node.has_self
-			else
-				name = self:transform(node[1]) .. ":" .. node.has_self
-			end
-		elseif #node[1] == 2 and node.is_method then
-			name = node[1][1] .. ":" .. node[1][2]
-		else
-			name = self:transform(node[1])
+		if _ ~= 1 and call[1] then
+			calls[#calls + 1] = "."
 		end
-		return name .. "(" .. self:transform_expression_list(node) .. ")"
+		if call.has_self and not call[1] then
+			name = ":" .. call.has_self
+		elseif call.has_self then
+			name = self:transform(call[1]) .. ":" .. call.has_self
+		elseif #call[1] == 2 and node.is_self and _ == 1 then
+			name = call[1][1] .. ":" .. call[1][2] -- hack in for @method();
+		else
+			name = self:transform(call[1])
+		end
+		calls[#calls + 1] = name .. "(" ..
+			self:transform_expression_list(call) .. ")"
 	end
+	return table.concat(calls)
 end
 
 handlers['variable'] = function(self, node)
