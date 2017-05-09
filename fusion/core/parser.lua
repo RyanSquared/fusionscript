@@ -197,16 +197,18 @@ local pattern = re.compile([[
 		(ws 'else' ws {:else: rstatement :})?
 	|}
 
+	function_call_first <-
+		variable ws
+		({:has_self: ':' ws {name / r} :} ws)?
+	function_call_name <-
+		(& ('.' variable / ':'))
+		'.'? ws variable? ws
+		({:has_self: ':' ws {name / r} :} ws)?
 	function_call <- {| {:type: '' -> 'function_call' :}
-		((& '@') {:is_method: '' -> true :})? (
-		(variable / literal) ({:has_self: ':' {name / r} :} ws
-		{:index_class: ws '<' ws {expression} ws '>' :}? )?
-		) ws '(' ws function_call_body? ws ')'
+		((& '@') {:is_self: '' -> true :})? -- the @ at the beginning
+		{| function_call_first ws '(' ws function_args? ws ')' ws |} -- first call
+		{| (function_call_name ws '(' ws function_args? ws ')' ws) |}* -- chained
 	|}
-	function_call_body <- {:generator: {|
-		expression_list ws 'for' ws (variable_list / r) ws 'in' ws expression /
-		variable_list ws 'in' ws expression
-	|} :} / function_args
 	function_args <- expression_list?
 
 	assignment <- {| {:type: '' -> 'assignment' :}
