@@ -1,10 +1,68 @@
 # FusionScript [![Build Status](https://travis-ci.org/RyanSquared/fusionscript.svg?branch=master)](https://travis-ci.org/RyanSquared/fusionscript)
 The programming language of ultimate dankliness
 
-**Warning:** This project is very recently released and possibly has many bugs.
-If your code does not compile, it is *very* likely a problem in the compiler
-instead of your code. Please feel free to add an issue if any errors arise that
-you believe were caused by the compiler.
+**Warning:** This project is very unstable and possibly has many bugs.  If your
+code does not compile, it is *very* likely a problem in the compiler or a
+change in the language instead of your code. Please feel free to add an issue
+if any errors arise that you believe were caused by the compiler.
+
+## What is FusionScript?
+
+FusionScript is a language that runs on the Lua runtime (currently, by
+transpiling to Lua and then using a Lua interpreter) inspired by C++, Python,
+and Lua. Eventually, FusionScript will compile to a modified Lua 5.3 bytecode
+and run on a modified Lua VM.
+
+FusionScript offers an improved runtime type checking system (that
+checks between both native Lua types, as well as instances of a class) by using
+the [standard library](/RyanSquared/stdlib)'s `assert.is()` method. Eventually,
+runtime type checking may be implemented using syntax similar to Pythonic type
+hints and checked using bytecode instructions.
+
+FusionScript also has a class system, with the ability to inherit values from a
+superclass as well as an "interface" system that when used (see below) will
+ensure that classes implement certain methods. Below is an example that closely
+mirrors the standard library's scope module:
+
+```fuse
+interface IScope { descope; with; }
+class Scope {
+	with(fn)=> {
+		fn(self);
+	}
+}
+
+-- Example:
+
+local lfs = require("lfs");
+
+class UseDir extends Scope implements IScope {
+	descope()=> lfs.chdir(@old_dir);
+	__init(directory)=> {
+		@old_dir = lfs.currentdir();
+		@dir = directory;
+		lfs.chdir(directory);
+	}
+}
+
+UseDir("/tmp"):with(\=> {
+	File("thing.txt"):with(\file-> {
+		file:write("Hello World!\n");
+	});
+});
+```
+
+There is also implemented an easier way to use generators / iterators using the
+`async` and `yield` functions:
+
+```
+async gen_numbers(low = 1, high)->
+	for (i=low, high)
+		yield i;
+
+for (number in gen_numbers(1, 10))
+	print(number);
+```
 
 ## Commands
 
