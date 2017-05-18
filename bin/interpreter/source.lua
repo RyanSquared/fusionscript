@@ -8,63 +8,58 @@
 --   --metadata <package> | Print metadata for package
 --   -m <package>         | Run <package>.main module
 --   -h                   | Print help information
+
+local argparse = require("argparse")
 local compiler = require("fusion.core.compilers.source")
 compiler.inject_loader()
 compiler.inject_extensions()
 
+local argparser = argparse() {
+	name = "fusion-source";
+	description = "Run FusionScript code with the Lua VM";
+	epilog = "For more info, see https://fusionscript.info";
+}
+
+argparser:mutex(
+	argparser:flag("--metadata", "Print metadata information for a package"),
+	argparser:flag("--package", "Run <package>.main module")
+)
+
+argparser:argument("file", "File to run")
+
+local args = argparser:parse()
+
 _G.compiler = compiler
 
-local arg_index = 1
-while arg_index <= #arg do
-	if arg[arg_index] == "--metadata" then -- return metadata from module
-		assert(arg[arg_index + 1], "missing argument to --metadata: module")
-		local ok, module = pcall(require, arg[arg_index + 1] ..
-			".metadata")
-		if not ok then
-			error("Could not find module metadata for package: " ..
-				arg[arg_index + 1] .. "\n" .. module)
-		else
-			local function check(name)
-				assert(module[name], "Missing field: " .. name)
-			end
-			local opts = {"version", "description", "author", "copyright",
-				"license"}
-			for _, name in ipairs(opts) do
-				check(name)
-			end
-			for _, name in ipairs(opts) do
-				local value = module[name]
-				local _type = type(value)
-				if _type == "string" then
-					print(("['%s'] = %q"):format(name, value))
-				else
-					print(("['%s'] = %s"):format(name, tostring(value)))
-				end
-			end
-			break
+if args.metadata then
+	local ok, module = pcall(require, args.file .. ".metadata")
+	if not ok then
+		error("Could not find module metadata for package: " .. args.file ..
+			"\n" .. module)
+	else
+		local function check(name)
+			assert(module[name], "Missing field: " .. name)
 		end
-	elseif arg[arg_index] == "-m" then -- load <module>.main and exit
-		local module = arg[arg_index + 1]
-		assert(module, "missing argument to -m: module")
-		require(module .. ".main")
-		break
-	elseif arg[arg_index] == "-h" or arg[arg_index] == "--help" then -- print help
-		local program = arg[0]:match(".+/(.-)$") or arg[0]
-		local usage = {
-			("Usage: %s [OPTIONS] [PACKAGE]"):format(program);
-			("   or: %s [FILE]"):format(program);
-			("");
-			("\t--metadata <package> | Print metadata for package");
-			("\t-m <package>         | Run <package>.main module");
-			("\t-h                   | Print help information")
-		}
-		print(table.concat(usage, "\n"))
-		break
-	else -- run a file
-		local file = assert(arg[arg_index]:match("^.+%.fuse"),
-			("Incorrect filetype: %s"):format(arg[arg_index]))
-		compiler.do_file(file)
-		break
+		local opts = {"version", "description", "author", "copyright",
+			"license"}
+		for _, name in ipairs(opts) do
+			check(name)
+		end
+		for _, name in ipairs(opts) do
+			local value = module[name]
+			local _type = type(value)
+			if _type == "string" then
+				print(("['%s'] = %q"):format(name, value))
+			else
+				print(("['%s'] = %s"):format(name, tostring(value)))
+			end
+		end
 	end
-	arg_index = arg_index + 1
+elseif args.package then
+	local module = args.file
+	require(module .. ".main")
+else
+	local file = assert(args.file:match("^.+%.fuse"),
+		("Incorrect filetype: %s"):format(args.file))
+		compiler.do_file(file)
 end
