@@ -107,8 +107,8 @@ edit the global state and only remain in the `package` table.
 There are two command line flags that can be used with the `fusion-source`
 program:
 
-**`-m`** - Load the `main` module of the supplied `package` argument and exit.
-This is somewhat similar to the Python `-m` flag.
+**`--package`** - Load the `main` module of the supplied `package` argument and
+exit. This is somewhat similar to the Python `-m` flag.
 
 **`--metadata`** - Load the `metadata` module of the supplied `package`
 argument and print out the compatible information. Acceptable fields are
