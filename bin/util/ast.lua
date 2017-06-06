@@ -5,7 +5,7 @@
 -- @usage fusion-ast [FILE]
 local argparse = require("argparse")
 local parser = require("fusion.core.parser")
-local pretty = require("pl.pretty") -- TODO: replace
+local serpent = require("serpent")
 
 local argparser = argparse() {
 	name = "fusion-ast";
@@ -19,9 +19,10 @@ local function read_file(file)
 	local file_handler = assert(io.open(file))
 	local line = file_handler:read()
 	if line:sub(1, 2) == "#!" then
-		pretty.dump(parser:match(file_handler:read("*a")))
+		print(serpent.block(parser:match(file_handler:read("*a"))))
 	else
-		pretty.dump(parser:match(line .. '\n' .. file_handler:read("*a")))
+		print(serpent.block(parser:match(line .. '\n' ..
+			file_handler:read("*a"))))
 	end
 	file_handler:close()
 end
