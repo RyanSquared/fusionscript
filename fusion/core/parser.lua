@@ -99,26 +99,26 @@ end
 
 local pattern = re.compile([[
 	statement_list <- ws {| ((! '}') rstatement ws)* |}
-	statement_block <- {| {:type: '' -> 'block' :} '{' ws statement_list ws '}' |}
-	statement <- (
+	statement_block <- {:type: '' -> 'block' :} '{' ws statement_list ws '}'
+	statement <- {| {:pos: {} :} ((
 		function_definition /
 		class /
 		interface
 	) / (
-		{|{:type: {'using'} :} (space using_name / ws '{' ws
+		{:type: {'using'} :} (space using_name / ws '{' ws
 			using_name (ws ',' ws using_name)*
-		ws '}' / ((pos '' -> 'Unclosed using statement') -> err)) |} /
+		ws '}' / ((pos '' -> 'Unclosed using statement') -> err)) /
 		assignment /
 		function_call /
 		return /
-		{| {:type: 'break' :} |}
+		{:type: 'break' :}
 	) (';' / {} -> semicolon) / (
 		statement_block /
 		while_loop /
 		numeric_for_loop /
 		iterative_for_loop /
 		if
-	)
+	)) |}
 	using_name <- {[A-Za-z]+} / {'*'}
 	keyword <- 'local' / 'class' / 'extends' / 'break' / 'return' / 'yield' /
 		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
@@ -126,14 +126,13 @@ local pattern = re.compile([[
 	rstatement <- statement / (pos '' -> 'Missing statement') -> err
 	r <- pos -> err
 	pos <- {} {.}
-	class <- {| {:is_local: 'local' -> true space :}?
+	class <- {:is_local: 'local' -> true space :}?
 		{:type: {'class'} :} space {:name: variable / r :}
 		(ws 'extends' ws {:extends: variable / r :})?
 		(ws 'implements' ws {:implements: variable / r :})?
 		ws '{' ws {| ((! '}') (class_field / r) ws)* |} ws '}'
-	|}
 	class_field <-
-		function_definition /
+		{| function_definition |} /
 		{| {:type: '' -> 'class_field' :}
 			(
 				'[' ws {:index: expression / r :} ws ']' ws ('=' / r) ws (expression
@@ -141,25 +140,24 @@ local pattern = re.compile([[
 				/ {:name: name / r :} ws ('=' / r) ws (expression / r) ws (';' / r)
 			)
 		|}
-	interface <- {| {:is_local: 'local' -> true space :}?
+	interface <- {:is_local: 'local' -> true space :}?
 		{:type: {'interface'} :} space {:name: variable / r :}
 		ws '{' ws {| ((! '}') (interface_field / r) ws)* |} ws '}'
-	|}
 	interface_field <- name ws ';'
 
-	return <- {| {:type: {'return' / 'yield'} :} ws expression_list? |}
+	return <- {:type: {'return' / 'yield'} :} ws expression_list?
 
 	lambda <- {| {:type: '' -> 'lambda' :}
-		'\' ws lambda_args? ws is_self '>' ws (expression_list / statement_block /
+		'\' ws lambda_args? ws is_self '>' ws (expression_list /
+			{| statement_block |} /
 			r)
 	|}
 	lambda_args <- {| lambda_arg (ws ',' ws lambda_arg)* |}
 	lambda_arg <- {| {:name: name / '...' :} |}
-	function_definition <- {| {:type: '' -> 'function_definition' :}
+	function_definition <- {:type: '' -> 'function_definition' :}
 		{:is_async: 'async' -> true space :}?
 		{:is_local: 'local' -> true space :}? ws
-		variable ws function_body -- Do NOT write functions with :
-	|}
+		variable ws function_body -- Do NOT write functions with :, use =>
 	function_body <-
 		'(' ws function_defined_arguments? ws ')' ws
 			is_self '>' ws
@@ -173,16 +171,13 @@ local pattern = re.compile([[
 		{:default: expression / r:})?
 	|}
 
-	while_loop <- {| {:type: '' -> 'while_loop' :}
+	while_loop <- {:type: '' -> 'while_loop' :}
 		'while' ws {:condition: expression / r :} ws rstatement
-	|}
-	iterative_for_loop <- {| {:type: '' -> 'iterative_for_loop' :}
+	iterative_for_loop <- {:type: '' -> 'iterative_for_loop' :}
 		'for' ws '(' ws (name_list / r) ws 'in' ws (expression / r) ws ')' ws
 		rstatement
-	|}
-	numeric_for_loop <- {| {:type: '' -> 'numeric_for_loop' :}
+	numeric_for_loop <- {:type: '' -> 'numeric_for_loop' :}
 		'for' ws numeric_for_assignment ws rstatement
-	|}
 	numeric_for_assignment <- '('
 		{:incremented_variable: name / r :} ws '=' ws
 		{:start: expression :} ws
@@ -190,13 +185,12 @@ local pattern = re.compile([[
 		(',' ws {:step: expression / r :})?
 	')'
 
-	if <- {|
+	if <-
 		{:type: 'if' :} ws {:condition: expression / r :} ws rstatement
 		{:elseif: {| (ws {|
 			'elseif' ws {:condition: expression / r :} ws rstatement
 		|})* |} :}
 		(ws 'else' ws {:else: rstatement :})?
-	|}
 
 	function_call_first <-
 		variable ws
@@ -205,20 +199,18 @@ local pattern = re.compile([[
 		(& ('.' variable / ':'))
 		'.'? ws variable? ws
 		({:has_self: ':' ws {name / r} :} ws)?
-	function_call <- {| {:type: '' -> 'function_call' :}
+	function_call <- {:type: '' -> 'function_call' :}
 		((& '@') {:is_self: '' -> true :})? -- the @ at the beginning
 		{| function_call_first ws '(' ws function_args? ws ')' ws |} -- first call
 		{| (function_call_name ws '(' ws function_args? ws ')' ws) |}* -- chained
-	|}
 	function_args <- expression_list?
 
-	assignment <- {| {:type: '' -> 'assignment' :}
+	assignment <- {:type: '' -> 'assignment' :}
 		(variable_list ws '=' ws (expression_list / r) /
 		{:is_local: 'local' -> true :} ws {:is_nil: '(' -> true :} ws local_name
 			(ws ',' ws (local_name / r))* ws ')' /
 		{:is_local: 'local' -> true :} space (name_list / r) ws ('=' / r) ws
 			(expression_list / r))
-	|}
 	name_list <- {:variable_list: {|
 		local_name (ws ',' ws (local_name / r))*
 	|} :} / {:variable_list: {|
@@ -249,7 +241,7 @@ local pattern = re.compile([[
 	:}
 	value <-
 		lambda /
-		function_call /
+		{| function_call |} /
 		literal /
 		variable
 	variable_list <- {:variable_list: {|

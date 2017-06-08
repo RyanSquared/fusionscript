@@ -1,73 +1,83 @@
 describe("lexer", function()
 	local lexer = require("fusion.core.parser")
 	it("can send appropriate errors", function()
+
 		local err_syntax = assert.errors(function() lexer:match("fail") end)
-		assert.same(err_syntax.quick, "syntax")
-		assert.same(err_syntax.context, "fail")
-		assert.is_not.same(tostring(err_syntax):sub(1, 5), "table")
+		assert.same("syntax", err_syntax.quick)
+		assert.same("fail", err_syntax.context)
+		assert.is_not_same("table", tostring(err_syntax):sub(1, 5))
+
 		local err_sc = assert.errors(function() lexer:match("fail()") end)
-		assert.same(err_sc.quick, "semicolon")
-		assert.same(err_sc.context, "fail()")
-		assert.is_not.same(tostring(err_sc):sub(1, 5), "table")
+		assert.same("semicolon", err_sc.quick)
+		assert.same("fail()", err_sc.context)
+		assert.is_not_same("table", tostring(err_sc):sub(1, 5))
+
 		local err_syntax_2 = assert.errors(function()
 				lexer:match("test();\nasdf") end)
-		assert.same(err_syntax_2.quick, "syntax")
-		assert.same(err_syntax_2.context, "asdf")
-		assert.is_not.same(tostring(err_syntax_2):sub(1, 5), "table")
+		assert.same("syntax", err_syntax_2.quick)
+		assert.same("asdf", err_syntax_2.context)
+		assert.is_not_same("table", tostring(err_syntax_2):sub(1, 5))
+
 		local err_sc_2 = assert.errors(function()
 				lexer:match("test();\nreturn") end)
 		assert.same(err_sc_2.quick, "semicolon")
 		assert.same(err_sc_2.context:sub(-6), "return")
-		assert.is_not.same(tostring(err_sc_2):sub(1, 5), "table")
+		assert.is_not_same("table", tostring(err_sc_2):sub(1, 5))
+
 	end)
+
 	it("can parse break statements", function()
-		assert.same(lexer:match("break;"), {{type = "break"}})
+		assert.same({{pos = 1, type = "break"}}, lexer:match("break;"))
 	end)
+
 	it("can parse simple yield statements", function()
-		assert.same(lexer:match("yield;"), {{type = "yield"}})
+		assert.same({{pos = 1, type = "yield"}}, lexer:match("yield;"))
 	end)
+
 	it("can parse complex yield statements", function()
-		assert.same(lexer:match("yield a, b;"), {{type = "yield",
+		assert.same({{pos = 1, type = "yield",
 			expression_list = {
 				{type = "variable", "a"},
 				{type = "variable", "b"}
 			}
-		}})
+		}}, lexer:match("yield a, b;"))
 	end)
+
 	it("can parse simple return statements", function()
-		assert.same(lexer:match("return;"), {{type = "return"}})
+		assert.same({{pos = 1, type = "return"}}, lexer:match("return;"))
 	end)
+
 	it("can parse complex return statements", function()
-		assert.same(lexer:match("return a, b;"), {{type = "return",
+		assert.same({{pos = 1, type = "return",
 			expression_list = {
 				{type = "variable", "a"},
 				{type = "variable", "b"}
 			}
-		}})
+		}}, lexer:match("return a, b;"))
 	end)
+
 	it("can parse local nil assignment", function()
-		assert.same(lexer:match("local (a, b);"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			{type = "variable", "a"},
 			{type = "variable", "b"},
 			is_local = true,
 			is_nil = true
-		}})
+		}}, lexer:match("local (a, b);"))
 	end)
+
 	it("can parse basic assignment", function()
-		assert.same(lexer:match("a = b;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"}
 				},
 				expression_list = {
 					{type = "variable", "b"}
 				}
-			}
-		})
+			}}, lexer:match("a = b;"))
 	end)
+
 	it("can parse local assignment", function()
-		assert.same(lexer:match("local a = b;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"}
 				},
@@ -75,12 +85,11 @@ describe("lexer", function()
 					{type = "variable", "b"}
 				},
 				is_local = true
-			}
-		})
+			}}, lexer:match("local a = b;"))
 	end)
+
 	it("can parse self indexing", function()
-		assert.same(lexer:match("local a = @b;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"}
 				},
@@ -88,12 +97,11 @@ describe("lexer", function()
 					{type = "variable", "self", "b"}
 				},
 				is_local = true
-			}
-		})
+			}}, lexer:match("local a = @b;"))
 	end)
+
 	it("can parse complex self indexing", function()
-		assert.same(lexer:match("local a = @[b];"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"}
 				},
@@ -101,24 +109,22 @@ describe("lexer", function()
 					{type = "variable", "self", {type = "variable", "b"}}
 				},
 				is_local = true
-			}
-		})
+			}}, lexer:match("local a = @[b];"))
 	end)
+
 	it("can parse assigning to self", function()
-		assert.same(lexer:match("@a = b;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "self", "a"}
 				},
 				expression_list = {
 					{type = "variable", "b"}
 				}
-			}
-		})
+			}}, lexer:match("@a = b;"))
 	end)
+
 	it("can parse destructuring tables to local assignment", function()
-		assert.same(lexer:match("local {a} = b;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
 					is_destructuring = "table"
@@ -127,12 +133,11 @@ describe("lexer", function()
 					{type = "variable", "b"}
 				},
 				is_local = true
-			}
-		})
+			}}, lexer:match("local {a} = b;"))
 	end)
+
 	it("can parse destructuring arrays to local assignment", function()
-		assert.same(lexer:match("local [a] = b;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
 					is_destructuring = "array"
@@ -141,12 +146,11 @@ describe("lexer", function()
 					{type = "variable", "b"}
 				},
 				is_local = true
-			}
-		})
+			}}, lexer:match("local [a] = b;"))
 	end)
+
 	it("can parse multi value assignment", function()
-		assert.same(lexer:match("a, b = c, d;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
 					{type = "variable", "b"}
@@ -155,12 +159,11 @@ describe("lexer", function()
 					{type = "variable", "c"},
 					{type = "variable", "d"}
 				}
-			}
-		})
+			}}, lexer:match("a, b = c, d;"))
 	end)
+
 	it("can parse replacement assignment", function()
-		assert.same(lexer:match("a, b = b, a;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
 					{type = "variable", "b"}
@@ -169,12 +172,11 @@ describe("lexer", function()
 					{type = "variable", "b"},
 					{type = "variable", "a"}
 				}
-			}
-		})
+			}}, lexer:match("a, b = b, a;"))
 	end)
+
 	it("can parse complex expressions", function()
-		assert.same(lexer:match("a = (?: false (^ b c) (/ d e));"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"}
 				},
@@ -192,12 +194,11 @@ describe("lexer", function()
 					},
 					operator = "?:",
 				}}
-			}
-		})
+			}}, lexer:match("a = (?: false (^ b c) (/ d e));"))
 	end)
+
 	it("can translate mathematical constants", function()
-		assert.same(lexer:match("a, b, c = 5, -3, 0xAF;"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
 					{type = "variable", "b"},
@@ -208,53 +209,46 @@ describe("lexer", function()
 					{type = "number", 3, base = "10", is_negative = true},
 					{type = "number", 0xAF, base = "16"}
 				}
-			}
-		})
+			}}, lexer:match("a, b, c = 5, -3, 0xAF;"))
 	end)
+
 	it("can parse a simple function", function()
-		assert.same(lexer:match("func();"), {{type = "function_call", {
+		assert.same({{pos = 1, type = "function_call", {
 			{type = "variable", "func"}
-		}}})
+		}}}, lexer:match("func();"))
 	end)
+
 	it("can parse chained functions", function()
-		assert.same(lexer:match("func().two():three().four:five();"), {{
-			type = "function_call", {
-				{type = "variable", "func"}
-			}, {
-				{type = "variable", "two"}
-			}, {
-				has_self = "three"
-			}, {
-				{type = "variable", "four"},
-				has_self = "five"
-			}
-		}})
+		assert.same({{pos = 1, type = "function_call",
+			{{type = "variable", "func"}},
+			{{type = "variable", "two"}},
+			{has_self = "three"},
+			{{type = "variable", "four"},has_self = "five"}
+		}}, lexer:match("func().two():three().four:five();"))
 	end)
+
 	it("can parse arguments passed to a function", function()
-		assert.same(lexer:match("func(test, test_two);"), {
-			{type = "function_call", {
+		assert.same({{pos = 1, type = "function_call", {
 				{type = "variable", "func"},
 				expression_list = {
 					{type = "variable", "test"},
 					{type = "variable", "test_two"}
 				}}
-			}
-		})
+			}}, lexer:match("func(test, test_two);"))
 	end)
+
 	it("can parse a complex function call", function()
-		assert.same(lexer:match("table.instance:method(argument);"), {
-			{type = "function_call", {
+		assert.same({{pos = 1, type = "function_call", {
 				{type = "variable", "table", "instance"}, -- tables parse -this- way
 				expression_list = {
 					{type = "variable", "argument"}
 				},
 				has_self = "method"
-			}}
-		})
+			}}}, lexer:match("table.instance:method(argument);"))
 	end)
+
 	it("can parse a non-generated table", function()
-		assert.same(lexer:match("a = {1, b = 2, [c] = 3};"), {
-			{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {{type = "variable", "a"}},
 				expression_list = {
 					{type = "table",
@@ -264,11 +258,11 @@ describe("lexer", function()
 							index = {type = "variable", "c"}}
 					}
 				}
-			}
-		})
+			}}, lexer:match("a = {1, b = 2, [c] = 3};"))
 	end)
+
 	it("can parse a generated table", function()
-		assert.same(lexer:match("a = {x in y};"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "table",
 				{type = "generator",
@@ -276,11 +270,11 @@ describe("lexer", function()
 					{type = "variable", "y"}
 				}
 			}}
-		}})
+		}}, lexer:match("a = {x in y};"))
 	end)
-	it("can parse a complex generated table", function()
-		assert.same(lexer:match("a = {(.. x ': ' z) for x, z in y(a, b)};"), {
-			{type = "assignment",
+
+	it("can parse a complex generated table", function() -- ::TODO:: what
+		assert.same({{pos = 1, type = "assignment",
 				variable_list = {{type = "variable", "a"}},
 				expression_list = {{type = "table",
 					{type = "generator",
@@ -303,11 +297,11 @@ describe("lexer", function()
 						}}
 					}
 				}}
-			}
-		})
+			}}, lexer:match("a = {(.. x ': ' z) for x, z in y(a, b)};"))
 	end)
+
 	it("can parse tables with variable non-numeric indexes", function()
-		assert.same(lexer:match("a = {[x] = a in y};"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "table",
 				{type = "generator",
@@ -315,23 +309,22 @@ describe("lexer", function()
 					{type = "variable", "y"}
 				}
 			}}
-		}})
+		}}, lexer:match("a = {[x] = a in y};"))
 	end)
+
 	it("can parse while loops", function()
-		assert.same(lexer:match("while true print('hi!');"), {
-			{type = "while_loop",
-				{type = "function_call", {
+		assert.same({{pos = 1, type = "while_loop",
+				{pos = 12, type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "sqstring", "hi!"}}
 				}},
 				condition = {type = "boolean", true}
-			}
-		})
+			}}, lexer:match("while true print('hi!');"))
 	end)
+
 	it("can parse numeric for loops", function()
-		assert.same(lexer:match("for (i=1, 100, 5) print(i);"), {
-			{type = "numeric_for_loop",
-				{type = "function_call", {
+		assert.same({{pos = 1, type = "numeric_for_loop",
+				{pos = 19, type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "i"}}
 				}},
@@ -339,24 +332,22 @@ describe("lexer", function()
 				stop = {type = "number", 100, base = "10"},
 				step = {type = "number", 5, base = "10"},
 				incremented_variable = "i"
-			}
-		})
+			}}, lexer:match("for (i=1, 100, 5) print(i);"))
 	end)
+
 	it("can parse iterative for loops", function()
-		assert.same(lexer:match("for (i in x) print(i);"), {
-			{type = "iterative_for_loop",
+		assert.same({{pos = 1, type = "iterative_for_loop",
 				{type = "variable", "x"},
-				{type = "function_call", {
+				{pos = 14, type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "i"}}
 				}},
 				variable_list = {{type = "variable", "i"}}
-			}
-		})
+			}}, lexer:match("for (i in x) print(i);"))
 	end)
+
 	it("can parse function definitions", function()
-		assert.same(lexer:match("test(a, b='c', ...)-> return a, b;"), {
-			{type = "function_definition",
+		assert.same({{pos = 1, type = "function_definition",
 				{type = "variable", "test"},
 				{
 					{name = "a"},
@@ -366,214 +357,207 @@ describe("lexer", function()
 					},
 					{name = "..."} -- vararg
 				},
-				{type = "return",
+				{pos = 23, type = "return",
 					expression_list = {
 						{type = "variable", "a"},
 						{type = "variable", "b"}
 					}
 				}
-			}
-		})
+			}}, lexer:match("test(a, b='c', ...)-> return a, b;"))
 	end)
+
 	it("can parse lambda definitions", function()
-		assert.same(lexer:match("a = \\-> 'hi';"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "lambda",
 				expression_list = {{type = "sqstring", "hi"}}
 			}}
-		}})
+		}}, lexer:match("a = \\-> 'hi';"))
 	end)
+
 	it("can parse method definitions", function()
-		assert.same(lexer:match("test(a, b='c')=> return a, b;"), {
-			{type = "function_definition",
+		assert.same({{pos = 1, type = "function_definition",
 				{type = "variable", "test"},
-				{
-					{name = "a"},
-					{
-						name = "b",
-						default = {type = "sqstring", "c"}
-					}
-				},
-				{type = "return",
+				{{name = "a"},
+					{name = "b",
+						default = {type = "sqstring", "c"}}},
+				{pos = 18, type = "return",
 					expression_list = {
 						{type = "variable", "a"},
-						{type = "variable", "b"}
-					}
-				},
+						{type = "variable", "b"}}},
 				is_self = true
-			}
-		})
+			}}, lexer:match("test(a, b='c')=> return a, b;"))
 	end)
+
 	it("can parse lambda method definitions", function()
-		assert.same(lexer:match("a = \\=> 'hi';"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "lambda",
 				expression_list = {{type = "sqstring", "hi"}},
 				is_self = true
 			}}
-		}})
+		}}, lexer:match("a = \\=> 'hi';"))
 	end)
+
 	it("can parse async function definitions", function()
-		assert.same(lexer:match("async test(a, b='c')-> return a, b;"), {
-			{type = "function_definition",
+		assert.same({{pos = 1, type = "function_definition",
 				{type = "variable", "test"},
-				{
-					{name = "a"},
-					{
-						name = "b",
-						default = {type = "sqstring", "c"}
-					}
-				},
-				{type = "return",
+				{{name = "a"},
+					{name = "b",
+						default = {type = "sqstring", "c"}}},
+				{pos = 24, type = "return",
 					expression_list = {
 						{type = "variable", "a"},
 						{type = "variable", "b"}
 					}
 				},
 				is_async = true
-			}
-		})
+			}}, lexer:match("async test(a, b='c')-> return a, b;"))
 	end)
+
 	it("can parse async method definitions", function()
-		assert.same(lexer:match("async test(a, b='c')=> return a, b;"), {
-			{type = "function_definition",
+		assert.same({{pos = 1, type = "function_definition",
 				{type = "variable", "test"},
-				{
-					{name = "a"},
-					{
-						name = "b",
-						default = {type = "sqstring", "c"}
-					}
-				},
-				{type = "return",
+				{{name = "a"},
+					{name = "b",
+						default = {type = "sqstring", "c"}}},
+				{pos = 24, type = "return",
 					expression_list = {
 						{type = "variable", "a"},
-						{type = "variable", "b"}
-					}
-				},
+						{type = "variable", "b"}}},
 				is_self = true,
 				is_async = true
-			}
-		})
+			}}, lexer:match("async test(a, b='c')=> return a, b;"))
 	end)
+
 	it("can parse simple if statements", function()
-		assert.same(lexer:match("if x print('test');"), {{type = "if",
+		assert.same({{pos = 1, type = "if",
 			condition = {type = "variable", "x"},
-			{type = "function_call", {
+			{pos = 6, type = "function_call", {
 				{type = "variable", "print"},
 				expression_list = {{type = "sqstring", "test"}}
 			}},
 			["elseif"] = {}
-		}})
+		}}, lexer:match("if x print('test');"))
 	end)
+
 	it("can parse complex if statements", function()
-		assert.same(lexer:match("if x print('test'); else print(x);"), {
-			{type = "if",
+		assert.same({{pos = 1, type = "if",
 				condition = {type = "variable", "x"},
-				{type = "function_call", {
+				{pos = 6, type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "sqstring", "test"}}
 				}},
-				['else'] = {type = "function_call", {
+				['else'] = {pos = 26, type = "function_call", {
 					{type = "variable", "print"},
 					expression_list = {{type = "variable", "x"}}
 				}},
 				["elseif"] = {}
-			}
-		})
+			}}, lexer:match("if x print('test'); else print(x);"))
 	end)
+
 	it("can parse basic classes", function()
-		assert.same(lexer:match("class x {}"), {{type = "class", {},
-			name = {type = "variable", "x"}}})
+		assert.same({{pos = 1, type = "class", {},
+			name = {type = "variable", "x"}}}, lexer:match("class x {}"))
 	end)
+
 	it("can parse local classes", function()
-		assert.same(lexer:match("local class x {}"), {{type = "class", {},
+		assert.same({{pos = 1, type = "class", {},
 			is_local = true,
-			name = {type = "variable", "x"}}})
+			name = {type = "variable", "x"}}}, lexer:match("local class x {}"))
 	end)
+
 	it("can parse classes with methods", function()
-		assert.same(lexer:match("class x { y()-> z }"), {{type = "class",
-			{
-				{type = "function_definition",
+		assert.same({{pos = 1, type = "class",
+			{{type = "function_definition",
 					{type = "variable", "y"},
-					expression_list = {{type = "variable", "z"}}
-				}
-			},
+					expression_list = {{type = "variable", "z"}}}},
 			name = {type = "variable", "x"},
-		}})
+		}}, lexer:match("class x { y()-> z }"))
 	end)
+
 	it("can parse classes with statically named values", function()
-		assert.same(lexer:match("class x { y = z; }"), {{type = "class",
+		assert.same({{pos = 1, type = "class",
 			{
 				{type = "class_field", {type = "variable", "z"}, name = "y"}
 			},
 			name = {type = "variable", "x"},
-		}})
+		}}, lexer:match("class x { y = z; }"))
 	end)
+
 	it("can parse classes with dynamically named values", function()
-		assert.same(lexer:match("class x { [y] = z; }"), {{type = "class",
+		assert.same({{pos = 1, type = "class",
 			{
 				{type = "class_field",
 				{type = "variable", "z"},
 				index = {type = "variable", "y"}}
 			},
 			name = {type = "variable", "x"},
-		}})
+		}}, lexer:match("class x { [y] = z; }"))
 	end)
+
 	it("can parse extended classes", function()
-		assert.same(lexer:match("class x extends y {}"), {{type = "class",
+		assert.same({{pos = 1, type = "class",
 			{},
 			name = {type = "variable", "x"},
 			extends = {type = "variable", "y"}
-		}})
+		}}, lexer:match("class x extends y {}"))
 	end)
+
 	it("can parse very complex classes", function()
-		assert.same(lexer:match("class x extends y implements z {}"), {{
-			{},
+		assert.same({{pos = 1, {},
 			implements = {type = "variable", "z"},
 			extends = {type = "variable", "y"},
 			name = {type = "variable", "x"},
 			type = "class"
-		}})
+		}}, lexer:match("class x extends y implements z {}"))
 	end)
+
 	it("can parse negative ranges", function()
-		assert.same(lexer:match("a = 10::1::2;"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "range",
 				start = {type = "number", base = "10", 10},
 				stop = {type = "number", base = "10", 1},
 				step = {type = "number", base = "10", 2}
 			}}
-		}})
+		}}, lexer:match("a = 10::1::2;"))
 	end)
+
 	it("can parse complex ranges", function()
-		assert.same(lexer:match("a = 1::10::2;"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "range",
 				start = {type = "number", base = "10", 1},
 				stop = {type = "number", base = "10", 10},
 				step = {type = "number", base = "10", 2}
 			}}
-		}})
+		}}, lexer:match("a = 1::10::2;"))
 	end)
+
 	it("can parse basic ranges", function()
-		assert.same(lexer:match("a = 1::5;"), {{type = "assignment",
+		assert.same({{pos = 1, type = "assignment",
 			variable_list = {{type = "variable", "a"}},
 			expression_list = {{type = "range",
 				start = {type = "number", base = "10", 1},
 				stop = {type = "number", base = "10", 5}
 			}}
-		}})
+		}}, lexer:match("a = 1::5;"))
 	end)
+
 	it("can parse `using` statements", function()
-		assert.same(lexer:match("using fnl;"), {{type = "using", "fnl"}})
+		assert.same({{pos = 1,
+			type = "using", "fnl"}}, lexer:match("using fnl;"))
 	end)
+
 	it("can parse multi-directive `using` statements", function()
-		assert.same(lexer:match("using {fnl, itr};"), {{type = "using",
-			"fnl", "itr"}})
+		assert.same({{pos = 1, type = "using",
+			"fnl", "itr"}}, lexer:match("using {fnl, itr};"))
 	end)
+
 	it("can parse LPeg regex literals", function()
-		assert.same(lexer:match("return /test/;"), {{type="return",
-			expression_list = {{type="re", "test"}}}})
+		assert.same({{pos = 1, type="return",
+			expression_list = {{type="re", "test"}}}},
+			lexer:match("return /test/;"))
 	end)
 end)
