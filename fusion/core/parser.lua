@@ -62,6 +62,7 @@ defs.err = function(pos, char, ctx)
 end
 
 defs.semicolon = function(pos)
+	pos = current_file:sub(1, pos - 1):match("()%s-$")
 	local line = 1
 	local start = 1
 	local line_start = 0
@@ -111,7 +112,7 @@ local pattern = re.compile([[
 		function_call /
 		return /
 		{| {:type: 'break' :} |}
-	) (';' / {} -> semicolon) ws / (
+	) (';' / {} -> semicolon) / (
 		statement_block /
 		while_loop /
 		numeric_for_loop /
