@@ -1,6 +1,6 @@
 --- Module for "functional" iterators and functions.
 -- @module fusion.stdlib.functional
-local unpack = unpack or table.unpack -- luacheck: ignore 113 143
+local unpack = require("fusion.util").unpack
 
 --- Iterate over a table's keys and values
 -- @tparam table input

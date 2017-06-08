@@ -1,6 +1,6 @@
 local class = require("fusion.stdlib.class")
+local unpack = require("fusion.util").unpack
 
-local unpack = unpack or table.unpack -- luacheck: ignore 113 143
 describe("class", function()
 	it("can make a simple class", function()
 		local x = class({}, {}, "Test")

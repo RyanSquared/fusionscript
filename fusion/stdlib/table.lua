@@ -48,6 +48,6 @@ function table.slice(t, start, stop)
 	end)
 end
 
-table.unpack = unpack or table.unpack -- luacheck: ignore 113 143
+table.unpack = require("fusion.util").unpack
 
 return table

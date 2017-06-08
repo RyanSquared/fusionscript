@@ -3,17 +3,17 @@
 
 local parser = require("fusion.core.parser")
 local lfs = require("lfs")
-local unpack = unpack or table.unpack -- luacheck: ignore 113 143
+local unpack = require("fusion.util").unpack
 
 local compiler = {}
 local handlers = {}
 
 --- Initialize a compiler state
-function compiler:new()
-	self = setmetatable({}, {__index = compiler})
-	self.indent = 0
-	self.last_node = {}
-	return self
+function compiler:new() -- luacheck: ignore 212
+	local new_self = setmetatable({}, {__index = compiler})
+	new_self.indent = 0
+	new_self.last_node = {}
+	return new_self
 end
 
 --- Transform a node using the registered handler.
@@ -110,7 +110,7 @@ function compiler:transform_class_function(node)
 	}
 end
 
-handlers['re'] = function(self, node)
+handlers['re'] = function(self, node) -- luacheck: ignore 212
 	return 're.compile(' .. ("%q"):format(node[1]) .. ')'
 end
 
@@ -222,11 +222,11 @@ handlers['table'] = function(self, node)
 	return table.concat(output, "\n")
 end
 
-handlers['boolean'] = function(self, node)
+handlers['boolean'] = function(self, node) -- luacheck: ignore 212
 	return tostring(node[1])
 end
 
-handlers['break'] = function(self, node)
+handlers['break'] = function(self, node) -- luacheck: ignore 212
 	return node.type
 end
 
@@ -464,7 +464,7 @@ handlers['expression'] = function(self, node)
 	end
 end
 
-handlers['number'] = function(self, node)
+handlers['number'] = function(self, node) -- luacheck: ignore 212
 	local is_negative = node.is_negative and "-" or ""
 	if node.base == "10" then
 		if math.floor(node[1]) == node[1] then
@@ -593,15 +593,15 @@ handlers['variable'] = function(self, node)
 	return table.concat(name)
 end
 
-handlers['sqstring'] = function(self, node)
+handlers['sqstring'] = function(self, node) -- luacheck: ignore 212
 	return ("%q"):format(node[1]:gsub("\\", "\\\\"))  -- \ is ignored in '' strings
 end
 
-handlers['dqstring'] = function(self, node)
+handlers['dqstring'] = function(self, node) -- luacheck: ignore 212
 	return ('"%s"'):format(node[1])
 end
 
-handlers['blstring'] = function(self, node)
+handlers['blstring'] = function(self, node) -- luacheck: ignore 212
 	local eq = ("="):rep(#node.eq)
 	return ("[%s[%s]%s]"):format(eq, node[1], eq)
 end

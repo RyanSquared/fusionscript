@@ -2,8 +2,7 @@
 -- @module fusion.stdlib.iterative
 local fnl = require("fusion.stdlib.functional")
 local table = require("fusion.stdlib.table")
-
-local unpack = unpack or table.unpack -- luacheck: ignore 113
+local unpack = require("fusion.util").unpack
 
 local iter, mk_gen = fnl._iter, fnl._mk_gen
 
