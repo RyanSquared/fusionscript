@@ -4,6 +4,7 @@
 local parser = require("fusion.core.parser")
 local lfs = require("lfs")
 local unpack = require("fusion.util").unpack
+local serpent = require("serpent")
 
 local compiler = {}
 local handlers = {}
@@ -22,11 +23,7 @@ function compiler:transform(node, ...)
 	if type(node) ~= "table" then
 		error(("Bad node type for (%s): %s"):format(node, type(node)))
 	elseif not node.type then
-		local out = {}
-		for k, v in pairs(node) do
-			out[#out + 1] = ("%s %s: %s"):format(type(v), k, v)
-		end
-		error("Bad node:\n" .. table.concat(out, "\n"))
+		error("Bad node:\n" .. serpent.block(node))
 	end
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	self.last_node = node
