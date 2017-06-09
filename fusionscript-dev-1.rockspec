@@ -41,6 +41,6 @@ build = {
 			["fusionc"] = ("bin/compiler/%s.lua"):format(default);
 			["fusion-source"] = "bin/interpreter//source.lua";
 			["fusionc-source"] = "bin/compiler/source.lua";
-		}
+		};
 	};
 }

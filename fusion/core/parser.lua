@@ -84,7 +84,7 @@ defs.semicolon = function(pos)
 		msg = errormsg_table;
 		pos = {
 			y = line;
-			x = pos - line_start - 1;
+			x = pos - line_start;
 		};
 		context = current_file:sub(pos - 7, pos);
 		quick = "semicolon"
