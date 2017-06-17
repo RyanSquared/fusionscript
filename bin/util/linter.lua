@@ -11,8 +11,11 @@ local argparser = argparse() {
 	description = "Check a FusionScript file for syntax and logical errors";
 	epilog = "For more info, see https://fusionscript.info";
 }
-argparser:argument("file", "File(s) to lint"):args("+")
-local files = argparser:parse().file
+argparser:argument("file", "File(s) to lint"):args("*")
+argparser:flag("-i", "Read from input")
+argparser:option("--filename", "Filename to use when printing errors")
+local options = argparser:parse()
+local files = options.files
 
 local function lint_file(file_name, file)
 	local messages = {}
@@ -28,12 +31,18 @@ local function lint_file(file_name, file)
 	return messages
 end
 
-for index, file in ipairs(files) do
-	files[index] = {file, assert(io.open(file))} -- TODO: support for dirs
-end
-
-for _, file in ipairs(files) do
-	for _, line in ipairs(lint_file(unpack(file))) do
+if options.i then
+	for _, line in ipairs(lint_file(options.filename or "stdin", io.stdin)) do
 		print(line)
+	end
+else
+	for index, file in ipairs(files) do
+		files[index] = {file, assert(io.open(file))} -- TODO: support for dirs
+	end
+
+	for _, file in ipairs(files) do
+		for _, line in ipairs(lint_file(unpack(file))) do
+			print(line)
+		end
 	end
 end
