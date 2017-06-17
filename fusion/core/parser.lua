@@ -43,7 +43,7 @@ defs.err = function(pos, char, ctx)
 		msg = errormsg_table;
 		pos = {
 			y = line;
-			x = pos - line_start;
+			x = math.max(1, pos - line_start);
 		};
 		context = current_file:sub(math.max(pos - 2, line_start),
 			math.min(pos + 5, current_file:match("()$")));
@@ -84,7 +84,7 @@ defs.semicolon = function(pos)
 		msg = errormsg_table;
 		pos = {
 			y = line;
-			x = pos - line_start;
+			x = math.max(1, pos - line_start);
 		};
 		context = current_file:sub(pos - 7, pos);
 		quick = "semicolon"
