@@ -341,8 +341,83 @@ local pattern = re.compile([[ -- LPEG-RE
 -- @usage require("pl.pretty").dump(lexer:match("print('hi');"))
 
 return {
-	match = function(self, input) -- luacheck: ignore 212
+	match = function(self, input, filename) -- luacheck: ignore 212
+		if filename then
+			local is_cached = self:check_cache(filename)
+			if is_cached then
+					return is_cached
+			end
+		end
+
 		current_file = input
-		return pattern:match(input)
-	end
+		local ast = pattern:match(input)
+
+		if filename then
+			local digest = require("openssl.digest")
+			local basexx = require("basexx")
+			local serpent = require("serpent")
+			local lfs = require("lfs")
+
+			lfs.mkdir('fs-cache')
+			local dir = lfs.currentdir()
+			lfs.chdir('fs-cache')
+			for path in filename:match("(.+)/.+"):gmatch("[^/]+") do
+				lfs.mkdir(path)
+				lfs.chdir(path)
+			end
+			lfs.chdir(dir)
+
+			local file = assert(io.open(("./fs-cache/%s"):format(filename), "w"))
+			file:write(("-- SHA-1: %s\n"):format(basexx.to_hex(digest.new():final(
+				input))))
+			file:write("return ")
+			file:write(serpent.block(ast, {comment = false}))
+			file:write(";")
+			file:close()
+		end
+
+		return ast
+	end;
+	check_cache = function(self, file)
+		assert(type(file) == "string", "argument to check_cache not string")
+		-- import here because these modules affect the filesystem
+		local digest = require("openssl.digest")
+		local basexx = require("basexx")
+		local lfs = require("lfs")
+		if lfs.attributes(("./fs-cache/%s"):format(file), "mode") == "file" then
+			-- cached found, check against hash of file
+			local f = io.open(file)
+			local chunk = f:read(1024)
+			local cur_digest = digest.new()
+			while chunk do
+				cur_digest:update(chunk)
+				chunk = f:read(1024)
+			end
+			f:close()
+			local hash = cur_digest:final()
+
+			local cached = io.open(("./fs-cache/%s"):format(file))
+			if not cached:read() then
+				return
+			end
+			cached:seek("set")
+
+			local line = cached:read()
+			local stored_hash = line:match("%-%- SHA%-1: (%x+)")
+			if not stored_hash then
+				return nil, ("unable to recover hash for: %q"):format(file)
+			else
+				stored_hash = stored_hash:upper()
+			end
+			if stored_hash == basexx.to_hex(hash) then
+				cached:close()
+				return dofile(("./fs-cache/%s"):format(file))
+			else
+				return nil, ("hash does not match: (base)%q != (cached)%q"):format(
+					basexx.to_hex(hash), stored_hash)
+			end
+		else
+			return nil, ("cached file not found: %q"):format(file)
+		end
+	end;
 }
