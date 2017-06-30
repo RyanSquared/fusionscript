@@ -19,10 +19,11 @@ local function read_file(file)
 	local file_handler = assert(io.open(file))
 	local line = file_handler:read()
 	if line:sub(1, 2) == "#!" then
-		print(serpent.block(parser:match(file_handler:read("*a"))))
+		print(serpent.block(parser:match(file_handler:read("*a")),
+			{comment = false}))
 	else
 		print(serpent.block(parser:match(line .. '\n' ..
-			file_handler:read("*a"))))
+			file_handler:read("*a")), {comment = false}))
 	end
 	file_handler:close()
 end
