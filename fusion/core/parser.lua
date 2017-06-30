@@ -359,13 +359,15 @@ return {
 			local lfs = require("lfs")
 
 			lfs.mkdir('fs-cache')
-			local dir = lfs.currentdir()
-			lfs.chdir('fs-cache')
-			for path in filename:match("(.+)/.+"):gmatch("[^/]+") do
-				lfs.mkdir(path)
-				lfs.chdir(path)
+			if filename:find("/") then
+				local dir = lfs.currentdir()
+				lfs.chdir('fs-cache')
+				for path in filename:match("(.+)/.+"):gmatch("[^/]+") do
+					lfs.mkdir(path)
+					lfs.chdir(path)
+				end
+				lfs.chdir(dir)
 			end
-			lfs.chdir(dir)
 
 			local file = assert(io.open(("./fs-cache/%s"):format(filename), "w"))
 			file:write(("-- SHA-1: %s\n"):format(basexx.to_hex(digest.new():final(
