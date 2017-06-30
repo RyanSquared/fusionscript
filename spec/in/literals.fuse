@@ -7,7 +7,7 @@ local b = 1.5;
 local c = 25e7;
 local d = 55E2;
 local e = 0xDEADBEEF;
-local f = 0x1P50;
+local f = 0x1P5;
 
 -- strings --
 
