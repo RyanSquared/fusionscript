@@ -1,2 +1,2 @@
-print("Hello World!")
-print((7 == 7))
+print(("Hello World!"))
+print(((7) == (7)))

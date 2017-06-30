@@ -30,10 +30,10 @@ function compiler:transform(node, ...)
 		-- scan through const and enums
 		if self.constants[node[1]] and #node == 1 then
 			-- is a constant, from statement or enumeration
-			return self.constants[node[1]]
+			return ("(%s)"):format(self.constants[node[1]])
 		elseif self.enums[node[1]] and #node == 2 then
 			-- is indexing an enum
-			return self.constants[node[2]]
+			return ("(%s)"):format(self.constants[node[2]])
 		end
 	end
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
