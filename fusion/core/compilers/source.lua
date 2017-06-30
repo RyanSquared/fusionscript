@@ -25,7 +25,7 @@ function compiler:transform(node, ...)
 	if type(node) ~= "table" then
 		error(("Bad node type for (%s): %s"):format(node, type(node)))
 	elseif not node.type then
-		error("Bad node:\n" .. serpent.block(node))
+		error("Bad node:\n" .. serpent.block(node, {comment = false}))
 	elseif node.type == "variable" then
 		-- scan through const and enums
 		if self.constants[node[1]] and #node == 1 then
@@ -689,7 +689,7 @@ function compiler.read_file(file)
 	if line and not line:match("^#!") then
 		source_file:seek("set")
 	end
-	local node = parser:match(source_file:read("*a"))
+	local node = parser:match(source_file:read("*a"), file)
 	source_file:close()
 	compiler.compile(node, append)
 	return table.concat(output, "\n") .. "\n" -- EOL at EOF
