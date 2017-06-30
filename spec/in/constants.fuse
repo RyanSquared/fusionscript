@@ -1,0 +1,13 @@
+const HELLO_WORLD = "Hello World!";
+
+print(HELLO_WORLD);
+
+enum X {
+	Y;
+	Z;
+	A = 5;
+	B;
+	C;
+};
+
+print((== X.C C));
