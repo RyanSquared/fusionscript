@@ -54,3 +54,6 @@ luac.out
 
 # Lua local repositories
 luarocks
+
+# FusionScript compiled files cache
+fs-cache/
