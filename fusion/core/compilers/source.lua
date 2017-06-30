@@ -14,6 +14,8 @@ function compiler:new() -- luacheck: ignore 212
 	local new_self = setmetatable({}, {__index = compiler})
 	new_self.indent = 0
 	new_self.last_node = {}
+	new_self.constants = {}
+	new_self.enums = {}
 	return new_self
 end
 
@@ -24,6 +26,15 @@ function compiler:transform(node, ...)
 		error(("Bad node type for (%s): %s"):format(node, type(node)))
 	elseif not node.type then
 		error("Bad node:\n" .. serpent.block(node))
+	elseif node.type == "variable" then
+		-- scan through const and enums
+		if self.constants[node[1]] and #node == 1 then
+			-- is a constant, from statement or enumeration
+			return self.constants[node[1]]
+		elseif self.enums[node[1]] and #node == 2 then
+			-- is indexing an enum
+			return self.constants[node[2]]
+		end
 	end
 	assert(handlers[node.type], ("Can't find node handler for (%s)"):format(node.type))
 	self.last_node = node
@@ -491,6 +502,44 @@ end
 
 local des_num = 0
 
+handlers['const'] = function(self, node)
+	if self.constants[node[1]] then
+		error(("Failed to reassign const value %s"):format(node[1]))
+	end
+	self.constants[node[1]] = self:transform(node[2])
+end
+
+handlers['enum'] = function(self, node) -- luacheck: ignore
+	if self.enums[node[1]] then
+		error(("Failed to reassign enum %s"):format(node[1]))
+	end
+	local enum = {}
+	local last = 0
+	-- enumerate enum, add values into constants and self, then add to enums
+	for i, v in ipairs(node) do
+		if i ~= 1 then
+			if self.constants[v[1]] then
+				error(("Failed to reassign const/enum value %s in enum %s"
+					):format(v[1], node[1]))
+			end
+			if v[2] then -- enum X { Y = 1; };
+				local value = self:transform(v[2])
+				if tonumber(value) < last then
+					error(("Value %s in enum %s lower than value %s"):format(
+						value, node[1], last))
+				else
+					last = tonumber(value)
+				end
+			else
+				last = last + 1
+			end
+			self.constants[v[1]] = last
+			enum[v[1]] = last
+		end
+	end
+	self.enums[node[1]] = enum
+end
+
 handlers['assignment'] = function(self, node)
 	local output = {}
 	if node.is_local then
@@ -609,8 +658,22 @@ end
 -- @tparam function output_stream Repeatedly called with generated code
 function compiler.compile(in_values, output_stream)
 	local compiler_state = compiler:new()
+	compiler_state.directives = {}
+	local dirs = compiler_state.directives
+	if in_values.directives then
+		for k, v in pairs(in_values.directives) do -- luacheck: ignore
+			dirs[table.remove(v, 1)] = v -- luacheck: ignore
+		end
+	end
+	if dirs.module then
+		output_stream(("-- :module: %s"):format(table.concat(dirs.module, ".")))
+		output_stream("_ENV = setmetatable({}, {__index = _G})")
+	end
 	for _, input in ipairs(in_values) do
 		output_stream(compiler_state:transform(input))
+	end
+	if compiler_state.directives.module then
+		output_stream("return _ENV")
 	end
 end
 
