@@ -548,6 +548,10 @@ handlers['assignment'] = function(self, node)
 	if node.is_nil then
 		local names = {}
 		for i, v in ipairs(node) do -- luacheck: ignore 213
+			if self.constants[v[1]] then
+				-- attempt to reassign over const value
+				error(("Failed to reassign const value %s"):format(v[1]))
+			end
 			table.insert(names, self:transform(v))
 		end
 		table.insert(output, table.concat(names, ", "))
@@ -566,6 +570,12 @@ handlers['assignment'] = function(self, node)
 		table.insert(output, 1, ("local %s = %s\n"):format(name, expression))
 		if node.variable_list.is_destructuring == "table" then
 			for i, v in ipairs(node.variable_list) do
+				-- check if overwriting enum or const into local scope
+				local first = v[1]
+				if self.constants[first] or self.enums[first] then
+					error(("Failed to destructure into %s over enum/const"):format(
+						first))
+				end
 				local value = self:transform(v)
 				last[#last + 1] = name .. "." .. value
 				output[#output + 1] = value
@@ -576,6 +586,12 @@ handlers['assignment'] = function(self, node)
 		elseif node.variable_list.is_destructuring == "array" then
 			local counter = 0
 			for i, v in ipairs(node.variable_list) do
+				-- check if overwriting enum or const into local scope
+				local first = v[1]
+				if self.constants[first] or self.enums[first] then
+					error(("Failed to destructure into %s over enum/const"):format(
+						first))
+				end
 				local value = self:transform(v)
 				counter = counter + 1
 				last[#last + 1] = ("%s[%i]"):format(name, counter)
@@ -589,6 +605,14 @@ handlers['assignment'] = function(self, node)
 		output[#output + 1] = table.concat(last, ', ')
 		des_num = des_num - 1
 		return table.concat(output)
+	end
+	for i, v in ipairs(node.variable_list) do -- luacheck: ignore
+		-- check if overwriting enum or const | local, reassign, global
+		local first = v[1]
+		if self.constants[first] or self.enums[first] then
+			error(("Failed to assign value to %s over enum/const"):format(
+				first))
+		end
 	end
 	output[#output + 1] = self:transform_variable_list(node)
 	output[#output + 1] = " = "
