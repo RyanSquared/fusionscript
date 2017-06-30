@@ -16,6 +16,8 @@ dependencies = {
 	"lpeg >= 1.0";
 	"luafilesystem";
 	"serpent";
+	"luaossl";
+	"basexx";
 }
 
 local default = "source"
