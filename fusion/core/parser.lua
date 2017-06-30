@@ -97,7 +97,7 @@ defs.semicolon = function(pos)
 	error(errormsg, 0)
 end
 
-local pattern = re.compile([[
+local pattern = re.compile([[ -- LPEG-RE
 	statement_list <- {|
 		{:description: '--- ' [^%nl]+ :}? %nl?
 		{:directives:
@@ -305,10 +305,10 @@ local pattern = re.compile([[
 
 	string <- {| dqstring / sqstring / blstring |}
 	dqstring <- {:type: '' -> 'dqstring' :} '"' { (('\' .) /
-		([^]] .. '\r\n' .. [["]))* } ('"' / r) -- no escape codes in block quotes
-	sqstring <- {:type: '' -> 'sqstring' :} "'" { [^]] .. '\r\n' .. [[']* }
+		([^%nl"]))* } ('"' / r) -- no escape codes in block quotes
+	sqstring <- {:type: '' -> 'sqstring' :} "'" { [^%nl']* }
 		("'" / r)
-	blopen <- '[' {:eq: '='* :} '[' ]] .. "'\r'?'\n'?" .. [[
+	blopen <- '[' {:eq: '='* :} '[' %nl?
 	blclose <- ']' =eq ']'
 	blstring <- {:type: '' -> 'blstring' :} blopen {((! blclose) .)*} blclose
 
@@ -327,8 +327,8 @@ local pattern = re.compile([[
 		expression
 
 	ws <-
-		('#!' [^]] .. '\r\n' .. [[]*)?
-		(%s* '--' [^]] .. '\r\n' .. [[]* ]] .. '\r\n' .. [[?)*
+		('#!' [^%nl]*)?
+		(%s* '--' [^%nl]* %nl?)*
 		%s*
 	ws_noc <- %s*
 	space <- %s+
