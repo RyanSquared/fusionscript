@@ -98,7 +98,13 @@ defs.semicolon = function(pos)
 end
 
 local pattern = re.compile([[
-	statement_list <- ws {| ((! '}') rstatement ws)* |}
+	statement_list <- {|
+		{:description: '--- ' [^%nl]+ :}? %nl?
+		{:directives:
+			{| {| '-- @' name (' ' {[^ %nl]+})* ws_noc |}+ |}
+		:}?
+		ws ((! '}') rstatement ws)*
+	|}
 	statement_block <- {:type: '' -> 'block' :} '{' ws statement_list ws '}'
 	statement <- {| {:pos: {} :} ((
 		function_definition /
@@ -108,6 +114,8 @@ local pattern = re.compile([[
 		{:type: {'using'} :} (space using_name / ws '{' ws
 			using_name (ws ',' ws using_name)*
 		ws '}' / ((pos '' -> 'Unclosed using statement') -> err)) /
+		const /
+		enum /
 		assignment /
 		function_call /
 		return /
@@ -119,6 +127,7 @@ local pattern = re.compile([[
 		iterative_for_loop /
 		if
 	)) |}
+
 	using_name <- {[A-Za-z]+} / {'*'}
 	keyword <- 'local' / 'class' / 'extends' / 'break' / 'return' / 'yield' /
 		'true' / 'false' / 'nil' / 'if' / 'else' / 'elseif' / 'while' / 'for' /
@@ -126,6 +135,7 @@ local pattern = re.compile([[
 	rstatement <- statement / (pos '' -> 'Missing statement') -> err
 	r <- pos -> err
 	pos <- {} {.}
+
 	class <- {:is_local: 'local' -> true space :}?
 		{:type: {'class'} :} space {:name: variable / r :}
 		(ws 'extends' ws {:extends: variable / r :})?
@@ -144,6 +154,11 @@ local pattern = re.compile([[
 		{:type: {'interface'} :} space {:name: variable / r :}
 		ws '{' ws {| ((! '}') (interface_field / r) ws)* |} ws '}'
 	interface_field <- name ws ';'
+
+	const <- {:type: 'const' :} space name ws '=' ws (number / string / boolean)
+	enum <- {:type: 'enum' :} space name ws '{' ws
+		enum_field+ '}'
+	enum_field <- {| name (ws '=' ws number)? ws ';' ws |}
 
 	return <- {:type: {'return' / 'yield'} :} ws expression_list?
 
@@ -260,10 +275,11 @@ local pattern = re.compile([[
 		range /
 		number /
 		string /
-		{| {:type: '' -> 'boolean' :}
-			('true' / 'false') -> bool
-		|} /
+		boolean /
 		{| {:type: {'nil'} :} |}
+	boolean <- {| {:type: '' -> 'boolean' :}
+		('true' / 'false') -> bool
+	|}
 	re <- {| {:type: '' -> 're' :}
 		'/' {('\' . / [^/]+)*} ('/' / r)
 	|}
@@ -314,6 +330,7 @@ local pattern = re.compile([[
 		('#!' [^]] .. '\r\n' .. [[]*)?
 		(%s* '--' [^]] .. '\r\n' .. [[]* ]] .. '\r\n' .. [[?)*
 		%s*
+	ws_noc <- %s*
 	space <- %s+
 ]], defs);
 
