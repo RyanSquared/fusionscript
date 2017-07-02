@@ -11,12 +11,13 @@ local handlers = {}
 
 --- Initialize a compiler state
 function compiler:new() -- luacheck: ignore 212
-	local new_self = setmetatable({}, {__index = compiler})
-	new_self.indent = 0
-	new_self.last_node = {}
-	new_self.constants = {}
-	new_self.enums = {}
-	return new_self
+	return setmetatable({
+		indent = 0;
+		last_node = {};
+		constants = {};
+		enums = {};
+		using = {};
+	}, {__index = compiler})
 end
 
 --- Transform a node using the registered handler.
@@ -79,24 +80,28 @@ handlers['vararg'] = function() return '...' end
 
 compiler.extensions = {
 	class = "fusion.stdlib.class";
-	fnl = "fusion.stdlib.functional";
-	itr = "fusion.stdlib.iterable";
 	re = "re";
 	ternary = "fusion.stdlib.ternary";
 }
 local ext_pat = "local %s = require(%q)"
 
-handlers['using'] = function(self, node) -- TODO: no repeat?
+handlers['using'] = function(self, node)
 	local output = {}
 	if node[1] == "*" then
 		for name, module in pairs(self.extensions) do
-			output[#output + 1] = ext_pat:format(name, module)
+			if not self.using[name] then
+				self.using[name] = true
+				output[#output + 1] = ext_pat:format(name, module)
+			end
 		end
-		table.sort(output) -- consistency, helps w/ tests
+		table.sort(output)
 	else
 		for _, extension in ipairs(node) do
-			output[#output + 1] = ext_pat:format(extension,
-				self.extensions[extension])
+			if not self.using[extension] then
+				self.using[extension] = true
+				output[#output + 1] = ext_pat:format(extension,
+					self.extensions[extension])
+			end
 		end
 	end
 	return table.concat(output, self:l"\n")
@@ -458,7 +463,7 @@ handlers['expression'] = function(self, node)
 	if operator_transformations[node.operator] then
 		node.operator = operator_transformations[node.operator]
 	end
-	if #node > 2 then -- TODO chain operators
+	if #node > 2 then
 		local expr = {}
 		for i = 1, #node do
 			expr[#expr + 1] = self:transform(node[i])
