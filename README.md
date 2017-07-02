@@ -187,46 +187,6 @@ bob:withdraw(1000); -- 100
 assert(bob:withdraw(math.max)); -- errors
 ```
 
-### Asynchronous Networking
-
-```
--- ::TODO::
--- The example in this code example is just for testing
--- and will not actually run as of 9/9/2016
-
-local {Async} = require("core.async");
-local {TCPSocket, TCPServer} = require("core.async.net");
-
-
--- The server MUST be started before the asynchronization
--- due to the fact the client can attempt connecting before
--- the server is initialized.
-
-server = TCPServer("localhost", 9999);
-
-class ExampleAsyncApp extends Async {
-    client()-> {
-        socket = TCPSocket("localhost", 9999);
-        socket:send("echo");
-        print((== socket:recv(4) "echo"));
-        socket:close();
-    }
-
-    server()-> {
-        local client = server:accept();
-        local input = client:recv(1024);
-        client:send(input);
-        client:close();
-        server:close();
-    }
-
-    handler(errorMessage)=>
-        error(errorMessage);
-}
-
-ExampleAsyncApp:run();
-```
-
 ### Building
 
 ```sh
