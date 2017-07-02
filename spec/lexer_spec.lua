@@ -127,13 +127,14 @@ describe("lexer", function()
 		assert.same({{pos = 1, type = "assignment",
 				variable_list = {
 					{type = "variable", "a"},
+					{type = "variable", "b", assign_to = "c"},
 					is_destructuring = "table"
 				},
 				expression_list = {
-					{type = "variable", "b"}
+					{type = "variable", "d"}
 				},
 				is_local = true
-			}}, lexer:match("local {a} = b;"))
+			}}, lexer:match("local {a, b => c} = d;"))
 	end)
 
 	it("can parse destructuring arrays to local assignment", function()

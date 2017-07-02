@@ -28,9 +28,13 @@ asdf(a = 5)-> {
 
 }
 
+-- assign constant, will be replaced at compile-time --
+
+const reserved = 5;
+
 -- destructure values into assignment, local only --
 
-local {a, b} = c;
+local {a, reserved => c} = d;
 
 -- destructure values into assignment from array, also local only --
 

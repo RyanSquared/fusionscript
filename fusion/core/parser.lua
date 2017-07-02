@@ -189,7 +189,7 @@ local pattern = re.compile([[ -- LPEG-RE
 	while_loop <- {:type: '' -> 'while_loop' :}
 		'while' ws {:condition: expression / r :} ws rstatement
 	iterative_for_loop <- {:type: '' -> 'iterative_for_loop' :}
-		'for' ws '(' ws (name_list / r) ws 'in' ws (expression / r) ws ')' ws
+		'for' ws '(' ws (for_name_list / r) ws 'in' ws (expression / r) ws ')' ws
 		rstatement
 	numeric_for_loop <- {:type: '' -> 'numeric_for_loop' :}
 		'for' ws numeric_for_assignment ws rstatement
@@ -199,6 +199,11 @@ local pattern = re.compile([[ -- LPEG-RE
 		',' ws {:stop: expression :} ws
 		(',' ws {:step: expression / r :})?
 	')'
+	for_name_list <- {:variable_list: {|
+		for_name (ws ',' ws (for_name / r))*
+	|} :}
+
+	for_name <- {| {:type: '' -> 'variable' :} name |}
 
 	if <-
 		{:type: 'if' :} ws {:condition: expression / r :} ws rstatement
@@ -224,22 +229,25 @@ local pattern = re.compile([[ -- LPEG-RE
 		(variable_list ws '=' ws (expression_list / r) /
 		{:is_local: 'local' -> true :} ws {:is_nil: '(' -> true :} ws local_name
 			(ws ',' ws (local_name / r))* ws ')' /
-		{:is_local: 'local' -> true :} space (name_list / r) ws ('=' / r) ws
+		{:is_local: 'local' -> true :} space (asn_name_list / r) ws ('=' / r) ws
 			(expression_list / r))
-	name_list <- {:variable_list: {|
+	asn_name_list <- {:variable_list: {|
 		local_name (ws ',' ws (local_name / r))*
 	|} :} / {:variable_list: {|
-		{:is_destructuring: '{' -> 'table' :} ws local_name -- local {x} = a;
-		(ws ',' ws (local_name / r))* ws '}'
+		{:is_destructuring: '{' -> 'table' :} ws des_name -- local {x} = a;
+		(ws ',' ws (des_name / r))* ws '}'
 	|} :} / {:variable_list: {|
 		{:is_destructuring: '[' -> 'array' :} ws local_name -- local [x] = a;
 		(ws ',' ws (local_name / r))* ws ']'
 	|} :}
+	des_name <- {| {:type: '' -> 'variable' :} name
+		(ws '=>' ws {:assign_to: name :})? -- local {x => y} = z;
+	|}
 	local_name <- {| {:type: '' -> 'variable' :} name |}
+
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws (expression / r))*
 	|} :}
-
 	expression <- value / {| {:type: '' -> 'expression' :}
 		'(' ws operator (((! ')') ws expression)+ / r) ws ')'
 	|}

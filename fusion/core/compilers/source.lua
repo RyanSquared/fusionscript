@@ -561,14 +561,14 @@ handlers['assignment'] = function(self, node)
 		if node.variable_list.is_destructuring == "table" then
 			for i, v in ipairs(node.variable_list) do
 				-- check if overwriting enum or const into local scope
-				local first = v[1]
+				local first = v.assign_to or v[1]
 				if self.constants[first] or self.enums[first] then
 					error(("Failed to destructure into %s over enum/const"):format(
 						first))
 				end
-				local value = self:transform(v)
+				local value = v[1] -- avoid destructuring const values
 				last[#last + 1] = name .. "." .. value
-				output[#output + 1] = value
+				output[#output + 1] = v.assign_to or value
 				if node.variable_list[i + 1] then
 					output[#output + 1] = ', '
 				end
