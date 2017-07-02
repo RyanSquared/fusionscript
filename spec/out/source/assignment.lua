@@ -12,7 +12,7 @@ function asdf(a)
 end
 local _des_d_0 = d
 local a, c = _des_d_0.a, _des_d_0.reserved
-local _des_c_0 = c
-local a, b = _des_c_0[1], _des_c_0[2]
-local _des_0 = c.d[e]
-local a, b = _des_0.a, _des_0.b
+local _des_c_1 = c
+local a, b = _des_c_1[1], _des_c_1[2]
+local _des_2 = c.d[e]
+local a, b = _des_2.a, _des_2.b

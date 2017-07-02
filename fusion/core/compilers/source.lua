@@ -17,6 +17,7 @@ function compiler:new() -- luacheck: ignore 212
 		constants = {};
 		enums = {};
 		using = {};
+		des_num = 0;
 	}, {__index = compiler})
 end
 
@@ -105,6 +106,35 @@ handlers['using'] = function(self, node)
 		end
 	end
 	return table.concat(output, self:l"\n")
+end
+
+handlers['import'] = function(self, node)
+	local output = {}
+	if node.get_everything then
+		error("scanning cached files for exported values is not yet supported")
+	else
+		local name = ("_des_%i"):format(self.des_num)
+		output[1] = ("local %s = require(%q)\n"):format(name,
+			table.concat(node.to_import, "."))
+		self.des_num = self.des_num + 1
+		output[2] = "local "
+		local last = {}
+		for i, v in ipairs(node.destructured_values) do
+			local first = v.assign_to or v[1]
+			if self.constants[first] or self.enums[first] then
+				error(("Failed to destructure into %s over enum/const"):format(
+					first))
+			end
+			local value = v[1] -- avoid transforming const values
+			last[#last + 1] = name .. "." .. value
+			output[#output + 1] = v.assign_to or value
+			if node.destructured_values[i + 1] then
+				output[#output + 1] = ", "
+			end
+		end
+		output[#output + 1] = (" = %s"):format(table.concat(last, ", "))
+	end
+	return table.concat(output)
 end
 
 --- Convert a function field in a class to a lambda table assignment.
@@ -490,8 +520,6 @@ handlers['number'] = function(self, node) -- luacheck: ignore 212
 	end
 end
 
-local des_num = 0
-
 handlers['const'] = function(self, node)
 	if self.constants[node[1]] then
 		error(("Failed to reassign const value %s"):format(node[1]))
@@ -551,11 +579,11 @@ handlers['assignment'] = function(self, node)
 		local name
 		if node.expression_list[1].type == "variable" and
 			not node.expression_list[1][2] then -- no indexing
-			name = ("_des_%s_%i"):format(expression, des_num)
+			name = ("_des_%s_%i"):format(expression, self.des_num)
 		else
-			name = "_des_" .. tostring(des_num)
+			name = "_des_" .. tostring(self.des_num)
 		end
-		des_num = des_num + 1
+		self.des_num = self.des_num + 1
 		local last = {} -- capture all last values
 		table.insert(output, 1, ("local %s = %s\n"):format(name, expression))
 		if node.variable_list.is_destructuring == "table" then
@@ -566,7 +594,7 @@ handlers['assignment'] = function(self, node)
 					error(("Failed to destructure into %s over enum/const"):format(
 						first))
 				end
-				local value = v[1] -- avoid destructuring const values
+				local value = v[1] -- avoid transforming const values
 				last[#last + 1] = name .. "." .. value
 				output[#output + 1] = v.assign_to or value
 				if node.variable_list[i + 1] then
@@ -593,7 +621,6 @@ handlers['assignment'] = function(self, node)
 		end
 		output[#output + 1] = " = "
 		output[#output + 1] = table.concat(last, ', ')
-		des_num = des_num - 1
 		return table.concat(output)
 	end
 	for i, v in ipairs(node.variable_list) do -- luacheck: ignore

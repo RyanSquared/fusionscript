@@ -114,6 +114,7 @@ local pattern = re.compile([[ -- LPEG-RE
 		{:type: {'using'} :} (space using_name / ws '{' ws
 			using_name (ws ',' ws using_name)*
 		ws '}' / ((pos '' -> 'Unclosed using statement') -> err)) /
+		import /
 		const /
 		enum /
 		assignment /
@@ -244,6 +245,14 @@ local pattern = re.compile([[ -- LPEG-RE
 		(ws '=>' ws {:assign_to: name :})? -- local {x => y} = z;
 	|}
 	local_name <- {| {:type: '' -> 'variable' :} name |}
+
+	import <- {:type: 'import' :} space {:to_import: {| name ('.' name)* |} :}
+		ws (
+			{:get_everything: '*' -> true :} /
+			{:destructured_values: '{' ws {|
+				(des_name ws (';' / {} -> semicolon) ws)+
+			|} '}' :}
+		)
 
 	expression_list <- {:expression_list: {|
 		expression (ws ',' ws (expression / r))*

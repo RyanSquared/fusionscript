@@ -1,1 +1,7 @@
 -- @module example module name
+
+import stdlib.error {
+	BaseError;
+	Error;
+	assert => error_lib_assert;
+};

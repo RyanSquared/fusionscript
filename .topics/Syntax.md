@@ -71,19 +71,6 @@ expression; or a variable name, `=`, and an expression.
 }
 ```
 
-### Ranges
-
-Ranges are a quick way to make an iterator, like a numeric `for` loop. They
-don't exist in Lua and require the `using itr;` statement somewhere before the
-range is constructed to be used. The syntax for ranges is simple: a _start_, a
-_stop_, and optionally a _step_ separated with two semicolons.
-
-```fuse
-using itr;
-for (i in 1::10::2)
-    print(i); -- odds from 1 to 10
-```
-
 ### Patterns
 
 Patterns use the LPeg `re` module to provide a quick way to make LPeg patterns
@@ -209,11 +196,22 @@ functionality of the language. Some examples:
 
 - `using class;`: Import the `class` stdlib module as a local variable; this
 can be used with the [`class`](#class-definitions) keyword.
-- `using fnl;`: Import the `functional` stdlib as `fnl`; adds support for
-the iterators `map` and `filter` as well as functions such as `reduce`.
-- `using itr;`: Does the same thing as `using fnl;` but with the `iterable`
-library (localized as `itr`).
+- `using {re, trinary};`: Import libraries from a list of names.
 - `using *;`: Load all available syntax extensions.
+
+### Importing Modules
+
+FusionScript offers a syntax-assisted way to import modules. Similar to how
+assignment destructures, the `import` statement also allows modifying the names
+of imported values.
+
+```fuse
+import error {
+	BaseError;
+	Error;
+	assert => error_lib_assert;
+};
+```
 
 ### Function Calls
 
