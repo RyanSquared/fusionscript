@@ -547,12 +547,12 @@ describe("lexer", function()
 
 	it("can parse `using` statements", function()
 		assert.same({{pos = 1,
-			type = "using", "fnl"}}, lexer:match("using fnl;"))
+			type = "using", "re"}}, lexer:match("using re;"))
 	end)
 
 	it("can parse multi-directive `using` statements", function()
 		assert.same({{pos = 1, type = "using",
-			"fnl", "itr"}}, lexer:match("using {fnl, itr};"))
+			"ternary", "class"}}, lexer:match("using {ternary, class};"))
 	end)
 
 	it("can parse LPeg regex literals", function()

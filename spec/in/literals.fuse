@@ -1,5 +1,3 @@
-using {itr};
-
 -- numbers --
 
 local a = 1;

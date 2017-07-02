@@ -1,5 +1,4 @@
 local class = require("fusion.stdlib.class")
-local itr = require("fusion.stdlib.iterable")
-local fnl = require("fusion.stdlib.functional")
 local re = require("re")
 local ternary = require("fusion.stdlib.ternary")
+

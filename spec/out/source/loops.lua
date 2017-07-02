@@ -1,4 +1,3 @@
-local itr = require("fusion.stdlib.iterable")
 for i in itr.range(1, 10) do
 end
 for i in itr.range(1, 10) do

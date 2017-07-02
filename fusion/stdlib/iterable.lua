@@ -245,7 +245,6 @@ local xslice = mk_gen(slice)
 -- @usage print(head("Hello World!"), 5); -- "Hello"
 -- @see tail
 local function head(n, input)
-	-- ::TODO:: queue with size limit to store last values, Pythonic tail()
 	return table.from_generator(xslice(input, 1, n))
 end
 
