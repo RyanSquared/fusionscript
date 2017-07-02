@@ -1,14 +1,7 @@
-for i in itr.range(1, 10) do
-end
-for i in itr.range(1, 10) do
-	print(i)
-end
 for i=1, 10 do
 	print(i)
 end
 for i=1, 10 do
-end
-for i in itr.range(10, 1, -1) do
 end
 for i=10, 1, -1 do
 end

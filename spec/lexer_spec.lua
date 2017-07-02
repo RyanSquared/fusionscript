@@ -513,38 +513,6 @@ describe("lexer", function()
 		}}, lexer:match("class x extends y implements z {}"))
 	end)
 
-	it("can parse negative ranges", function()
-		assert.same({{pos = 1, type = "assignment",
-			variable_list = {{type = "variable", "a"}},
-			expression_list = {{type = "range",
-				start = {type = "number", base = "10", 10},
-				stop = {type = "number", base = "10", 1},
-				step = {type = "number", base = "10", 2}
-			}}
-		}}, lexer:match("a = 10::1::2;"))
-	end)
-
-	it("can parse complex ranges", function()
-		assert.same({{pos = 1, type = "assignment",
-			variable_list = {{type = "variable", "a"}},
-			expression_list = {{type = "range",
-				start = {type = "number", base = "10", 1},
-				stop = {type = "number", base = "10", 10},
-				step = {type = "number", base = "10", 2}
-			}}
-		}}, lexer:match("a = 1::10::2;"))
-	end)
-
-	it("can parse basic ranges", function()
-		assert.same({{pos = 1, type = "assignment",
-			variable_list = {{type = "variable", "a"}},
-			expression_list = {{type = "range",
-				start = {type = "number", base = "10", 1},
-				stop = {type = "number", base = "10", 5}
-			}}
-		}}, lexer:match("a = 1::5;"))
-	end)
-
 	it("can parse `using` statements", function()
 		assert.same({{pos = 1,
 			type = "using", "re"}}, lexer:match("using re;"))

@@ -38,21 +38,14 @@ local a = {
 	["d"] = 4,
 	[{}] = 5,
 	[true] = 6,
-	[false] = 7,
-	[1::2] = 8
+	[false] = 7
 };
 
 -- generated tables --
 
-local array = {k in 1::5};
-local transformed_array = {(^ 2 k) for k in 1::5};
+local array = {k in ipairs({1, 2, 3, 4, 5})};
+local transformed_array = {(^ 2 k) for k in ipairs({1, 2, 3, 4, 5})};
 local copy_transformed_array = {[k] = v for k, v in pairs(transformed_array)};
-
--- ranges --
-
-local a = 1::5;
-local b = 5::1::-1;
-local c = 1::10::2;
 
 -- patterns --
 

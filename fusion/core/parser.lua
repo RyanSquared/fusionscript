@@ -272,7 +272,6 @@ local pattern = re.compile([[ -- LPEG-RE
 		re /
 		table /
 		{| {:type: '' -> 'vararg' :} { '...' } |} /
-		range /
 		number /
 		string /
 		boolean /
@@ -282,9 +281,6 @@ local pattern = re.compile([[ -- LPEG-RE
 	|}
 	re <- {| {:type: '' -> 're' :}
 		'/' {('\' . / [^/]+)*} ('/' / r)
-	|}
-	range <- {| {:type: '' -> 'range' :}
-		{:start: number :} '::' {:stop: number :} ('::' {:step: number :})?
 	|}
 	number <- {| {:type: '' -> 'number' :} {:is_negative: '-' -> true :}? (
 		base16num /
@@ -400,11 +396,13 @@ return {
 
 			local cached = io.open(("./fs-cache/%s"):format(file))
 			if not cached:read() then
+				cached:close()
 				return
 			end
 			cached:seek("set")
 
 			local line = cached:read()
+			cached:close()
 			local stored_hash = line:match("%-%- SHA%-1: (%x+)")
 			if not stored_hash then
 				return nil, ("unable to recover hash for: %q"):format(file)
@@ -412,7 +410,6 @@ return {
 				stored_hash = stored_hash:upper()
 			end
 			if stored_hash == basexx.to_hex(hash) then
-				cached:close()
 				return dofile(("./fs-cache/%s"):format(file))
 			else
 				return nil, ("hash does not match: (base)%q != (cached)%q"):format(

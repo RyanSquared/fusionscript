@@ -490,21 +490,6 @@ handlers['number'] = function(self, node) -- luacheck: ignore 212
 	end
 end
 
-handlers['range'] = function(self, node)
-	local output = {
-		"itr.range(";
-		self:transform(node.start);
-		", ";
-		self:transform(node.stop);
-	}
-	if node.step then
-		output[5] = ", "
-		output[6] = self:transform(node.step)
-	end
-	output[#output + 1] = ")"
-	return table.concat(output)
-end
-
 local des_num = 0
 
 handlers['const'] = function(self, node)
