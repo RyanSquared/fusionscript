@@ -1,5 +1,5 @@
 --- Lex FusionScript files.
--- @module fusion.core.lexer
+-- @module fusion.core.parser
 
 local re = require("re");
 
