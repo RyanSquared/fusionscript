@@ -98,7 +98,7 @@ describe("iterable extension", function()
 	it("can get head of stream", function()
 		assert.same("Hello", table.concat(itr.head(5, "Hello World!")))
 	end)
-	it("can get tail of stream", function() -- ::TODO:: fix in iterable lib
+	it("can get tail of stream", function()
 		assert.same("World!", table.concat(itr.tail(7, "Hello World!")))
 	end)
 	it("can consume a section of an iterator", function()

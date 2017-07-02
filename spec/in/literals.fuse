@@ -13,7 +13,7 @@ local f = 0x1P5;
 
 local a = 'tes\t';
 local b = "tes\t";
-local c = "tes\\t"; -- TODO: interpolation?
+local c = "tes\\t";
 local d = [[
 this is a long string
 ]];

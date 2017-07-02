@@ -273,7 +273,7 @@ describe("lexer", function()
 		}}, lexer:match("a = {x in y};"))
 	end)
 
-	it("can parse a complex generated table", function() -- ::TODO:: what
+	it("can parse a complex generated table", function()
 		assert.same({{pos = 1, type = "assignment",
 				variable_list = {{type = "variable", "a"}},
 				expression_list = {{type = "table",
