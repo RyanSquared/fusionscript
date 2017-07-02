@@ -264,6 +264,41 @@ b = print;
 local asdf = b;
 ```
 
+If a value is used often but is never changed, it might be a good idea to turn
+the value into a `const` value. The values are changed at compile time, which
+can speed up the time it takes to look up these values when running. Multiple
+associated `const` values could be stored using an `enum`, which allows for
+multiple sequential integer `const` values to be stored in one structure.
+
+Values inside of an enumeration will be auto-incremented, but can be manually
+set to any integer value. Values that are assigned after the beginning of an
+auto-incrementation can't be less than the previous value (so, if a value in
+the enumeration is `5`, the next value can't be `4`).
+
+```fuse
+const format_pattern = "%s: %s %q";
+const max_char = 255;
+
+enum Colors {
+	RED;
+	BLUE;
+	GREEN;
+};
+
+const Letters {
+	A = 65;
+	B;
+	C;
+	a = 97;
+	b;
+	c;
+}
+```
+
+Tables, functions, and userdata can't be `const` values. Attempting to assign
+a value to the direct name of a `const` value will result in an error upon
+compilation.
+
 ---
 
 Destructuring is a quick way to take items from a table and assign them to
@@ -274,6 +309,21 @@ time the function is needed.
 ```fuse
 local {print, write} = io.stdout;
 print("Hello World!");
+```
+
+Array-like tables can also be destructured into the elements of the array, from
+value `1` to value `n`, where `n` is the count of variables.
+
+```fuse
+local [a, b, c] = {1, 2, 3};
+```
+
+Values that are destructured can also be assigned to a different name than was
+taken from the value being destructured. This can help avoid name collisions
+and prevent overriding constant variables.
+
+```fuse
+local {values, reserved_const => other_name} = tbl;
 ```
 
 ---
