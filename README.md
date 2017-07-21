@@ -1,6 +1,12 @@
 # FusionScript [![Build Status](https://travis-ci.org/RyanSquared/fusionscript.svg?branch=master)](https://travis-ci.org/RyanSquared/fusionscript)
 The programming language of ultimate dankliness
 
+**Note:** I will no longer be actively working on FusionScript. I have decided
+that I should make better use of my time instead of working on a proof of
+concept that I don't expect anyone to use. The code will remain available but
+will most likely not be updated for future versions of Lua and new features
+will not be added.
+
 **Warning:** This project is very unstable and possibly has many bugs.  If your
 code does not compile, it is *very* likely a problem in the compiler or a
 change in the language instead of your code. Please feel free to add an issue
